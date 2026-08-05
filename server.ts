@@ -1038,6 +1038,93 @@ app.post('/api/admin/support-messages/:id/reply', requireAdmin, (req: AuthReques
   res.json({ success: true, message: updated });
 });
 
+// ================= SEO ENDPOINTS =================
+
+// Dynamic robots.txt
+app.get('/robots.txt', (req: Request, res: Response) => {
+  const host = req.get('host') || 'xn--inanhzlmedya-54bc.online';
+  const protocol = req.protocol === 'https' || req.headers['x-forwarded-proto'] === 'https' ? 'https' : 'http';
+  
+  res.type('text/plain');
+  res.send(
+`User-agent: *
+Allow: /
+Allow: /hakkimizda
+Allow: /sartlar
+Allow: /yardim
+Allow: /ihbar
+Allow: /destek
+Allow: /premium
+Allow: /i/
+Disallow: /api/
+Disallow: /admin
+Disallow: /galerim
+
+Sitemap: ${protocol}://${host}/sitemap.xml`
+  );
+});
+
+// Dynamic sitemap.xml
+app.get('/sitemap.xml', (req: Request, res: Response) => {
+  const host = req.get('host') || 'xn--inanhzlmedya-54bc.online';
+  const protocol = req.protocol === 'https' || req.headers['x-forwarded-proto'] === 'https' ? 'https' : 'http';
+  const baseUrl = `${protocol}://${host}`;
+  const currentDate = new Date().toISOString().split('T')[0];
+
+  // Core static pages
+  const staticPages = [
+    { loc: '', changefreq: 'daily', priority: '1.0' },
+    { loc: '/premium', changefreq: 'weekly', priority: '0.9' },
+    { loc: '/yardim', changefreq: 'weekly', priority: '0.8' },
+    { loc: '/hakkimizda', changefreq: 'monthly', priority: '0.7' },
+    { loc: '/destek', changefreq: 'monthly', priority: '0.7' },
+    { loc: '/sartlar', changefreq: 'monthly', priority: '0.5' },
+    { loc: '/ihbar', changefreq: 'monthly', priority: '0.4' }
+  ];
+
+  let xml = '<?xml version="1.0" encoding="UTF-8"?>\n';
+  xml += '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n';
+
+  // Add static routes
+  staticPages.forEach(page => {
+    xml += '  <url>\n';
+    xml += `    <loc>${baseUrl}${page.loc}</loc>\n`;
+    xml += `    <lastmod>${currentDate}</lastmod>\n`;
+    xml += `    <changefreq>${page.changefreq}</changefreq>\n`;
+    xml += `    <priority>${page.priority}</priority>\n`;
+    xml += '  </url>\n';
+  });
+
+  // Dynamic Image Detail pages (if public images exist)
+  try {
+    const images = db.getImages();
+    // Only index non-expired images
+    const now = new Date().toISOString();
+    const publicImages = images.filter(img => {
+      return !img.expiresAt || img.expiresAt > now;
+    });
+
+    // Limit dynamic pages to top 5000 to keep it extremely fast
+    const limitImages = publicImages.slice(0, 5000);
+    limitImages.forEach(img => {
+      xml += '  <url>\n';
+      xml += `    <loc>${baseUrl}/i/${img.id}</loc>\n`;
+      const imgDate = img.createdAt ? img.createdAt.split('T')[0] : currentDate;
+      xml += `    <lastmod>${imgDate}</lastmod>\n`;
+      xml += '    <changefreq>monthly</changefreq>\n';
+      xml += '    <priority>0.6</priority>\n';
+      xml += '  </url>\n';
+    });
+  } catch (err) {
+    console.error("Error adding dynamic image details to sitemap:", err);
+  }
+
+  xml += '</urlset>';
+
+  res.type('application/xml');
+  res.send(xml);
+});
+
 // ================= BACKGROUND CLEANUP OF EXPIRED IMAGES =================
 function cleanupExpiredImages() {
   try {
