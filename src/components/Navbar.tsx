@@ -447,19 +447,19 @@ export default function Navbar({ user, onLogout, systemStatus, themeShade }: Nav
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              transition={{ duration: 0.25, ease: 'easeOut' }}
-              className="absolute inset-0 bg-black/60 backdrop-blur-md"
+              transition={{ duration: 0.2, ease: 'easeOut' }}
+              className="absolute inset-0 bg-black/50 backdrop-blur-[4px]"
               onClick={() => setMobileMenuOpen(false)}
             />
 
             {/* Drawer Content Body */}
             <div className="absolute inset-y-0 right-0 max-w-full flex pl-6">
               <motion.div 
-                initial={{ x: '100%', filter: 'blur(5px)' }}
-                animate={{ x: 0, filter: 'blur(0px)' }}
-                exit={{ x: '100%', filter: 'blur(5px)' }}
-                transition={{ type: 'spring', damping: 28, stiffness: 240 }}
-                className="w-screen max-w-sm bg-zinc-950/95 border-l border-zinc-900 shadow-[0_0_50px_rgba(0,0,0,0.8)] flex flex-col justify-between backdrop-blur-xl"
+                initial={{ x: '100%' }}
+                animate={{ x: 0 }}
+                exit={{ x: '100%' }}
+                transition={{ type: 'tween', ease: 'easeOut', duration: 0.25 }}
+                className="w-screen max-w-sm bg-zinc-950/98 border-l border-zinc-900/80 shadow-2xl flex flex-col justify-between"
               >
                 
                 {/* Header inside the Drawer */}

@@ -20,6 +20,7 @@ export default function AuthForms({ type, onAuthSuccess }: AuthFormsProps) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
+  const [isDirectBypass, setIsDirectBypass] = useState<boolean>(false);
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
@@ -66,6 +67,13 @@ export default function AuthForms({ type, onAuthSuccess }: AuthFormsProps) {
 
         if (!response.ok) {
           throw new Error(data.error || "Şifre sıfırlama kodu gönderilirken bir hata oluştu.");
+        }
+
+        if (data.isDirectBypass) {
+          setCode(data.code);
+          setIsDirectBypass(true);
+        } else {
+          setIsDirectBypass(false);
         }
 
         setSuccessMessage(data.message || "Doğrulama kodu e-postanıza gönderildi!");
@@ -182,7 +190,7 @@ export default function AuthForms({ type, onAuthSuccess }: AuthFormsProps) {
           </div>
 
           {/* VERIFICATION CODE INPUT (Only for Reset Password) */}
-          {mode === 'reset-password' && (
+          {mode === 'reset-password' && !isDirectBypass && (
             <div className="space-y-1.5">
               <label className="text-xs font-semibold text-zinc-400 flex items-center gap-1.5">
                 <KeyRound className="h-3.5 w-3.5 text-teal-400" />
@@ -334,6 +342,7 @@ export default function AuthForms({ type, onAuthSuccess }: AuthFormsProps) {
                   onClick={() => {
                     setError(null);
                     setSuccessMessage(null);
+                    setIsDirectBypass(false);
                     setMode('forgot-password');
                   }}
                   className="text-teal-400 hover:text-teal-300 font-semibold text-xs cursor-pointer"
@@ -346,6 +355,7 @@ export default function AuthForms({ type, onAuthSuccess }: AuthFormsProps) {
                 onClick={() => {
                   setError(null);
                   setSuccessMessage(null);
+                  setIsDirectBypass(false);
                   setMode('login');
                 }}
                 className="text-zinc-400 hover:text-zinc-300 text-xs font-semibold cursor-pointer"

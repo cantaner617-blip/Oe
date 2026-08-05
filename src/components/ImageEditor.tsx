@@ -287,13 +287,6 @@ export default function ImageEditor({ file, user, onSave, onCancel, onDirectUplo
         {/* RIGHT COLUMN: Control Panel Tabs */}
         <div className="lg:col-span-5 flex flex-col gap-5 bg-zinc-950 border border-zinc-900 rounded-2xl p-5 relative">
           
-          {/* Lock overlay if not premium */}
-          {!isPremium && (
-            <div className="absolute top-12 left-0 right-0 bottom-0 bg-zinc-950/20 backdrop-blur-[1px] rounded-b-2xl z-20 pointer-events-none flex flex-col items-center justify-center p-6 text-center">
-              {/* Subtle indicator that they can still customize but can't save */}
-            </div>
-          )}
-
           {/* Controls Navigation tabs */}
           <div className="flex border-b border-zinc-900 p-1 bg-zinc-950 rounded-xl">
             <button
