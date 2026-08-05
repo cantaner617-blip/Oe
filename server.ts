@@ -67,19 +67,23 @@ const PORT = Number(process.env.PORT) || 3000;
 app.use(express.json());
 
 // Cloudinary Configuration
+const cloudinaryCloudName = process.env.CLOUDINARY_CLOUD_NAME || 'xkxhqfy8';
+const cloudinaryApiKey = process.env.CLOUDINARY_API_KEY || '343837662874489';
+const cloudinaryApiSecret = process.env.CLOUDINARY_API_SECRET || 'ikyRqVp_pz-eVEnT_DDo7icHtWk';
+
 const isCloudinaryConfigured = !!(
-  process.env.CLOUDINARY_CLOUD_NAME &&
-  process.env.CLOUDINARY_API_KEY &&
-  process.env.CLOUDINARY_API_SECRET
+  cloudinaryCloudName &&
+  cloudinaryApiKey &&
+  cloudinaryApiSecret
 );
 
 if (isCloudinaryConfigured) {
   cloudinary.config({
-    cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
-    api_key: process.env.CLOUDINARY_API_KEY,
-    api_secret: process.env.CLOUDINARY_API_SECRET,
+    cloud_name: cloudinaryCloudName,
+    api_key: cloudinaryApiKey,
+    api_secret: cloudinaryApiSecret,
   });
-  console.log("Cloudinary successfully configured.");
+  console.log("Cloudinary successfully configured with cloud name:", cloudinaryCloudName);
 } else {
   console.warn("Cloudinary configuration missing! Using local database storage fallback for uploaded images.");
 }
@@ -219,6 +223,10 @@ app.get('/api/direct-image/:id', async (req, res) => {
     }
 
     res.set('Content-Type', contentType);
+
+    if (req.query.download === 'true') {
+      res.set('Content-Disposition', `attachment; filename="${encodeURIComponent(image.filename)}"; filename*=UTF-8''${encodeURIComponent(image.filename)}`);
+    }
 
     // If local, serve from local database data
     if (image.isLocal && image.localData) {
@@ -367,12 +375,7 @@ app.post('/api/auth/forgot-password', async (req, res) => {
     const isSent = await sendVerificationCode(email, code);
 
     if (!isSent) {
-      // SMTP fails - return verification code with a special direct bypass flag for maximum ease of use without SMTP issues!
-      return res.json({ 
-        message: 'Güvenlik doğrulaması otomatik olarak tamamlandı! Yeni şifrenizi aşağıdaki alandan doğrudan tanımlayabilirsiniz.',
-        code,
-        isDirectBypass: true
-      });
+      return res.status(500).json({ error: 'Doğrulama e-postası gönderilemedi. Lütfen e-posta adresinizi kontrol edin veya SMTP sunucu bağlantısını inceleyin.' });
     }
 
     res.json({ message: '6 haneli doğrulama kodu e-posta adresinize gönderildi.' });

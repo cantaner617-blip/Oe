@@ -87,10 +87,10 @@ export default function Navbar({ user, onLogout, systemStatus, themeShade }: Nav
     <>
       <header 
         id="site-header" 
-        className={`sticky top-0 w-full border-b transition-all duration-500 ${
+        className={`sticky top-0 w-full border-b transition-colors duration-300 ${
           themeShade === 'slate' 
-            ? 'border-slate-800/60 bg-slate-950/80' 
-            : 'border-zinc-900/80 bg-zinc-950/80'
+            ? 'border-slate-800/60 bg-slate-950/92' 
+            : 'border-zinc-900/80 bg-zinc-950/92'
         } backdrop-blur-md z-40`}
       >
         {/* Top Glow Accent Line */}
