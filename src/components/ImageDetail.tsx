@@ -146,7 +146,8 @@ export default function ImageDetail({ id, onBack, user, systemStatus }: ImageDet
           <span>Geri Dön</span>
         </button>
         <a
-          href={`${directUrl}?download=true`}
+          href={`/api/direct-image/${image.id}?download=true`}
+          download={image.filename}
           className="inline-flex items-center space-x-1.5 rounded-lg bg-teal-500 hover:bg-teal-400 px-4 py-2 text-sm font-semibold text-zinc-950 transition-all duration-200"
           id="detail-download-btn"
         >
