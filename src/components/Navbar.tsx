@@ -229,65 +229,71 @@ export default function Navbar({ user, onLogout, systemStatus, themeShade }: Nav
                 <MoreVertical className="h-4 w-4" />
               </button>
 
-              {dropdownOpen && (
-                <div 
-                  id="nav-more-dropdown-menu"
-                  className="absolute right-0 mt-2 w-56 rounded-xl border border-zinc-800/80 bg-zinc-950 p-1.5 shadow-2xl ring-1 ring-black/50 z-50 animate-in fade-in slide-in-from-top-2 duration-150"
-                >
-                  <div className="px-2.5 py-1 text-[10px] font-bold text-zinc-500 uppercase tracking-widest border-b border-zinc-900/60 mb-1">
-                    Kurumsal &amp; Bilgi
-                  </div>
-                  
-                  <Link
-                    to="/hakkimizda"
-                    onClick={() => setDropdownOpen(false)}
-                    className="flex items-center space-x-2 rounded-lg px-2.5 py-2 text-xs font-semibold text-zinc-300 hover:bg-zinc-900 hover:text-white transition-colors"
+              <AnimatePresence>
+                {dropdownOpen && (
+                  <motion.div 
+                    id="nav-more-dropdown-menu"
+                    initial={{ opacity: 0, scale: 0.95, y: -10 }}
+                    animate={{ opacity: 1, scale: 1, y: 0 }}
+                    exit={{ opacity: 0, scale: 0.95, y: -10 }}
+                    transition={{ duration: 0.15, ease: 'easeOut' }}
+                    className="absolute right-0 mt-2 w-56 rounded-xl border border-zinc-800/80 bg-zinc-950 p-1.5 shadow-2xl ring-1 ring-black/50 z-50 origin-top-right transform-gpu"
                   >
-                    <Info className="h-3.5 w-3.5 text-teal-400" />
-                    <span>Hakkımızda &amp; Altyapı</span>
-                  </Link>
+                    <div className="px-2.5 py-1 text-[10px] font-bold text-zinc-500 uppercase tracking-widest border-b border-zinc-900/60 mb-1">
+                      Kurumsal &amp; Bilgi
+                    </div>
+                    
+                    <Link
+                      to="/hakkimizda"
+                      onClick={() => setDropdownOpen(false)}
+                      className="flex items-center space-x-2 rounded-lg px-2.5 py-2 text-xs font-semibold text-zinc-300 hover:bg-zinc-900 hover:text-white transition-colors"
+                    >
+                      <Info className="h-3.5 w-3.5 text-teal-400" />
+                      <span>Hakkımızda &amp; Altyapı</span>
+                    </Link>
 
-                  <Link
-                    to="/sartlar"
-                    onClick={() => setDropdownOpen(false)}
-                    className="flex items-center space-x-2 rounded-lg px-2.5 py-2 text-xs font-semibold text-zinc-300 hover:bg-zinc-900 hover:text-white transition-colors"
-                  >
-                    <FileText className="h-3.5 w-3.5 text-teal-400" />
-                    <span>Kullanım Koşulları</span>
-                  </Link>
+                    <Link
+                      to="/sartlar"
+                      onClick={() => setDropdownOpen(false)}
+                      className="flex items-center space-x-2 rounded-lg px-2.5 py-2 text-xs font-semibold text-zinc-300 hover:bg-zinc-900 hover:text-white transition-colors"
+                    >
+                      <FileText className="h-3.5 w-3.5 text-teal-400" />
+                      <span>Kullanım Koşulları</span>
+                    </Link>
 
-                  <Link
-                    to="/yardim"
-                    onClick={() => setDropdownOpen(false)}
-                    className="flex items-center space-x-2 rounded-lg px-2.5 py-2 text-xs font-semibold text-zinc-300 hover:bg-zinc-900 hover:text-white transition-colors"
-                  >
-                    <HelpCircle className="h-3.5 w-3.5 text-teal-400" />
-                    <span>SSS &amp; Kılavuz</span>
-                  </Link>
+                    <Link
+                      to="/yardim"
+                      onClick={() => setDropdownOpen(false)}
+                      className="flex items-center space-x-2 rounded-lg px-2.5 py-2 text-xs font-semibold text-zinc-300 hover:bg-zinc-900 hover:text-white transition-colors"
+                    >
+                      <HelpCircle className="h-3.5 w-3.5 text-teal-400" />
+                      <span>SSS &amp; Kılavuz</span>
+                    </Link>
 
-                  <div className="px-2.5 py-1 text-[10px] font-bold text-zinc-500 uppercase tracking-widest border-t border-b border-zinc-900/60 my-1">
-                    Destek &amp; Bildirim
-                  </div>
+                    <div className="px-2.5 py-1 text-[10px] font-bold text-zinc-500 uppercase tracking-widest border-t border-b border-zinc-900/60 my-1">
+                      Destek &amp; Bildirim
+                    </div>
 
-                  <Link
-                    to="/ihbar"
-                    onClick={() => setDropdownOpen(false)}
-                    className="flex items-center space-x-2 rounded-lg px-2.5 py-2 text-xs font-semibold text-red-400 hover:bg-red-950/20 hover:text-red-300 transition-colors"
-                  >
-                    <ShieldAlert className="h-3.5 w-3.5 text-red-500" />
-                    <span>İhlal Bildirimi (DMCA)</span>
-                  </Link>
+                    <Link
+                      to="/ihbar"
+                      onClick={() => setDropdownOpen(false)}
+                      className="flex items-center space-x-2 rounded-lg px-2.5 py-2 text-xs font-semibold text-red-400 hover:bg-red-950/20 hover:text-red-300 transition-colors"
+                    >
+                      <ShieldAlert className="h-3.5 w-3.5 text-red-500" />
+                      <span>İhlal Bildirimi (DMCA)</span>
+                    </Link>
 
-                  <Link
-                    to="/destek"
-                    onClick={() => setDropdownOpen(false)}
-                    className="flex items-center space-x-2 rounded-lg px-2.5 py-2 text-xs font-semibold text-zinc-300 hover:bg-zinc-900 hover:text-white transition-colors"
-                  >
-                    <MessageSquare className="h-3.5 w-3.5 text-teal-400" />
-                    <span>7/24 Teknik Destek</span>
-                  </Link>
-                </div>
-              )}
+                    <Link
+                      to="/destek"
+                      onClick={() => setDropdownOpen(false)}
+                      className="flex items-center space-x-2 rounded-lg px-2.5 py-2 text-xs font-semibold text-zinc-300 hover:bg-zinc-900 hover:text-white transition-colors"
+                    >
+                      <MessageSquare className="h-3.5 w-3.5 text-teal-400" />
+                      <span>7/24 Teknik Destek</span>
+                    </Link>
+                  </motion.div>
+                )}
+              </AnimatePresence>
             </div>
 
             {/* User Profile / Auth Area */}
@@ -318,50 +324,56 @@ export default function Navbar({ user, onLogout, systemStatus, themeShade }: Nav
                   <ChevronDown className="h-3 w-3 text-zinc-500" />
                 </button>
 
-                {profileDropdownOpen && (
-                  <div 
-                    className="absolute right-20 top-12 mt-1.5 w-48 rounded-xl border border-zinc-800 bg-zinc-950 p-1.5 shadow-2xl ring-1 ring-black/50 z-50 animate-in fade-in slide-in-from-top-1 duration-150"
-                  >
-                    <div className="px-2.5 py-2 border-b border-zinc-900 mb-1">
-                      <p className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest mb-0.5">Kullanıcı Hesabı</p>
-                      <p className="text-xs font-bold text-teal-400 truncate flex items-center gap-1">
-                        {user.username}
-                        {user.isPremium && <span className="inline-flex items-center rounded-md bg-amber-500/15 border border-amber-500/30 text-amber-400 text-[8px] font-black tracking-widest px-1 py-0.5 leading-none shrink-0">PREMIUM</span>}
-                      </p>
-                    </div>
-
-                    <Link
-                      to="/galerim?tab=profile"
-                      onClick={() => setProfileDropdownOpen(false)}
-                      className="flex items-center space-x-2 rounded-lg px-2.5 py-2 text-xs font-semibold text-zinc-300 hover:bg-zinc-900 hover:text-white transition-colors"
+                <AnimatePresence>
+                  {profileDropdownOpen && (
+                    <motion.div 
+                      initial={{ opacity: 0, scale: 0.95, y: -10 }}
+                      animate={{ opacity: 1, scale: 1, y: 0 }}
+                      exit={{ opacity: 0, scale: 0.95, y: -10 }}
+                      transition={{ duration: 0.15, ease: 'easeOut' }}
+                      className="absolute right-20 top-12 mt-1.5 w-48 rounded-xl border border-zinc-800 bg-zinc-950 p-1.5 shadow-2xl ring-1 ring-black/50 z-50 origin-top-right transform-gpu"
                     >
-                      <UserIcon className="h-3.5 w-3.5 text-teal-400" />
-                      <span>Profil ve Ayarlar</span>
-                    </Link>
+                      <div className="px-2.5 py-2 border-b border-zinc-900 mb-1">
+                        <p className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest mb-0.5">Kullanıcı Hesabı</p>
+                        <p className="text-xs font-bold text-teal-400 truncate flex items-center gap-1">
+                          {user.username}
+                          {user.isPremium && <span className="inline-flex items-center rounded-md bg-amber-500/15 border border-amber-500/30 text-amber-400 text-[8px] font-black tracking-widest px-1 py-0.5 leading-none shrink-0">PREMIUM</span>}
+                        </p>
+                      </div>
 
-                    <Link
-                      to="/galerim"
-                      onClick={() => setProfileDropdownOpen(false)}
-                      className="flex items-center space-x-2 rounded-lg px-2.5 py-2 text-xs font-semibold text-zinc-300 hover:bg-zinc-900 hover:text-white transition-colors"
-                    >
-                      <Grid className="h-3.5 w-3.5 text-teal-400" />
-                      <span>Görsellerim</span>
-                    </Link>
+                      <Link
+                        to="/galerim?tab=profile"
+                        onClick={() => setProfileDropdownOpen(false)}
+                        className="flex items-center space-x-2 rounded-lg px-2.5 py-2 text-xs font-semibold text-zinc-300 hover:bg-zinc-900 hover:text-white transition-colors"
+                      >
+                        <UserIcon className="h-3.5 w-3.5 text-teal-400" />
+                        <span>Profil ve Ayarlar</span>
+                      </Link>
 
-                    <button
-                      onClick={() => {
-                        setProfileDropdownOpen(false);
-                        onLogout();
-                        navigate('/');
-                      }}
-                      id="nav-logout-btn"
-                      className="flex w-full items-center space-x-2 rounded-lg px-2.5 py-2 text-xs font-semibold text-red-400 hover:bg-red-950/20 hover:text-red-300 transition-colors text-left cursor-pointer"
-                    >
-                      <LogOut className="h-3.5 w-3.5" />
-                      <span>Çıkış Yap</span>
-                    </button>
-                  </div>
-                )}
+                      <Link
+                        to="/galerim"
+                        onClick={() => setProfileDropdownOpen(false)}
+                        className="flex items-center space-x-2 rounded-lg px-2.5 py-2 text-xs font-semibold text-zinc-300 hover:bg-zinc-900 hover:text-white transition-colors"
+                      >
+                        <Grid className="h-3.5 w-3.5 text-teal-400" />
+                        <span>Görsellerim</span>
+                      </Link>
+
+                      <button
+                        onClick={() => {
+                          setProfileDropdownOpen(false);
+                          onLogout();
+                          navigate('/');
+                        }}
+                        id="nav-logout-btn"
+                        className="flex w-full items-center space-x-2 rounded-lg px-2.5 py-2 text-xs font-semibold text-red-400 hover:bg-red-950/20 hover:text-red-300 transition-colors text-left cursor-pointer"
+                      >
+                        <LogOut className="h-3.5 w-3.5" />
+                        <span>Çıkış Yap</span>
+                      </button>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
 
                 {/* Direct High-Visibility Logout Button (Desktop only, next to profile pill) */}
                 <button

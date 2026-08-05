@@ -335,15 +335,15 @@ export default function ImageEditor({ file, user, onSave, onCancel, onDirectUplo
                     className={`flex flex-col items-center justify-center p-2.5 rounded-xl border transition-all text-center cursor-pointer relative overflow-hidden ${
                       activeFilter === filter.id
                         ? filter.isPremium 
-                          ? 'border-amber-500 bg-amber-500/5 text-amber-400 font-extrabold shadow-[0_0_12px_rgba(245,158,11,0.15)]'
-                          : 'border-teal-500 bg-teal-500/5 text-teal-400 font-extrabold'
+                          ? 'border-amber-500 bg-amber-500/10 text-amber-400 font-extrabold shadow-[0_0_12px_rgba(245,158,11,0.15)]'
+                          : 'border-teal-500 bg-teal-500/10 text-teal-400 font-extrabold'
                         : filter.isPremium
                           ? 'border-amber-500/20 bg-zinc-950/40 text-amber-500/80 hover:border-amber-500/40 hover:text-amber-400'
                           : 'border-zinc-900 bg-zinc-950/40 text-zinc-400 hover:border-zinc-800 hover:text-zinc-200'
                     }`}
                   >
-                    <div className="text-[11px] font-bold line-clamp-1 flex items-center justify-center gap-1 w-full">
-                      {filter.isPremium && <Sparkles className="h-3 w-3 shrink-0 text-amber-500 fill-amber-500/10 animate-pulse" />}
+                    <div className="text-xs font-bold line-clamp-1 flex items-center justify-center gap-1 w-full">
+                      {filter.isPremium && <Sparkles className="h-3.5 w-3.5 shrink-0 text-amber-400 fill-amber-400/10 animate-pulse" />}
                       <span>{filter.name}</span>
                     </div>
                   </button>
@@ -357,31 +357,31 @@ export default function ImageEditor({ file, user, onSave, onCancel, onDirectUplo
                 <div className="flex flex-wrap gap-1.5 mb-2">
                   <button 
                     onClick={() => applyCropPreset('original')}
-                    className="px-2.5 py-1 rounded bg-zinc-900 border border-zinc-800 text-[10px] text-zinc-300 hover:text-white transition-all font-bold cursor-pointer"
+                    className="px-3 py-1.5 rounded-lg bg-zinc-900 border border-zinc-800 text-xs text-zinc-200 hover:text-white hover:bg-zinc-800 transition-all font-bold cursor-pointer"
                   >
                     Orijinal / Sıfırla
                   </button>
                   <button 
                     onClick={() => applyCropPreset(1)}
-                    className="px-2.5 py-1 rounded bg-zinc-900 border border-zinc-800 text-[10px] text-zinc-300 hover:text-white transition-all font-bold cursor-pointer"
+                    className="px-3 py-1.5 rounded-lg bg-zinc-900 border border-zinc-800 text-xs text-zinc-200 hover:text-white hover:bg-zinc-800 transition-all font-bold cursor-pointer"
                   >
                     Kare (1:1)
                   </button>
                   <button 
                     onClick={() => applyCropPreset(16/9)}
-                    className="px-2.5 py-1 rounded bg-zinc-900 border border-zinc-800 text-[10px] text-zinc-300 hover:text-white transition-all font-bold cursor-pointer"
+                    className="px-3 py-1.5 rounded-lg bg-zinc-900 border border-zinc-800 text-xs text-zinc-200 hover:text-white hover:bg-zinc-800 transition-all font-bold cursor-pointer"
                   >
                     Sinematik (16:9)
                   </button>
                   <button 
                     onClick={() => applyCropPreset(4/3)}
-                    className="px-2.5 py-1 rounded bg-zinc-900 border border-zinc-800 text-[10px] text-zinc-300 hover:text-white transition-all font-bold cursor-pointer"
+                    className="px-3 py-1.5 rounded-lg bg-zinc-900 border border-zinc-800 text-xs text-zinc-200 hover:text-white hover:bg-zinc-800 transition-all font-bold cursor-pointer"
                   >
                     Klasik (4:3)
                   </button>
                   <button 
                     onClick={() => applyCropPreset(4/5)}
-                    className="px-2.5 py-1 rounded bg-zinc-900 border border-zinc-800 text-[10px] text-zinc-300 hover:text-white transition-all font-bold cursor-pointer"
+                    className="px-3 py-1.5 rounded-lg bg-zinc-900 border border-zinc-800 text-xs text-zinc-200 hover:text-white hover:bg-zinc-800 transition-all font-bold cursor-pointer"
                   >
                     Portre (4:5)
                   </button>
@@ -391,9 +391,9 @@ export default function ImageEditor({ file, user, onSave, onCancel, onDirectUplo
                 <div className="space-y-3">
                   {/* Left Crop */}
                   <div className="space-y-1">
-                    <div className="flex justify-between text-[10px] text-zinc-500 font-bold">
+                    <div className="flex justify-between text-xs text-zinc-300 font-bold">
                       <span>SOL KENAR</span>
-                      <span>%{cropLeft}</span>
+                      <span className="text-teal-400 font-black">%{cropLeft}</span>
                     </div>
                     <input 
                       type="range" 
@@ -407,9 +407,9 @@ export default function ImageEditor({ file, user, onSave, onCancel, onDirectUplo
 
                   {/* Right Crop */}
                   <div className="space-y-1">
-                    <div className="flex justify-between text-[10px] text-zinc-500 font-bold">
+                    <div className="flex justify-between text-xs text-zinc-300 font-bold">
                       <span>SAĞ KENAR</span>
-                      <span>%{cropRight}</span>
+                      <span className="text-teal-400 font-black">%{cropRight}</span>
                     </div>
                     <input 
                       type="range" 
@@ -423,9 +423,9 @@ export default function ImageEditor({ file, user, onSave, onCancel, onDirectUplo
 
                   {/* Top Crop */}
                   <div className="space-y-1">
-                    <div className="flex justify-between text-[10px] text-zinc-500 font-bold">
+                    <div className="flex justify-between text-xs text-zinc-300 font-bold">
                       <span>ÜST KENAR</span>
-                      <span>%{cropTop}</span>
+                      <span className="text-teal-400 font-black">%{cropTop}</span>
                     </div>
                     <input 
                       type="range" 
@@ -439,9 +439,9 @@ export default function ImageEditor({ file, user, onSave, onCancel, onDirectUplo
 
                   {/* Bottom Crop */}
                   <div className="space-y-1">
-                    <div className="flex justify-between text-[10px] text-zinc-500 font-bold">
+                    <div className="flex justify-between text-xs text-zinc-300 font-bold">
                       <span>ALT KENAR</span>
-                      <span>%{cropBottom}</span>
+                      <span className="text-teal-400 font-black">%{cropBottom}</span>
                     </div>
                     <input 
                       type="range" 
@@ -465,15 +465,15 @@ export default function ImageEditor({ file, user, onSave, onCancel, onDirectUplo
                   <RotateCw className="h-8 w-8 mb-2" />
                   <span className="text-xs font-black">90° Döndür</span>
                 </button>
-                <p className="text-[10px] text-zinc-500 text-center font-medium">Her tıklamada görseli saat yönünde 90 derece döndürür.</p>
+                <p className="text-xs text-zinc-400 text-center font-medium">Her tıklamada görseli saat yönünde 90 derece döndürür.</p>
               </div>
             )}
           </div>
 
           {/* Disclaimer for non-premium trying to use features */}
           {!isPremium && (
-            <div className="border border-amber-500/20 bg-amber-500/5 rounded-xl p-3 flex items-start gap-2 text-[11px] text-amber-500 leading-normal">
-              <Lock className="h-4 w-4 shrink-0 mt-0.5" />
+            <div className="border border-amber-500/20 bg-amber-500/10 rounded-xl p-3.5 flex items-start gap-2.5 text-xs text-amber-400 leading-relaxed">
+              <Lock className="h-4.5 w-4.5 shrink-0 mt-0.5 text-amber-400" />
               <span>
                 <strong>Düzenleme Modu Aktif:</strong> Ayarları dilediğiniz gibi deneyebilirsiniz. Ancak kaydetmek ve bu şekilde yüklemek için <strong>Premium Paket</strong> gerekir.
               </span>

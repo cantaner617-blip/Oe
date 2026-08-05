@@ -69,12 +69,7 @@ export default function AuthForms({ type, onAuthSuccess }: AuthFormsProps) {
           throw new Error(data.error || "Şifre sıfırlama kodu gönderilirken bir hata oluştu.");
         }
 
-        if (data.isDirectBypass) {
-          setCode(data.code);
-          setIsDirectBypass(true);
-        } else {
-          setIsDirectBypass(false);
-        }
+        setIsDirectBypass(false);
 
         setSuccessMessage(data.message || "Doğrulama kodu e-postanıza gönderildi!");
         setMode('reset-password');

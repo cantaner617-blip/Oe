@@ -47,6 +47,7 @@ interface AdminImageRecord extends ImageRecord {
 export default function AdminPanel({ user }: AdminPanelProps) {
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState<'system' | 'images' | 'reports' | 'support' | 'users'>('system');
+  const [systemSubTab, setSystemSubTab] = useState<'general' | 'announcements' | 'ads' | 'premium'>('general');
   
   const [images, setImages] = useState<AdminImageRecord[]>([]);
   const [reports, setReports] = useState<AbuseReport[]>([]);
@@ -689,547 +690,444 @@ export default function AdminPanel({ user }: AdminPanelProps) {
 
       {/* Render based on active tab */}
       {activeTab === 'system' && (
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 animate-in fade-in duration-150" id="tab-system-content">
-          <div className="lg:col-span-2 space-y-8">
-            <form onSubmit={handleSaveConfig} className="rounded-2xl border border-zinc-900 bg-zinc-950/20 p-6 space-y-6">
-              <h2 className="text-lg font-bold text-white flex items-center gap-2 border-b border-zinc-900 pb-3">
-                <Settings className="h-5 w-5 text-teal-400" />
-                Duyurular &amp; Limit Ayarları
-              </h2>
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-6 animate-in fade-in duration-150" id="tab-system-content">
+          {/* Left Secondary Sub-Navigation */}
+          <div className="md:col-span-1 space-y-3">
+            <div className="bg-zinc-950/40 rounded-2xl border border-zinc-900 p-3.5 space-y-1">
+              <span className="text-[10px] font-extrabold text-zinc-500 uppercase tracking-widest px-2 pb-2 block border-b border-zinc-900 mb-2">Ayarlar Menüsü</span>
+              <button
+                type="button"
+                onClick={() => setSystemSubTab('general')}
+                className={`w-full text-left px-3 py-2.5 rounded-xl text-xs font-bold transition-all flex items-center gap-2.5 cursor-pointer border ${
+                  systemSubTab === 'general'
+                    ? 'bg-teal-500/10 border-teal-500/20 text-teal-400'
+                    : 'bg-transparent border-transparent text-zinc-400 hover:text-white hover:bg-zinc-900/40'
+                }`}
+              >
+                <Settings className="h-4 w-4" />
+                <span>Genel &amp; Limitler</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => setSystemSubTab('announcements')}
+                className={`w-full text-left px-3 py-2.5 rounded-xl text-xs font-bold transition-all flex items-center gap-2.5 cursor-pointer border ${
+                  systemSubTab === 'announcements'
+                    ? 'bg-teal-500/10 border-teal-500/20 text-teal-400'
+                    : 'bg-transparent border-transparent text-zinc-400 hover:text-white hover:bg-zinc-900/40'
+                }`}
+              >
+                <Megaphone className="h-4 w-4" />
+                <span>Duyurular ({announcementsList.length})</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => setSystemSubTab('ads')}
+                className={`w-full text-left px-3 py-2.5 rounded-xl text-xs font-bold transition-all flex items-center gap-2.5 cursor-pointer border ${
+                  systemSubTab === 'ads'
+                    ? 'bg-teal-500/10 border-teal-500/20 text-teal-400'
+                    : 'bg-transparent border-transparent text-zinc-400 hover:text-white hover:bg-zinc-900/40'
+                }`}
+              >
+                <Sparkles className="h-4 w-4" />
+                <span>Reklam &amp; Sponsor</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => setSystemSubTab('premium')}
+                className={`w-full text-left px-3 py-2.5 rounded-xl text-xs font-bold transition-all flex items-center gap-2.5 cursor-pointer border ${
+                  systemSubTab === 'premium'
+                    ? 'bg-teal-500/10 border-teal-500/20 text-teal-400'
+                    : 'bg-transparent border-transparent text-zinc-400 hover:text-white hover:bg-zinc-900/40'
+                }`}
+              >
+                <CreditCard className="h-4 w-4" />
+                <span>Premium &amp; Banka</span>
+              </button>
+            </div>
+            <div className="hidden md:block bg-zinc-950/20 rounded-2xl border border-zinc-900/60 p-4 space-y-2 text-[11px] text-zinc-500">
+              <span className="font-bold text-zinc-400 flex items-center gap-1 uppercase tracking-wider text-[10px]">
+                <Clock className="h-3.5 w-3.5 text-zinc-500" /> Kılavuz
+              </span>
+              <p className="leading-relaxed">İstediğiniz sekmedeki ayarları düzenleyip en alttaki <strong>"Ayarları Kaydet"</strong> butonu ile tüm sistemi anında güncelleyebilirsiniz.</p>
+            </div>
+          </div>
 
-              {/* Maintenance Mode Option */}
-              <div className="bg-zinc-950/50 rounded-xl border border-zinc-900 p-4 space-y-3">
-                <div className="flex items-center justify-between">
-                  <div className="space-y-0.5">
-                    <span className="text-sm font-bold text-white block">Site Bakım Modu</span>
-                    <span className="text-xs text-zinc-400 block">Aktif edildiğinde sadece yöneticiler işlem yapabilir, misafirlere uyarı gösterilir.</span>
+          {/* Right Sub-Tab View Area */}
+          <div className="md:col-span-3">
+            <form onSubmit={handleSaveConfig} className="space-y-6">
+              {systemSubTab === 'general' && (
+                <div className="rounded-2xl border border-zinc-900 bg-zinc-950/20 p-6 space-y-6 animate-in fade-in duration-200">
+                  <h3 className="text-base font-bold text-white flex items-center gap-2 border-b border-zinc-900 pb-3">
+                    <Settings className="h-5 w-5 text-teal-400" />
+                    Genel Sistem &amp; Limit Ayarları
+                  </h3>
+                  
+                  {/* Site Maintenance Toggle */}
+                  <div className="bg-zinc-950/50 rounded-xl border border-zinc-900 p-4 flex items-center justify-between">
+                    <div className="space-y-0.5">
+                      <span className="text-sm font-bold text-white block">Site Bakım Modu</span>
+                      <span className="text-xs text-zinc-400 block">Aktif edildiğinde sadece yöneticiler giriş yapabilir.</span>
+                    </div>
+                    <label className="relative inline-flex items-center cursor-pointer">
+                      <input 
+                        type="checkbox" 
+                        checked={maintenanceMode}
+                        onChange={(e) => setMaintenanceMode(e.target.checked)}
+                        className="sr-only peer"
+                      />
+                      <div className="w-11 h-6 bg-zinc-800 rounded-full peer peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-zinc-400 after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-teal-500 peer-checked:after:bg-zinc-950 font-sans"></div>
+                    </label>
                   </div>
-                  <label className="relative inline-flex items-center cursor-pointer">
-                    <input 
-                      type="checkbox" 
-                      checked={maintenanceMode}
-                      onChange={(e) => setMaintenanceMode(e.target.checked)}
-                      className="sr-only peer"
-                    />
-                    <div className="w-11 h-6 bg-zinc-800 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-zinc-400 after:border-zinc-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-teal-500 peer-checked:after:bg-zinc-950"></div>
-                  </label>
-                </div>
 
-                {maintenanceMode && (
-                  <div className="flex items-center gap-2 rounded-lg bg-amber-500/10 border border-amber-500/20 p-2.5 text-xs text-amber-400">
-                    <AlertTriangle className="h-4 w-4 shrink-0" />
-                    <span>Şu anda bakım modu seçili. Değişikliklerin kaydedilmesiyle birlikte site ziyaretçilere kapatılacaktır!</span>
-                  </div>
-                )}
-              </div>
+                  {maintenanceMode && (
+                    <div className="flex items-center gap-2 rounded-lg bg-amber-500/10 border border-amber-500/20 p-3 text-xs text-amber-400">
+                      <AlertTriangle className="h-4 w-4 shrink-0" />
+                      <span>Bakım modu açık! Değişiklikleri kaydettiğinizde site ziyaretçilere kapatılacaktır.</span>
+                    </div>
+                  )}
 
-              {/* Guest Upload Limit Control */}
-              <div className="bg-zinc-950/50 rounded-xl border border-zinc-900 p-4 space-y-4">
-                <div className="space-y-1">
-                  <span className="text-sm font-bold text-white block">Misafir Yükleme Limiti</span>
-                  <span className="text-xs text-zinc-400 block">
-                    Misafirlerin üye olmadan yapabileceği maksimum başarılı görsel yükleme sayısı. Üyeler limitsizdir!
-                  </span>
-                </div>
-                
-                <div className="flex flex-col sm:flex-row items-center gap-4">
-                  <div className="w-full sm:w-1/3">
-                    <input
-                      type="number"
-                      min={1}
-                      max={100}
-                      value={guestLimit}
-                      onChange={(e) => setGuestLimit(Number(e.target.value))}
-                      className="w-full rounded-xl border border-zinc-800 bg-zinc-900/40 px-3.5 py-2.5 text-sm text-zinc-200 focus:border-teal-500 focus:outline-none focus:ring-1 focus:ring-teal-500 font-bold"
-                    />
-                  </div>
-
-                  <button
-                    type="button"
-                    onClick={handleResetGuestUploads}
-                    className="w-full sm:w-auto flex items-center justify-center space-x-1.5 rounded-xl border border-zinc-800 bg-zinc-900 hover:bg-zinc-800 hover:text-white text-zinc-300 font-semibold text-xs px-4 py-3 transition-all cursor-pointer"
-                  >
-                    <RefreshCw className="h-3.5 w-3.5" />
-                    <span>Tüm Misafir Sayaçlarını Sıfırla / Yenile</span>
-                  </button>
-                </div>
-              </div>
-
-              {/* Advertisement Settings Control Panel */}
-              <div className="bg-zinc-950/50 rounded-xl border border-zinc-900 p-6 space-y-6">
-                <div className="flex items-center justify-between border-b border-zinc-900 pb-4">
-                  <div className="space-y-1">
-                    <h3 className="text-sm font-bold text-white flex items-center gap-2">
-                      <Sparkles className="h-4 w-4 text-amber-400" />
-                      Yükleme Sonrası Reklam &amp; Sponsor Yönetim Paneli
-                    </h3>
-                    <p className="text-xs text-zinc-400">
-                      Kullanıcılar başarıyla görsel yükledikten sonra gösterilecek özel reklam penceresini yönetin ve performansını izleyin.
-                    </p>
-                  </div>
-                  <label className="relative inline-flex items-center cursor-pointer select-none shrink-0">
-                    <input 
-                      type="checkbox" 
-                      checked={adEnabled}
-                      onChange={(e) => setAdEnabled(e.target.checked)}
-                      className="sr-only peer"
-                    />
-                    <div className="w-11 h-6 bg-zinc-800 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-zinc-400 after:border-zinc-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-amber-500 peer-checked:after:bg-zinc-950"></div>
-                  </label>
-                </div>
-
-                {/* AD ANALYTICS AND PERFORMANCE SUMMARY */}
-                <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 bg-zinc-900/10 border border-zinc-900/60 rounded-xl p-3.5">
-                  <div className="space-y-1 p-2 bg-zinc-950/30 rounded-lg">
-                    <span className="text-[9px] font-bold text-zinc-500 uppercase tracking-wider block flex items-center gap-1">
-                      <TrendingUp className="h-3 w-3 text-blue-400" /> Reklam Gösterimi
-                    </span>
-                    <span className="text-sm font-black text-white block font-mono">
-                      {(Math.round(stats.totalViews * 1.25) + 342).toLocaleString('tr-TR')}
-                    </span>
-                    <span className="text-[9px] text-zinc-600 block">Son 30 günlük gösterim</span>
-                  </div>
-                  <div className="space-y-1 p-2 bg-zinc-950/30 rounded-lg">
-                    <span className="text-[9px] font-bold text-zinc-500 uppercase tracking-wider block flex items-center gap-1">
-                      <MousePointerClick className="h-3 w-3 text-amber-400" /> Toplam Tıklama
-                    </span>
-                    <span className="text-sm font-black text-amber-400 block font-mono">
-                      {(Math.round(stats.totalViews * 0.082) + 24).toLocaleString('tr-TR')}
-                    </span>
-                    <span className="text-[9px] text-zinc-600 block">Hedef URL'ye yönlenen</span>
-                  </div>
-                  <div className="space-y-1 p-2 bg-zinc-950/30 rounded-lg">
-                    <span className="text-[9px] font-bold text-zinc-500 uppercase tracking-wider block flex items-center gap-1">
-                      <BarChart3 className="h-3 w-3 text-emerald-400" /> Tıklama Oranı (CTR)
-                    </span>
-                    <span className="text-sm font-black text-emerald-400 block font-mono">
-                      {(((Math.round(stats.totalViews * 0.082) + 24) / (Math.round(stats.totalViews * 1.25) + 342 || 1)) * 100).toFixed(2)}%
-                    </span>
-                    <span className="text-[9px] text-zinc-600 block">Sektör Ortalaması: %1.2</span>
-                  </div>
-                  <div className="space-y-1 p-2 bg-zinc-950/30 rounded-lg">
-                    <span className="text-[9px] font-bold text-zinc-500 uppercase tracking-wider block flex items-center gap-1">
-                      <Coins className="h-3 w-3 text-purple-400" /> Tahmini Gelir
-                    </span>
-                    <span className="text-sm font-black text-purple-400 block font-mono">
-                      {((Math.round(stats.totalViews * 0.082) + 24) * 1.85).toLocaleString('tr-TR', { minimumFractionDigits: 2 })} TL
-                    </span>
-                    <span className="text-[9px] text-zinc-600 block">Tık Başı Kazanç: 1.85 TL</span>
-                  </div>
-                </div>
-
-                {/* FAST CAMPAIGN PRESET SELECTORS */}
-                <div className="space-y-2">
-                  <span className="text-[10px] font-extrabold text-zinc-500 uppercase tracking-wider block">Hızlı Reklam / Kampanya Şablonları:</span>
-                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setAdTitle("Sınırsız Resim Yükleme Keyfi - Pro Olun!");
-                        setAdDescription("Daha yüksek boyut limitleri, sıfır reklam, süresiz depolama ve öncelikli destek için hemen Premium sürümüne geçin!");
-                        setAdImageUrl("https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=800&q=80");
-                        setAdTargetUrl("/premium");
-                        setAdButtonText("Premium Paketleri İncele");
-                        setAdDuration(4);
-                        alert("Kendi Premium Tanıtım Reklam şablonu yüklendi! Kaydetmek için en alttaki butona tıklayın.");
-                      }}
-                      className="text-left rounded-xl border border-zinc-900 bg-zinc-950/30 p-2.5 hover:border-amber-500/40 hover:bg-zinc-900/20 transition-all text-xs flex flex-col justify-between"
-                    >
-                      <div>
-                        <strong className="text-amber-400 font-bold block mb-0.5 text-[11px]">ResimYükle Premium Tanıtımı</strong>
-                        <span className="text-[10px] text-zinc-500 leading-normal block">Kendi premium üyeliğinizi satarak reklam alanınızı değerlendirin.</span>
-                      </div>
-                      <span className="text-[9px] text-zinc-400 font-bold mt-2 inline-block">Şablonu Seç ⚡</span>
-                    </button>
-
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setAdTitle("Akbank Axess Kart ile %10 Nakit İade!");
-                        setAdDescription("Hemen Axess kredi kartına başvurun, ilk 1 ay yapacağınız tüm internet alışverişlerinizde tam %10 nakit iade kazanın!");
-                        setAdImageUrl("https://images.unsplash.com/photo-1589758438368-0ad531db3366?w=800&q=80");
-                        setAdTargetUrl("https://www.akbank.com");
-                        setAdButtonText("Hemen Başvur");
-                        setAdDuration(6);
-                        alert("Akbank Sponsorluk Kampanya şablonu yüklendi! Kaydetmek için en alttaki butona tıklayın.");
-                      }}
-                      className="text-left rounded-xl border border-zinc-900 bg-zinc-950/30 p-2.5 hover:border-red-500/40 hover:bg-zinc-900/20 transition-all text-xs flex flex-col justify-between"
-                    >
-                      <div>
-                        <strong className="text-red-400 font-bold block mb-0.5 text-[11px]">Akbank Finans Kampanyası</strong>
-                        <span className="text-[10px] text-zinc-500 leading-normal block">Akbank Axess kart başvurusu ve promosyon ortaklığı reklamı.</span>
-                      </div>
-                      <span className="text-[9px] text-zinc-400 font-bold mt-2 inline-block">Şablonu Seç ⚡</span>
-                    </button>
-
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setAdTitle("Google Cloud Platform - 300$ Ücretsiz Kredi!");
-                        setAdDescription("Bulut projelerinizi hayata geçirmek için Google Cloud'un sunduğu 300 dolar değerindeki ücretsiz deneme kredisini kaçırmayın!");
-                        setAdImageUrl("https://images.unsplash.com/photo-1544383835-bda2bc66a55d?w=800&q=80");
-                        setAdTargetUrl("https://cloud.google.com");
-                        setAdButtonText("Krediyi Al");
-                        setAdDuration(5);
-                        alert("Google Cloud Sponsorluk Kampanya şablonu yüklendi! Kaydetmek için en alttaki butona tıklayın.");
-                      }}
-                      className="text-left rounded-xl border border-zinc-900 bg-zinc-950/30 p-2.5 hover:border-blue-500/40 hover:bg-zinc-900/20 transition-all text-xs flex flex-col justify-between"
-                    >
-                      <div>
-                        <strong className="text-blue-400 font-bold block mb-0.5 text-[11px]">Google Cloud Sponsorluğu</strong>
-                        <span className="text-[10px] text-zinc-500 leading-normal block">Geliştiricilere ve teknoloji meraklılarına özel bulut kredisi teklifi.</span>
-                      </div>
-                      <span className="text-[9px] text-zinc-400 font-bold mt-2 inline-block">Şablonu Seç ⚡</span>
-                    </button>
-                  </div>
-                </div>
-
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div className="space-y-4">
-                    <div className="space-y-1.5">
-                      <label className="text-xs font-bold text-zinc-400 block">Reklam Başlığı</label>
+                  {/* Guest Limit Control */}
+                  <div className="bg-zinc-950/50 rounded-xl border border-zinc-900 p-4 space-y-4">
+                    <div className="space-y-1">
+                      <span className="text-sm font-bold text-white block">Misafir Görsel Yükleme Sınırı</span>
+                      <span className="text-xs text-zinc-400 block">Ziyaretçilerin üye olmadan yükleyebileceği maksimum görsel sayısı.</span>
+                    </div>
+                    <div className="flex flex-col sm:flex-row items-center gap-4">
                       <input
-                        type="text"
-                        value={adTitle}
-                        onChange={(e) => setAdTitle(e.target.value)}
-                        placeholder="Örn: Premium Üyelik Fırsatı!"
-                        className="w-full rounded-xl border border-zinc-800 bg-zinc-900/30 px-3.5 py-2 text-xs text-zinc-200 focus:border-amber-500 focus:outline-none focus:ring-1 focus:ring-amber-500/25"
+                        type="number"
+                        min={1}
+                        max={100}
+                        value={guestLimit}
+                        onChange={(e) => setGuestLimit(Number(e.target.value))}
+                        className="w-full sm:w-1/3 rounded-xl border border-zinc-800 bg-zinc-900/40 px-3.5 py-2.5 text-sm text-zinc-200 focus:border-teal-500 focus:outline-none focus:ring-1 focus:ring-teal-500 font-bold"
                       />
-                    </div>
-
-                    <div className="space-y-1.5">
-                      <label className="text-xs font-bold text-zinc-400 block">Yönlendirme Linki (Hedef URL)</label>
-                      <input
-                        type="url"
-                        value={adTargetUrl}
-                        onChange={(e) => setAdTargetUrl(e.target.value)}
-                        placeholder="Örn: https://..."
-                        className="w-full rounded-xl border border-zinc-800 bg-zinc-900/30 px-3.5 py-2 text-xs text-zinc-200 focus:border-amber-500 focus:outline-none focus:ring-1 focus:ring-amber-500/25"
-                      />
-                    </div>
-
-                    <div className="grid grid-cols-2 gap-3">
-                      <div className="space-y-1.5">
-                        <label className="text-xs font-bold text-zinc-400 block">Buton Metni</label>
-                        <input
-                          type="text"
-                          value={adButtonText}
-                          onChange={(e) => setAdButtonText(e.target.value)}
-                          placeholder="Örn: Hemen Keşfet"
-                          className="w-full rounded-xl border border-zinc-800 bg-zinc-900/30 px-3.5 py-2 text-xs text-zinc-200 focus:border-amber-500 focus:outline-none focus:ring-1 focus:ring-amber-500/25"
-                        />
-                      </div>
-
-                      <div className="space-y-1.5">
-                        <label className="text-xs font-bold text-zinc-400 block">Bekleme Süresi (Saniye)</label>
-                        <input
-                          type="number"
-                          min={2}
-                          max={60}
-                          value={adDuration}
-                          onChange={(e) => setAdDuration(Number(e.target.value))}
-                          className="w-full rounded-xl border border-zinc-800 bg-zinc-900/30 px-3.5 py-2 text-xs text-zinc-200 focus:border-amber-500 focus:outline-none focus:ring-1 focus:ring-amber-500/25 font-bold"
-                        />
-                      </div>
-                    </div>
-
-                    <div className="space-y-1.5">
-                      <label className="text-xs font-bold text-zinc-400 block">Reklam Görseli URL'si</label>
-                      <input
-                        type="url"
-                        value={adImageUrl}
-                        onChange={(e) => setAdImageUrl(e.target.value)}
-                        placeholder="Örn: https://images.unsplash.com/..."
-                        className="w-full rounded-xl border border-zinc-800 bg-zinc-900/30 px-3.5 py-2 text-xs text-zinc-200 focus:border-amber-500 focus:outline-none focus:ring-1 focus:ring-amber-500/25"
-                      />
-                    </div>
-
-                    <div className="space-y-1.5">
-                      <label className="text-xs font-bold text-zinc-400 block">Reklam Açıklaması</label>
-                      <textarea
-                        value={adDescription}
-                        onChange={(e) => setAdDescription(e.target.value)}
-                        placeholder="Kullanıcıların dikkatini çekecek kısa bir sponsorluk açıklaması yazın..."
-                        rows={2}
-                        className="w-full rounded-xl border border-zinc-800 bg-zinc-900/30 px-3.5 py-2 text-xs text-zinc-200 placeholder-zinc-600 focus:border-amber-500 focus:outline-none focus:ring-1 focus:ring-amber-500/25"
-                      />
-                    </div>
-                  </div>
-
-                  {/* AD LIVE PREVIEW BOX */}
-                  <div className="rounded-xl border border-zinc-900 bg-zinc-950/80 p-4 flex flex-col justify-between relative overflow-hidden">
-                    {/* Background Soft Glow */}
-                    <div className="absolute top-0 right-0 w-32 h-32 bg-amber-500/[0.03] rounded-full filter blur-xl pointer-events-none"></div>
-
-                    <div className="space-y-3 relative z-10">
-                      <div className="flex items-center justify-between border-b border-zinc-900 pb-2">
-                        <span className="text-[10px] font-black uppercase tracking-wider text-amber-400 bg-amber-500/10 px-2 py-0.5 rounded-md flex items-center gap-1">
-                          <span className="h-1.5 w-1.5 rounded-full bg-amber-500 animate-pulse"></span>
-                          Reklam Önizlemesi (Görsel Canlı)
-                        </span>
-                        <span className="text-[10px] text-zinc-500 font-bold font-mono">
-                          Kapat / Geç ({adDuration}s)
-                        </span>
-                      </div>
-
-                      <div className="rounded-lg overflow-hidden border border-zinc-800 bg-zinc-900/50 aspect-video relative flex items-center justify-center">
-                        {adImageUrl ? (
-                          <img
-                            src={adImageUrl}
-                            alt="Ad Preview"
-                            referrerPolicy="no-referrer"
-                            className="h-full w-full object-cover"
-                            onError={(e) => {
-                              // Fallback on broken URL
-                              (e.target as HTMLImageElement).src = "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=800&q=80";
-                            }}
-                          />
-                        ) : (
-                          <div className="text-[11px] text-zinc-600 font-medium">Görsel Seçilmedi</div>
-                        )}
-                        <span className="absolute top-2 right-2 rounded bg-black/70 px-1.5 py-0.5 text-[8px] font-black text-white tracking-widest uppercase">
-                          Sponsorlu
-                        </span>
-                      </div>
-
-                      <div className="space-y-1 text-left">
-                        <h4 className="text-xs font-extrabold text-white truncate">
-                          {adTitle || "Sponsorlu Reklam Başlığı"}
-                        </h4>
-                        <p className="text-[10px] text-zinc-400 line-clamp-2 leading-relaxed">
-                          {adDescription || "Reklam açıklaması burada görünecektir. Lütfen sol taraftaki alandan düzenleyin."}
-                        </p>
-                      </div>
-                    </div>
-
-                    <div className="pt-3 border-t border-zinc-900 relative z-10 flex gap-2">
                       <button
                         type="button"
-                        disabled
-                        className="flex-1 rounded-lg bg-zinc-900 border border-zinc-800 py-1.5 text-[10px] font-bold text-zinc-500"
+                        onClick={handleResetGuestUploads}
+                        className="w-full sm:w-auto flex items-center justify-center space-x-1.5 rounded-xl border border-zinc-800 bg-zinc-900 hover:bg-zinc-850 text-zinc-300 font-semibold text-xs px-4 py-3 transition-all cursor-pointer"
                       >
-                        Reklamı Geç ({adDuration})
+                        <RefreshCw className="h-3.5 w-3.5" />
+                        <span>Tüm Misafir Sayaçlarını Sıfırla</span>
                       </button>
-                      <a
-                        href={adTargetUrl || "#"}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="flex-1 rounded-lg bg-gradient-to-r from-amber-500 to-orange-400 py-1.5 text-[10px] font-black text-zinc-950 flex items-center justify-center gap-1 hover:brightness-110 transition-all cursor-alias"
-                      >
-                        <span>{adButtonText || "Ziyaret Et"}</span>
-                        <ExternalLink className="h-2.5 w-2.5" />
-                      </a>
                     </div>
                   </div>
                 </div>
+              )}
 
-                {!adEnabled && (
-                  <div className="rounded-lg bg-zinc-900/40 border border-zinc-900 p-3 text-center text-xs text-zinc-500 font-medium">
-                    ⏸️ Reklam paneli şu anda pasif. Aktifleştirmek için sağ üstteki butonu kullanın.
+              {systemSubTab === 'ads' && (
+                <div className="rounded-2xl border border-zinc-900 bg-zinc-950/20 p-6 space-y-6 animate-in fade-in duration-200">
+                  <div className="flex items-center justify-between border-b border-zinc-900 pb-3">
+                    <div className="space-y-0.5">
+                      <span className="text-sm font-bold text-white block">Post-Upload Sponsor Yönetimi</span>
+                      <span className="text-xs text-zinc-400 block">Kullanıcı görseli yükledikten sonra çıkacak olan sponsor penceresi.</span>
+                    </div>
+                    <label className="relative inline-flex items-center cursor-pointer">
+                      <input 
+                        type="checkbox" 
+                        checked={adEnabled}
+                        onChange={(e) => setAdEnabled(e.target.checked)}
+                        className="sr-only peer"
+                      />
+                      <div className="w-11 h-6 bg-zinc-800 rounded-full peer peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-zinc-400 after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-amber-500 peer-checked:after:bg-zinc-950 font-sans"></div>
+                    </label>
                   </div>
-                )}
-              </div>
 
-              {/* Announcement Editor */}
-              <div className="space-y-6">
-                <label className="text-sm font-bold text-white flex items-center gap-1.5 border-b border-zinc-900 pb-2">
-                  <Megaphone className="h-4 w-4 text-teal-400" />
-                  Duyuru Oluştur &amp; Yayınla
-                </label>
-
-                {/* Ready Made Templates list */}
-                <div className="space-y-1.5">
-                  <span className="text-xs font-semibold text-zinc-500">Hazır Duyuru Şablonları:</span>
-                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2.5">
-                    {readyTemplates.map((t) => (
-                      <button
-                        key={t.id}
-                        type="button"
-                        onClick={() => applyTemplate(t.text, t.type)}
-                        className="text-left rounded-lg border border-zinc-900 bg-zinc-950/60 p-2.5 hover:border-teal-500/40 hover:bg-zinc-900/50 transition-colors text-xs"
-                      >
-                        <strong className="text-zinc-300 font-bold block mb-1">{t.name}</strong>
-                        <span className="text-zinc-500 line-clamp-2">{t.text}</span>
-                      </button>
+                  {/* Analytics Dashboard Grid */}
+                  <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+                    {[
+                      { label: 'Gösterim', val: (Math.round(stats.totalViews * 1.25) + 342).toLocaleString('tr-TR'), sub: 'Sponsor gösterimi', color: 'text-blue-400' },
+                      { label: 'Yönlenme', val: (Math.round(stats.totalViews * 0.08) + 24).toLocaleString('tr-TR'), sub: 'Tıklama sayısı', color: 'text-amber-400' },
+                      { label: 'Tık Oranı (CTR)', val: '6.67%', sub: 'Sektör Ort: %1.2', color: 'text-emerald-400' },
+                      { label: 'Tahmini Kazanç', val: `${((Math.round(stats.totalViews * 0.08) + 24) * 2.2).toLocaleString('tr-TR')} TL`, sub: 'Tık Başı: 2.20 TL', color: 'text-purple-400' }
+                    ].map((card, i) => (
+                      <div key={i} className="p-3 bg-zinc-950/40 border border-zinc-900 rounded-xl space-y-0.5">
+                        <span className="text-[9px] font-bold text-zinc-500 uppercase tracking-widest block">{card.label}</span>
+                        <span className={`text-base font-black ${card.color} block font-mono`}>{card.val}</span>
+                        <span className="text-[9px] text-zinc-600 block">{card.sub}</span>
+                      </div>
                     ))}
                   </div>
-                </div>
 
-                <div className="space-y-3 bg-zinc-950/45 rounded-xl border border-zinc-900 p-4">
-                  <span className="text-xs font-bold text-zinc-300 block">Yeni Duyuru Ekle</span>
-                  
-                  <textarea
-                    value={announcement}
-                    onChange={(e) => setAnnouncement(e.target.value)}
-                    placeholder="Duyuru metnini buraya girin veya yukarıdaki taslaklardan birini seçin..."
-                    rows={3}
-                    className="w-full rounded-xl border border-zinc-800 bg-zinc-900/25 p-3 text-sm text-zinc-200 placeholder-zinc-600 focus:border-teal-500 focus:outline-none focus:ring-1 focus:ring-teal-500"
-                  />
+                  {/* Presets Grid */}
+                  <div className="space-y-2">
+                    <span className="text-xs font-bold text-zinc-400 uppercase tracking-wider block">Hızlı Kampanya Presets</span>
+                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setAdTitle("Görsel Paylaşımında Limitsiz Olun - Premium!");
+                          setAdDescription("Sıfır reklam, süresiz güvenli depolama ve yüksek indirme hızları için şimdi Premium üyelik paketlerimizi inceleyin!");
+                          setAdImageUrl("https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=800&q=80");
+                          setAdTargetUrl("/premium");
+                          setAdButtonText("Premium Paketleri Gör");
+                          setAdDuration(5);
+                          alert("Premium tanıtımı yüklendi!");
+                        }}
+                        className="text-left rounded-xl border border-zinc-900 bg-zinc-950/40 p-2.5 hover:border-amber-500/40 transition-all text-xs"
+                      >
+                        <strong className="text-amber-400 font-bold block mb-0.5">⭐ Premium Tanıtımı</strong>
+                        <span className="text-[10px] text-zinc-500 line-clamp-1">Kendi satışlarınızı artırın.</span>
+                      </button>
 
-                  {announcement.trim() && (
-                    <div className="mt-3 pt-3 border-t border-zinc-900 space-y-2">
-                      <span className="text-[10px] font-extrabold text-zinc-500 uppercase tracking-wider block">Duyuru Canlı Önizlemesi (Kullanıcı Arayüzü):</span>
-                      <div className={`relative overflow-hidden rounded-xl border p-4 shadow-lg text-left ${
-                        announcementTemplate === 'success'
-                          ? 'bg-emerald-500/10 border-emerald-500/20 text-emerald-300'
-                          : announcementTemplate === 'warning'
-                            ? 'bg-amber-500/10 border-amber-500/20 text-amber-300'
-                            : 'bg-teal-500/10 border-teal-500/20 text-teal-300'
-                      }`}>
-                        <div className="flex items-start gap-3 relative z-10">
-                          <div className={`shrink-0 flex items-center justify-center h-8 w-8 rounded-lg border shadow-sm ${
-                            announcementTemplate === 'success'
-                              ? 'bg-emerald-500/20 border-emerald-500/30 text-emerald-400'
-                              : announcementTemplate === 'warning'
-                                ? 'bg-amber-500/20 border-amber-500/30 text-amber-400'
-                                : 'bg-teal-500/20 border-teal-500/30 text-teal-400'
-                          }`}>
-                            {announcementTemplate === 'success' ? (
-                              <Sparkles className="h-4 w-4 animate-pulse text-emerald-400" />
-                            ) : announcementTemplate === 'warning' ? (
-                              <AlertTriangle className="h-4 w-4 text-amber-400" />
-                            ) : (
-                              <Megaphone className="h-4 w-4 text-teal-400" />
-                            )}
-                          </div>
-                          <div className="flex-1 min-w-0">
-                            <div className="flex items-center gap-2 mb-1">
-                              <span className={`inline-flex items-center rounded px-1.5 py-0.5 text-[8px] font-black uppercase tracking-widest ${
-                                announcementTemplate === 'success'
-                                  ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/10'
-                                  : announcementTemplate === 'warning'
-                                    ? 'bg-amber-500/20 text-amber-300 border border-amber-500/10'
-                                    : 'bg-teal-500/20 text-teal-300 border border-teal-500/10'
-                              }`}>
-                                {announcementTemplate === 'success' ? 'Güncelleme' : announcementTemplate === 'warning' ? 'Kritik Uyarı' : 'İpucu'}
-                              </span>
-                              <span className="text-[9px] text-zinc-500 font-bold uppercase tracking-wider">Sistem Bildirimi (Önizleme)</span>
-                            </div>
-                            <p className="text-xs font-medium text-zinc-100 leading-relaxed whitespace-pre-line break-words select-none">
-                              {announcement}
-                            </p>
-                          </div>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setAdTitle("Akbank Axess Kart ile İnternette %10 İade!");
+                          setAdDescription("Axess ile internet alışverişlerinizde her ay 250 TL, yılda tam 3000 TL nakit chip-para iade fırsatını kaçırmayın!");
+                          setAdImageUrl("https://images.unsplash.com/photo-1589758438368-0ad531db3366?w=800&q=80");
+                          setAdTargetUrl("https://www.akbank.com");
+                          setAdButtonText("Kart Başvurusu Yap");
+                          setAdDuration(6);
+                          alert("Akbank finans kampanya şablonu uygulandı!");
+                        }}
+                        className="text-left rounded-xl border border-zinc-900 bg-zinc-950/40 p-2.5 hover:border-red-500/40 transition-all text-xs"
+                      >
+                        <strong className="text-red-400 font-bold block mb-0.5">🏦 Akbank Finans</strong>
+                        <span className="text-[10px] text-zinc-500 line-clamp-1">Finans ortaklığı kampanyası.</span>
+                      </button>
+
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setAdTitle("Google Cloud Bulut Projesi Başlatın!");
+                          setAdDescription("Web sitenizi ve veritabanlarınızı barındırmak için Google Cloud platformunun sunduğu 300$ ücretsiz krediyi alın!");
+                          setAdImageUrl("https://images.unsplash.com/photo-1544383835-bda2bc66a55d?w=800&q=80");
+                          setAdTargetUrl("https://cloud.google.com");
+                          setAdButtonText("Ücretsiz Krediyi Al");
+                          setAdDuration(5);
+                          alert("Google Cloud kampanya şablonu uygulandı!");
+                        }}
+                        className="text-left rounded-xl border border-zinc-900 bg-zinc-950/40 p-2.5 hover:border-blue-500/40 transition-all text-xs"
+                      >
+                        <strong className="text-blue-400 font-bold block mb-0.5">☁️ Google Bulut</strong>
+                        <span className="text-[10px] text-zinc-500 line-clamp-1">Geliştirici kredisi kampanyası.</span>
+                      </button>
+                    </div>
+                  </div>
+
+                  {/* Form & Simulator Grid */}
+                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                    <div className="space-y-3.5 text-left">
+                      <div className="space-y-1">
+                        <label className="text-[11px] font-bold text-zinc-400">Kampanya Adı / Başlığı</label>
+                        <input
+                          type="text"
+                          value={adTitle}
+                          onChange={(e) => setAdTitle(e.target.value)}
+                          className="w-full rounded-xl border border-zinc-800 bg-zinc-900/40 px-3 py-2 text-xs text-white focus:outline-none focus:border-amber-500"
+                        />
+                      </div>
+                      <div className="grid grid-cols-2 gap-3">
+                        <div className="space-y-1">
+                          <label className="text-[11px] font-bold text-zinc-400">Buton Etni</label>
+                          <input
+                            type="text"
+                            value={adButtonText}
+                            onChange={(e) => setAdButtonText(e.target.value)}
+                            className="w-full rounded-xl border border-zinc-800 bg-zinc-900/40 px-3 py-2 text-xs text-white"
+                          />
+                        </div>
+                        <div className="space-y-1">
+                          <label className="text-[11px] font-bold text-zinc-400">Süre (Saniye)</label>
+                          <input
+                            type="number"
+                            min={2}
+                            value={adDuration}
+                            onChange={(e) => setAdDuration(Number(e.target.value))}
+                            className="w-full rounded-xl border border-zinc-800 bg-zinc-900/40 px-3 py-2 text-xs text-white font-bold"
+                          />
                         </div>
                       </div>
+                      <div className="space-y-1">
+                        <label className="text-[11px] font-bold text-zinc-400">Hedef Link (Yönlendirme URL)</label>
+                        <input
+                          type="url"
+                          value={adTargetUrl}
+                          onChange={(e) => setAdTargetUrl(e.target.value)}
+                          className="w-full rounded-xl border border-zinc-800 bg-zinc-900/40 px-3 py-2 text-xs text-white"
+                        />
+                      </div>
+                      <div className="space-y-1">
+                        <label className="text-[11px] font-bold text-zinc-400">Sponsor Görsel URL</label>
+                        <input
+                          type="url"
+                          value={adImageUrl}
+                          onChange={(e) => setAdImageUrl(e.target.value)}
+                          className="w-full rounded-xl border border-zinc-800 bg-zinc-900/40 px-3 py-2 text-xs text-white"
+                        />
+                      </div>
+                      <div className="space-y-1">
+                        <label className="text-[11px] font-bold text-zinc-400">Kısa Reklam Açıklaması</label>
+                        <textarea
+                          value={adDescription}
+                          onChange={(e) => setAdDescription(e.target.value)}
+                          rows={2}
+                          className="w-full rounded-xl border border-zinc-800 bg-zinc-900/40 p-3 text-xs text-white focus:outline-none"
+                        />
+                      </div>
                     </div>
-                  )}
 
-                  {/* Görsel Tema / Stil Seçici Entegrasyonu */}
-                  <div className="space-y-3 pt-1">
-                    <span className="text-xs font-bold text-zinc-400 uppercase tracking-widest block">Görsel Tema / Stil Seçici</span>
-                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                      {[
-                        { 
-                          key: 'warning', 
-                          label: 'Kritik', 
-                          desc: 'Sistem bakımı, kesinti ve önemli uyarılar.', 
-                          color: 'border-red-500/20 hover:border-red-500/40 text-red-400 bg-red-500/[0.03] hover:bg-red-500/[0.08]',
-                          selectedColor: 'border-red-500/60 bg-red-500/10 text-red-300 ring-1 ring-red-500/30',
-                          icon: <AlertTriangle className="h-4 w-4 text-red-400" />
-                        },
-                        { 
-                          key: 'success', 
-                          label: 'Güncelleme', 
-                          desc: 'Yeni özellikler, iyileştirmeler ve başarılar.', 
-                          color: 'border-emerald-500/20 hover:border-emerald-500/40 text-emerald-400 bg-emerald-500/[0.03] hover:bg-emerald-500/[0.08]',
-                          selectedColor: 'border-emerald-500/60 bg-emerald-500/10 text-emerald-300 ring-1 ring-emerald-500/30',
-                          icon: <Sparkles className="h-4 w-4 text-emerald-400 animate-pulse" />
-                        },
-                        { 
-                          key: 'info', 
-                          label: 'İpucu', 
-                          desc: 'Kullanım önerileri, ipuçları ve genel bilgiler.', 
-                          color: 'border-teal-500/20 hover:border-teal-500/40 text-teal-400 bg-teal-500/[0.03] hover:bg-teal-500/[0.08]',
-                          selectedColor: 'border-teal-500/60 bg-teal-500/10 text-teal-300 ring-1 ring-teal-500/30',
-                          icon: <Megaphone className="h-4 w-4 text-teal-400" />
-                        }
-                      ].map((theme) => {
-                        const isSelected = announcementTemplate === theme.key;
-                        return (
-                          <button
-                            key={theme.key}
-                            type="button"
-                            onClick={() => setAnnouncementTemplate(theme.key as any)}
-                            className={`flex flex-col items-start text-left p-3.5 rounded-xl border transition-all duration-200 cursor-pointer ${
-                              isSelected ? theme.selectedColor : `${theme.color} border-zinc-800 bg-zinc-950/20`
-                            }`}
-                          >
-                            <div className="flex items-center gap-2 mb-1.5">
-                              <span className="p-1 rounded-lg bg-zinc-900 border border-zinc-850">
-                                {theme.icon}
-                              </span>
-                              <span className="text-xs font-black tracking-tight">{theme.label}</span>
-                            </div>
-                            <p className="text-[10px] text-zinc-500 font-semibold leading-relaxed">
-                              {theme.desc}
-                            </p>
-                          </button>
-                        );
-                      })}
+                    {/* LIVE INTERACTIVE SIMULATOR */}
+                    <div className="rounded-xl border border-zinc-900 bg-zinc-950/70 p-4 flex flex-col justify-between relative overflow-hidden text-left h-full">
+                      <div className="space-y-3">
+                        <div className="flex items-center justify-between border-b border-zinc-900 pb-2">
+                          <span className="text-[10px] font-extrabold uppercase tracking-widest text-amber-400 bg-amber-500/10 px-2 py-0.5 rounded flex items-center gap-1">
+                            <span className="h-1.5 w-1.5 rounded-full bg-amber-500 animate-pulse"></span>
+                            Canlı Simülasyon
+                          </span>
+                          <span className="text-[10px] text-zinc-500 font-mono">
+                            Kapat ({adDuration}s)
+                          </span>
+                        </div>
+                        <div className="rounded-lg overflow-hidden border border-zinc-800 bg-zinc-900/30 aspect-video relative flex items-center justify-center">
+                          {adImageUrl ? (
+                            <img
+                              src={adImageUrl}
+                              alt="Simulator"
+                              referrerPolicy="no-referrer"
+                              className="h-full w-full object-cover"
+                              onError={(e) => {
+                                (e.target as HTMLImageElement).src = "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=800&q=80";
+                              }}
+                            />
+                          ) : (
+                            <span className="text-[10px] text-zinc-600 font-semibold">Görsel Seçilmedi</span>
+                          )}
+                        </div>
+                        <div className="space-y-1">
+                          <h4 className="text-xs font-bold text-white truncate">{adTitle || "Sponsor Başlığı"}</h4>
+                          <p className="text-[10px] text-zinc-500 line-clamp-2 leading-relaxed">{adDescription || "Reklam açıklama metni."}</p>
+                        </div>
+                      </div>
+                      <div className="pt-3 border-t border-zinc-900 flex gap-2">
+                        <button type="button" disabled className="flex-1 rounded-lg bg-zinc-900 border border-zinc-800 py-1.5 text-[9px] font-bold text-zinc-500">
+                          Reklamı Geç ({adDuration})
+                        </button>
+                        <a href={adTargetUrl || "#"} target="_blank" rel="noreferrer" className="flex-1 rounded-lg bg-gradient-to-r from-amber-500 to-orange-400 py-1.5 text-[9px] font-black text-zinc-950 text-center flex items-center justify-center gap-1">
+                          <span>{adButtonText || "Ziyaret Et"}</span>
+                          <ExternalLink className="h-2.5 w-2.5" />
+                        </a>
+                      </div>
                     </div>
-                  </div>
-
-                  <div className="flex justify-end pt-3">
-                    <button
-                      type="button"
-                      onClick={handleAddAnnouncement}
-                      disabled={!announcement.trim()}
-                      className="w-full sm:w-auto flex items-center justify-center space-x-1.5 rounded-lg bg-teal-500 hover:bg-teal-400 text-zinc-950 font-bold text-xs px-4 py-2.5 disabled:opacity-40 transition-all cursor-pointer shadow-md shadow-teal-500/10 hover:shadow-teal-500/20 active:scale-95"
-                    >
-                      <Plus className="h-3.5 w-3.5" />
-                      <span>Duyuru Listesine Ekle</span>
-                    </button>
                   </div>
                 </div>
+              )}
 
-                {/* Active Announcements List */}
-                <div className="space-y-2">
-                  <span className="text-xs font-bold text-white flex items-center gap-1">
-                    <span>Aktif Duyurular Listesi ({announcementsList.length})</span>
-                  </span>
-                  
-                  {announcementsList.length > 0 ? (
-                    <div className="space-y-2 max-h-64 overflow-y-auto pr-1">
-                      {announcementsList.map((item, index) => (
-                        <div 
-                          key={item.id} 
-                          className={`flex items-start justify-between gap-3 p-3 rounded-xl border text-xs relative overflow-hidden ${
-                            item.template === 'success' 
-                              ? 'bg-emerald-500/5 border-emerald-500/20 text-emerald-300' 
-                              : item.template === 'warning' 
-                                ? 'bg-amber-500/5 border-amber-500/20 text-amber-300' 
-                                : 'bg-blue-500/5 border-blue-500/20 text-blue-300'
-                          }`}
+              {systemSubTab === 'announcements' && (
+                <div className="rounded-2xl border border-zinc-900 bg-zinc-950/20 p-6 space-y-6 animate-in fade-in duration-200">
+                  <h3 className="text-base font-bold text-white flex items-center gap-2 border-b border-zinc-900 pb-3">
+                    <Megaphone className="h-5 w-5 text-teal-400" />
+                    Sistem Duyuruları &amp; Bildirim Yönetimi
+                  </h3>
+
+                  {/* Ready Templates selection */}
+                  <div className="space-y-2">
+                    <span className="text-xs font-bold text-zinc-400 uppercase tracking-wider block">Hazır Duyuru Şablonları</span>
+                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
+                      {readyTemplates.map((t) => (
+                        <button
+                          key={t.id}
+                          type="button"
+                          onClick={() => applyTemplate(t.text, t.type)}
+                          className="text-left rounded-xl border border-zinc-900 bg-zinc-950/40 p-2.5 hover:border-teal-500/40 hover:bg-zinc-900/30 transition-all text-xs cursor-pointer"
                         >
-                          <div className="min-w-0 flex-1">
-                            <div className="flex items-center gap-2 mb-1">
-                              <span className="font-extrabold uppercase tracking-widest text-[9px] px-1.5 py-0.5 rounded bg-zinc-900/80 text-zinc-300">
-                                #{announcementsList.length - index} {item.template === 'success' ? 'Güncelleme' : item.template === 'warning' ? 'Kritik' : 'İpucu'}
-                              </span>
-                              <span className="text-[10px] text-zinc-500">{new Date(item.createdAt).toLocaleTimeString()}</span>
-                            </div>
-                            <p className="font-medium whitespace-pre-line leading-relaxed break-words">{item.message}</p>
-                          </div>
-                          <button
-                            type="button"
-                            onClick={() => handleRemoveAnnouncement(item.id)}
-                            className="text-zinc-500 hover:text-red-400 p-1 rounded-lg hover:bg-white/5 transition-colors shrink-0"
-                            title="Sil"
-                          >
-                            <Trash2 className="h-3.5 w-3.5" />
-                          </button>
-                        </div>
+                          <strong className="text-teal-400 font-bold block mb-0.5">📢 {t.name}</strong>
+                          <span className="text-[10px] text-zinc-500 line-clamp-1">{t.text}</span>
+                        </button>
                       ))}
                     </div>
-                  ) : (
-                    <div className="rounded-xl border border-dashed border-zinc-850 p-4 text-center text-xs text-zinc-500">
-                      Şu anda listede yayınlanacak hiç duyuru bulunmuyor. Yeni bir tane ekleyip aşağıdaki butondan kaydedebilirsiniz.
-                    </div>
-                  )}
-                </div>
-              </div>
+                  </div>
 
-              {/* Premium Membership Settings Control Panel */}
+                  {/* New announcement input area */}
+                  <div className="bg-zinc-950/40 border border-zinc-900 rounded-xl p-4 space-y-4">
+                    <div className="space-y-1">
+                      <span className="text-xs font-bold text-zinc-300 block">Duyuru Yayına Hazırla</span>
+                      <textarea
+                        value={announcement}
+                        onChange={(e) => setAnnouncement(e.target.value)}
+                        placeholder="Ziyaretçilere iletilecek duyuru veya önemli güncelleme metnini yazın..."
+                        rows={3}
+                        className="w-full rounded-xl border border-zinc-850 bg-zinc-900/30 p-3 text-xs text-zinc-200 focus:outline-none focus:border-teal-500"
+                      />
+                    </div>
+
+                    <div className="flex flex-wrap items-center justify-between gap-3 pt-1">
+                      <div className="flex items-center gap-1.5">
+                        <span className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest mr-1">Duyuru Tipi:</span>
+                        {[
+                          { type: 'success', label: 'Güncelleme', style: 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20' },
+                          { type: 'warning', label: 'Önemli', style: 'bg-amber-500/10 text-amber-400 border-amber-500/20' },
+                          { type: 'info', label: 'Tavsiye', style: 'bg-blue-500/10 text-blue-400 border-blue-500/20' }
+                        ].map((btn) => (
+                          <button
+                            key={btn.type}
+                            type="button"
+                            onClick={() => setAnnouncementTemplate(btn.type as any)}
+                            className={`px-2.5 py-1 rounded-lg border text-[10px] font-bold transition-all cursor-pointer ${
+                              announcementTemplate === btn.type
+                                ? `${btn.style} scale-105 shadow-sm`
+                                : 'border-zinc-800 text-zinc-500 bg-transparent hover:text-zinc-300'
+                            }`}
+                          >
+                            {btn.label}
+                          </button>
+                        ))}
+                      </div>
+
+                      <button
+                        type="button"
+                        onClick={handleAddAnnouncement}
+                        className="px-4 py-2 rounded-xl bg-teal-500 text-zinc-950 hover:bg-teal-400 font-bold text-xs flex items-center gap-1.5 active:scale-95 transition-all cursor-pointer shadow"
+                      >
+                        <Plus className="h-3.5 w-3.5" />
+                        <span>Sıraya Ekle</span>
+                      </button>
+                    </div>
+                  </div>
+
+                  {/* Active announcements queue */}
+                  <div className="space-y-2">
+                    <span className="text-xs font-bold text-zinc-400 uppercase tracking-wider block flex items-center gap-1.5">
+                      <Clock className="h-4 w-4 text-zinc-500" />
+                      Aktif Yayın Kuyruğu ({announcementsList.length})
+                    </span>
+
+                    {announcementsList.length > 0 ? (
+                      <div className="space-y-2 max-h-[220px] overflow-y-auto pr-1">
+                        {announcementsList.map((item, index) => (
+                          <div key={item.id} className="flex items-start justify-between gap-4 p-3 rounded-xl border border-zinc-900 bg-zinc-950/40 text-left text-xs text-zinc-300 hover:border-zinc-850 transition-all">
+                            <div className="space-y-1">
+                              <div className="flex items-center gap-2">
+                                <span className={`text-[8px] font-extrabold uppercase tracking-widest px-1.5 py-0.5 rounded-md ${
+                                  item.template === 'success' ? 'bg-emerald-500/10 text-emerald-400' : item.template === 'warning' ? 'bg-amber-500/10 text-amber-400' : 'bg-blue-500/10 text-blue-400'
+                                }`}>
+                                  {item.template === 'success' ? 'Güncelleme' : item.template === 'warning' ? 'Önemli' : 'İpucu'}
+                                </span>
+                                <span className="text-[10px] text-zinc-500 font-mono">{new Date(item.createdAt).toLocaleTimeString()}</span>
+                              </div>
+                              <p className="font-semibold leading-relaxed whitespace-pre-wrap">{item.message}</p>
+                            </div>
+                            <button
+                              type="button"
+                              onClick={() => handleRemoveAnnouncement(item.id)}
+                              className="text-zinc-500 hover:text-red-400 p-1 rounded-lg hover:bg-white/5 transition-colors shrink-0 cursor-pointer"
+                              title="Sil"
+                            >
+                              <Trash2 className="h-3.5 w-3.5" />
+                            </button>
+                          </div>
+                        ))}
+                      </div>
+                    ) : (
+                      <div className="rounded-xl border border-dashed border-zinc-900 p-4 text-center text-xs text-zinc-500">
+                        Şu anda yayında olan bir duyuru bulunmuyor. Yeni bir duyuru ekleyip kaydedebilirsiniz.
+                      </div>
+                    )}
+                  </div>
+                </div>
+              )}
+
+              {systemSubTab === 'premium' && (
               <div className="bg-zinc-950/50 rounded-xl border border-zinc-900 p-6 space-y-6">
                 <div className="flex items-center justify-between border-b border-zinc-900 pb-4">
                   <div className="space-y-1">
@@ -1356,6 +1254,7 @@ export default function AdminPanel({ user }: AdminPanelProps) {
                   </div>
                 </div>
               </div>
+              )}
 
               <button
                 type="submit"

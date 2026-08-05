@@ -10,13 +10,26 @@ import { signToken, verifyToken } from './server/token';
 
 const app = express();
 
+// Helper to clean environment variables from platform artifacts
+function cleanEnvVar(val: string | undefined): string {
+  if (!val) return '';
+  const trimmed = val.trim();
+  if (trimmed === 'undefined' || trimmed === 'null' || trimmed === 'placeholder' || trimmed === '') {
+    return '';
+  }
+  return trimmed;
+}
+
 // In-memory verification codes storage for password reset
 // Key: email (lowercased), Value: { code: string, expiresAt: number }
 const verificationCodes = new Map<string, { code: string; expiresAt: number }>();
 
 async function sendVerificationCode(email: string, code: string): Promise<boolean> {
-  const smtpUser = process.env.SMTP_USER || 'angfs777@gmail.com';
-  const smtpPass = process.env.SMTP_PASS || 'xejjbvwkznsxvpaa';
+  const envSmtpUser = cleanEnvVar(process.env.SMTP_USER);
+  const envSmtpPass = cleanEnvVar(process.env.SMTP_PASS);
+  
+  const smtpUser = envSmtpUser || 'angfs777@gmail.com';
+  const smtpPass = envSmtpPass || 'xejjbvwkznsxvpaa';
   const cleanPass = smtpPass.replace(/\s+/g, '');
 
   const transporter = nodemailer.createTransport({
@@ -67,9 +80,13 @@ const PORT = Number(process.env.PORT) || 3000;
 app.use(express.json());
 
 // Cloudinary Configuration
-const cloudinaryCloudName = process.env.CLOUDINARY_CLOUD_NAME || 'xkxhqfy8';
-const cloudinaryApiKey = process.env.CLOUDINARY_API_KEY || '343837662874489';
-const cloudinaryApiSecret = process.env.CLOUDINARY_API_SECRET || 'ikyRqVp_pz-eVEnT_DDo7icHtWk';
+const envCloudName = cleanEnvVar(process.env.CLOUDINARY_CLOUD_NAME);
+const envApiKey = cleanEnvVar(process.env.CLOUDINARY_API_KEY);
+const envApiSecret = cleanEnvVar(process.env.CLOUDINARY_API_SECRET);
+
+const cloudinaryCloudName = envCloudName || 'xkxhqfy8';
+const cloudinaryApiKey = envApiKey || '343837662874489';
+const cloudinaryApiSecret = envApiSecret || 'ikyRqVp_pz-eVEnT_DDo7icHtWk';
 
 const isCloudinaryConfigured = !!(
   cloudinaryCloudName &&
