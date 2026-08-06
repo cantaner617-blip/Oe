@@ -6,6 +6,7 @@ import multer from 'multer';
 import nodemailer from 'nodemailer';
 import { v2 as cloudinary } from 'cloudinary';
 import { createServer as createViteServer } from 'vite';
+import { S3Client, PutObjectCommand, DeleteObjectCommand } from '@aws-sdk/client-s3';
 import { db, pwdUtil } from './server/db';
 import { signToken, verifyToken } from './server/token';
 
@@ -104,6 +105,64 @@ if (isCloudinaryConfigured) {
   console.log("Cloudinary successfully configured with cloud name:", cloudinaryCloudName);
 } else {
   console.warn("Cloudinary configuration missing! Using local database storage fallback for uploaded images.");
+}
+
+// Cloudflare R2 Configuration (S3 Compatible)
+const r2AccessKeyId = cleanEnvVar(process.env.R2_ACCESS_KEY_ID);
+const r2SecretAccessKey = cleanEnvVar(process.env.R2_SECRET_ACCESS_KEY);
+const r2BucketName = cleanEnvVar(process.env.R2_BUCKET_NAME);
+const r2AccountId = cleanEnvVar(process.env.R2_ACCOUNT_ID);
+const r2CustomDomain = cleanEnvVar(process.env.R2_CUSTOM_DOMAIN);
+
+const isR2Configured = !!(
+  r2AccessKeyId &&
+  r2SecretAccessKey &&
+  r2BucketName &&
+  r2AccountId
+);
+
+let r2Client: S3Client | null = null;
+if (isR2Configured) {
+  r2Client = new S3Client({
+    region: 'auto',
+    endpoint: `https://${r2AccountId}.r2.cloudflarestorage.com`,
+    credentials: {
+      accessKeyId: r2AccessKeyId,
+      secretAccessKey: r2SecretAccessKey,
+    },
+  });
+  console.log("Cloudflare R2 successfully configured with bucket:", r2BucketName);
+} else {
+  console.log("Cloudflare R2 configuration missing. R2 upload is inactive.");
+}
+
+// Helper to delete remote asset (Cloudinary or Cloudflare R2)
+async function deleteRemoteAsset(publicId?: string, isLocal?: boolean): Promise<void> {
+  if (isLocal) return;
+  if (!publicId) return;
+
+  // 1. Cloudflare R2
+  if (isR2Configured && r2Client && publicId.startsWith('r2:')) {
+    const s3Key = publicId.substring(3); // remove 'r2:' prefix
+    try {
+      await r2Client.send(new DeleteObjectCommand({
+        Bucket: r2BucketName,
+        Key: s3Key,
+      }));
+      console.log(`Cloudflare R2 object deleted successfully: ${s3Key}`);
+    } catch (r2Err) {
+      console.error(`Cloudflare R2 delete failed for key ${s3Key}:`, r2Err);
+    }
+  } 
+  // 2. Cloudinary
+  else if (isCloudinaryConfigured && !publicId.startsWith('r2:')) {
+    try {
+      await cloudinary.uploader.destroy(publicId);
+      console.log(`Cloudinary asset deleted successfully: ${publicId}`);
+    } catch (cloudinaryErr) {
+      console.error(`Cloudinary destroy failed:`, cloudinaryErr);
+    }
+  }
 }
 
 // Multer storage
@@ -209,9 +268,9 @@ app.get('/api/direct-image/:id', async (req, res) => {
     // Check if image is expired on-the-fly
     const now = new Date().toISOString();
     if (image.expiresAt && image.expiresAt <= now) {
-      if (isCloudinaryConfigured && image.publicId) {
-        cloudinary.uploader.destroy(image.publicId).catch((err: any) => {
-          console.error(`Failed to destroy expired Cloudinary asset for image ${image.id} on direct access:`, err);
+      if (image.publicId) {
+        deleteRemoteAsset(image.publicId, image.isLocal).catch((err: any) => {
+          console.error(`Failed to destroy expired remote asset for image ${image.id} on direct access:`, err);
         });
       }
       db.deleteImage(image.id);
@@ -543,7 +602,67 @@ app.post('/api/upload', optionalAuth, upload.single('image'), async (req: AuthRe
     let width = 600;
     let height = 400;
 
-    if (isCloudinaryConfigured) {
+    if (isR2Configured && r2Client) {
+      // Stream to Cloudflare R2
+      try {
+        const s3Key = `${fileId}.${format}`;
+        const uploadParams = {
+          Bucket: r2BucketName,
+          Key: s3Key,
+          Body: req.file.buffer,
+          ContentType: req.file.mimetype,
+        };
+        await r2Client.send(new PutObjectCommand(uploadParams));
+
+        if (r2CustomDomain) {
+          imageUrl = `https://${r2CustomDomain}/${s3Key}`;
+        } else {
+          imageUrl = `https://${r2BucketName}.${r2AccountId}.r2.cloudflarestorage.com/${s3Key}`;
+        }
+        publicId = `r2:${s3Key}`; // Prefix with 'r2:' to identify in deleteRemoteAsset
+        width = 600; // default for R2
+        height = 400;
+      } catch (r2Err: any) {
+        console.error("Cloudflare R2 upload failed, falling back to local database storage...", r2Err);
+        // Fallback internally
+        const base64Data = req.file.buffer.toString('base64');
+        const siteUrl = process.env.APP_URL || `http://localhost:${PORT}`;
+        imageUrl = `${siteUrl}/api/local-images/${fileId}`;
+
+        if (!isLoggedIn && guestId) {
+          db.incrementGuestUploadCount(guestId);
+        }
+
+        const record = db.addImage({
+          id: fileId,
+          userId: req.user ? req.user.id : null,
+          url: imageUrl,
+          filename,
+          format,
+          bytes,
+          width,
+          height,
+          isLocal: true,
+          localData: base64Data,
+          expiresAt,
+          deleteAfter,
+        });
+
+        const siteUrlVal = process.env.APP_URL || `${req.protocol}://${req.get('host')}`;
+        return res.json({
+          id: record.id,
+          directUrl: `${siteUrlVal}/api/direct-image/${record.id}`,
+          pageUrl: `/i/${record.id}`,
+          width: record.width,
+          height: record.height,
+          bytes: record.bytes,
+          filename: record.filename,
+          isLocalFallback: true,
+          expiresAt: record.expiresAt,
+          deleteAfter: record.deleteAfter,
+        });
+      }
+    } else if (isCloudinaryConfigured) {
       // Stream to Cloudinary
       try {
         const result = await new Promise<any>((resolve, reject) => {
@@ -732,13 +851,9 @@ app.delete('/api/images/:id', requireAuth, async (req: AuthRequest, res) => {
     return res.status(403).json({ error: 'Bu resmi silme yetkiniz bulunmamaktadır.' });
   }
 
-  // If Cloudinary stored, attempt to destroy it
-  if (isCloudinaryConfigured && image.publicId) {
-    try {
-      await cloudinary.uploader.destroy(image.publicId);
-    } catch (cloudinaryErr) {
-      console.error('Cloudinary destroy failed:', cloudinaryErr);
-    }
+  // Attempt to delete from R2 or Cloudinary
+  if (image.publicId) {
+    await deleteRemoteAsset(image.publicId, image.isLocal);
   }
 
   db.deleteImage(req.params.id);
@@ -858,12 +973,8 @@ app.delete('/api/admin/images/:id', requireAdmin, async (req: AuthRequest, res) 
     return res.status(404).json({ error: 'Resim bulunamadı.' });
   }
 
-  if (isCloudinaryConfigured && image.publicId) {
-    try {
-      await cloudinary.uploader.destroy(image.publicId);
-    } catch (cloudinaryErr) {
-      console.error('Cloudinary destroy failed in admin delete:', cloudinaryErr);
-    }
+  if (image.publicId) {
+    await deleteRemoteAsset(image.publicId, image.isLocal);
   }
 
   db.deleteImage(req.params.id);
@@ -874,15 +985,9 @@ app.delete('/api/admin/images/:id', requireAdmin, async (req: AuthRequest, res) 
 app.delete('/api/admin/images', requireAdmin, async (req: AuthRequest, res) => {
   const images = db.getImages();
 
-  if (isCloudinaryConfigured) {
-    for (const image of images) {
-      if (image.publicId) {
-        try {
-          await cloudinary.uploader.destroy(image.publicId);
-        } catch (cloudinaryErr) {
-          console.error(`Cloudinary destroy failed in admin delete all for image ${image.id}:`, cloudinaryErr);
-        }
-      }
+  for (const image of images) {
+    if (image.publicId) {
+      await deleteRemoteAsset(image.publicId, image.isLocal);
     }
   }
 
@@ -1258,9 +1363,9 @@ function cleanupExpiredImages() {
     if (expired.length > 0) {
       console.log(`[CLEANUP] Found ${expired.length} expired images.`);
       for (const img of expired) {
-        if (isCloudinaryConfigured && img.publicId) {
-          cloudinary.uploader.destroy(img.publicId).catch((err: any) => {
-            console.error(`Failed to destroy expired Cloudinary asset for image ${img.id}:`, err);
+        if (img.publicId) {
+          deleteRemoteAsset(img.publicId, img.isLocal).catch((err: any) => {
+            console.error(`Failed to destroy expired remote asset for image ${img.id}:`, err);
           });
         }
         db.deleteImage(img.id);
