@@ -471,21 +471,20 @@ export default function Uploader({ user, onUploadSuccess, systemStatus }: Upload
     const allowedTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/bmp', 'image/webp'];
     const limitMb = user ? 100 : 20;
     const maxSize = limitMb * 1024 * 1024;
+    const CONCURRENCY_LIMIT = 4; // limit concurrent uploads to 4 at a time to optimize network
 
-    for (let i = 0; i < files.length; i++) {
-      const file = files[i];
-      const queueId = initialQueue[i].id;
-
+    // Single file processing and upload logic
+    const uploadSingleFile = async (file: File, queueId: string) => {
       // Validate format
       if (!allowedTypes.includes(file.type)) {
         setUploadQueue(prev => prev.map(item => item.id === queueId ? { ...item, status: 'failed', error: "Geçersiz format. Yalnızca JPG, PNG, GIF, BMP, WEBP yüklenebilir." } : item));
-        continue;
+        return;
       }
 
       // Validate size
       if (file.size > maxSize) {
         setUploadQueue(prev => prev.map(item => item.id === queueId ? { ...item, status: 'failed', error: `Maksimum limit ${limitMb} MB'dır.` } : item));
-        continue;
+        return;
       }
 
       // Process client-side compression if active
@@ -585,7 +584,22 @@ export default function Uploader({ user, onUploadSuccess, systemStatus }: Upload
         console.error(err);
         setUploadQueue(prev => prev.map(item => item.id === queueId ? { ...item, status: 'failed', error: err.message || "Yükleme hatası." } : item));
       }
-    }
+    };
+
+    // Execute multiple uploads with a concurrency limit
+    const queue = files.map((file, idx) => ({ file, queueId: initialQueue[idx].id }));
+    let index = 0;
+
+    const worker = async () => {
+      while (index < queue.length) {
+        const currentIdx = index++;
+        const item = queue[currentIdx];
+        await uploadSingleFile(item.file, item.queueId);
+      }
+    };
+
+    const workers = Array.from({ length: Math.min(CONCURRENCY_LIMIT, queue.length) }, () => worker());
+    await Promise.all(workers);
 
     setLoading(false);
 
