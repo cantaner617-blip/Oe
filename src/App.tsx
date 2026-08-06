@@ -12,6 +12,7 @@ import Help from './components/Help';
 import ReportAbuse from './components/ReportAbuse';
 import Support from './components/Support';
 import Premium from './components/Premium';
+import Legal from './components/Legal';
 import { User, SystemStatus } from './types';
 import { ShieldCheck, Zap, Globe, Heart, AlertTriangle, Hammer, LogIn, Megaphone, X, Sparkles, Gauge, Cloud, Code, Info } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
@@ -485,6 +486,7 @@ export default function App() {
             <Route path="/yardim" element={<Help />} />
             <Route path="/ihbar" element={<ReportAbuse />} />
             <Route path="/destek" element={<Support user={user} />} />
+            <Route path="/sozlesmeler" element={<Legal />} />
             <Route path="/premium" element={<Premium user={user} systemStatus={systemStatus} onRefreshSession={checkSession} />} />
 
             {/* Catch-all Fallback */}
@@ -500,13 +502,24 @@ export default function App() {
           <div className="flex flex-wrap items-center justify-center gap-x-6 gap-y-2 text-xs font-semibold text-zinc-400">
             <Link to="/hakkimizda" className="hover:text-teal-400 transition-colors">Hakkımızda &amp; Platform Mimarisi</Link>
             <span className="h-1.5 w-1.5 rounded-full bg-zinc-800" />
-            <Link to="/sartlar" className="hover:text-teal-400 transition-colors">Kullanım Şartları ve Hizmet Standartları</Link>
-            <span className="h-1.5 w-1.5 rounded-full bg-zinc-800" />
             <Link to="/yardim" className="hover:text-teal-400 transition-colors">Yardım &amp; SSS</Link>
             <span className="h-1.5 w-1.5 rounded-full bg-zinc-800" />
             <Link to="/ihbar" className="hover:text-red-400 transition-colors text-red-400/90">Kötüye Kullanım Bildir (DMCA / İhlal)</Link>
             <span className="h-1.5 w-1.5 rounded-full bg-zinc-800" />
             <Link to="/destek" className="hover:text-teal-400 transition-colors">İletişim &amp; Destek Merkezi</Link>
+          </div>
+          <div className="flex flex-wrap items-center justify-center gap-x-4 gap-y-2 text-[11px] font-medium text-zinc-500 border-t border-zinc-900/40 pt-3">
+            <Link to="/sozlesmeler?tab=uyelik" className="hover:text-teal-400 transition-colors">Kullanıcı &amp; Üyelik Sözleşmesi</Link>
+            <span className="h-1 w-1 rounded-full bg-zinc-800" />
+            <Link to="/sozlesmeler?tab=mesafeli" className="hover:text-teal-400 transition-colors">Mesafeli Satış Sözleşmesi</Link>
+            <span className="h-1 w-1 rounded-full bg-zinc-800" />
+            <Link to="/sozlesmeler?tab=onbilgilendirme" className="hover:text-teal-400 transition-colors">Ön Bilgilendirme Formu</Link>
+            <span className="h-1 w-1 rounded-full bg-zinc-800" />
+            <Link to="/sozlesmeler?tab=kvkk" className="hover:text-teal-400 transition-colors">Gizlilik &amp; KVKK Politikası</Link>
+            <span className="h-1 w-1 rounded-full bg-zinc-800" />
+            <Link to="/sozlesmeler?tab=iade" className="hover:text-teal-400 transition-colors">İptal &amp; İade Koşulları</Link>
+            <span className="h-1 w-1 rounded-full bg-zinc-800" />
+            <Link to="/sozlesmeler?tab=teslimat" className="hover:text-teal-400 transition-colors">Teslimat &amp; Aktivasyon Politikası</Link>
           </div>
           <div className="border-t border-zinc-900/60 pt-4 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-zinc-500">
             <div className="flex items-center space-x-1">
