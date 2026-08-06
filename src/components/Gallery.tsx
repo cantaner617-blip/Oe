@@ -16,7 +16,8 @@ import {
   Lock,
   Mail,
   ShieldAlert,
-  CalendarDays
+  CalendarDays,
+  Sparkles
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { ImageRecord, User } from '../types';
@@ -222,6 +223,12 @@ export default function Gallery({ onSelectImage, user, themeShade = 'midnight', 
                   >
                     {/* Image Thumbnail Preview container */}
                     <div className="relative aspect-[4/3] w-full bg-zinc-900/40 overflow-hidden flex items-center justify-center">
+                      {user?.isPremium && (
+                        <div className="absolute top-2.5 left-2.5 z-10 inline-flex items-center gap-1 rounded-lg bg-gradient-to-r from-amber-500 to-yellow-400 px-2.5 py-1 text-[10px] font-black text-zinc-950 shadow-[0_2px_8px_rgba(245,158,11,0.35)] select-none">
+                          <Sparkles className="h-3 w-3 text-zinc-950 fill-zinc-950/20 animate-pulse" />
+                          <span>PREMIUM</span>
+                        </div>
+                      )}
                       <img
                         src={img.url}
                         alt={img.filename}
@@ -339,28 +346,45 @@ export default function Gallery({ onSelectImage, user, themeShade = 'midnight', 
                 <div className="absolute top-0 right-0 h-32 w-32 bg-teal-500/5 rounded-full filter blur-xl pointer-events-none"></div>
                 
                 <div className="flex flex-col items-center text-center space-y-4">
-                  <div className="h-16 w-16 rounded-2xl bg-teal-500/10 border border-teal-500/20 text-teal-400 flex items-center justify-center shadow-lg">
-                    <UserIcon className="h-8 w-8 text-teal-400" />
-                  </div>
+                  {user?.isPremium ? (
+                    <div className="h-16 w-16 rounded-2xl bg-gradient-to-tr from-amber-500/20 to-yellow-500/10 border border-amber-500/40 text-amber-400 flex items-center justify-center shadow-[0_0_15px_rgba(245,158,11,0.15)] relative">
+                      <UserIcon className="h-8 w-8 text-amber-400" />
+                      <div className="absolute -top-1.5 -right-1.5 bg-gradient-to-r from-amber-500 to-yellow-400 rounded-lg p-1 border border-zinc-950 shadow-md">
+                        <Sparkles className="h-3 w-3 text-zinc-950 fill-zinc-950/20 animate-pulse" />
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="h-16 w-16 rounded-2xl bg-teal-500/10 border border-teal-500/20 text-teal-400 flex items-center justify-center shadow-lg">
+                      <UserIcon className="h-8 w-8 text-teal-400" />
+                    </div>
+                  )}
                   
                   <div>
-                    <h3 className="text-lg font-bold text-white">{user?.username || "Kullanıcı"}</h3>
+                    <div className="flex items-center justify-center gap-1.5">
+                      <h3 className="text-lg font-bold text-white">{user?.username || "Kullanıcı"}</h3>
+                      {user?.isPremium && (
+                        <Sparkles className="h-4 w-4 text-amber-400 fill-amber-400/20 animate-pulse" />
+                      )}
+                    </div>
                     <p className="text-xs text-zinc-500">{user?.email || "e-posta belirtilmedi"}</p>
                   </div>
 
-                  <div className="inline-flex items-center gap-1.5 rounded-full px-2.5 py-0.5 text-xs font-bold border border-teal-500/20 bg-teal-500/5 text-teal-400">
-                    {user?.isAdmin ? (
-                      <>
-                        <ShieldAlert className="h-3 w-3" />
-                        Platform Yöneticisi
-                      </>
-                    ) : (
-                      <>
-                        <CheckCircle2 className="h-3 w-3" />
-                        Standart Üye
-                      </>
-                    )}
-                  </div>
+                  {user?.isAdmin ? (
+                    <div className="inline-flex items-center gap-1.5 rounded-full px-2.5 py-0.5 text-xs font-bold border border-teal-500/20 bg-teal-500/5 text-teal-400">
+                      <ShieldAlert className="h-3 w-3" />
+                      Platform Yöneticisi
+                    </div>
+                  ) : user?.isPremium ? (
+                    <div className="inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-black border border-amber-500/30 bg-gradient-to-r from-amber-500/10 to-yellow-500/5 text-amber-400 shadow-[0_0_12px_rgba(245,158,11,0.1)]">
+                      <Sparkles className="h-3 w-3 text-amber-400 fill-amber-400/20 animate-spin" style={{ animationDuration: '4s' }} />
+                      Premium Üye
+                    </div>
+                  ) : (
+                    <div className="inline-flex items-center gap-1.5 rounded-full px-2.5 py-0.5 text-xs font-bold border border-zinc-800 bg-zinc-900/50 text-zinc-400">
+                      <CheckCircle2 className="h-3 w-3" />
+                      Standart Üye
+                    </div>
+                  )}
                 </div>
 
                 <div className="mt-8 pt-6 border-t border-zinc-900/60 space-y-4">
