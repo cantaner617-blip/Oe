@@ -1,5 +1,6 @@
 import express, { Request, Response, NextFunction } from 'express';
 import path from 'path';
+import fs from 'fs';
 import crypto from 'crypto';
 import multer from 'multer';
 import nodemailer from 'nodemailer';
@@ -887,6 +888,29 @@ app.delete('/api/admin/images', requireAdmin, async (req: AuthRequest, res) => {
 
   db.deleteAllImages();
   res.json({ success: true, message: 'Tüm görseller başarıyla silindi.' });
+});
+
+// ================= SITE LOGO ENDPOINTS =================
+
+// Get Site Logo (Public)
+app.get('/api/site-logo', (req, res) => {
+  const logoPath = path.join(process.cwd(), 'src/assets/images/site_logo_1786005177763.jpg');
+  if (fs.existsSync(logoPath)) {
+    res.setHeader('Content-Type', 'image/jpeg');
+    return res.sendFile(logoPath);
+  }
+  res.status(404).json({ error: 'Logo bulunamadı.' });
+});
+
+// Download Site Logo (Public PNG)
+app.get('/api/download-logo', (req, res) => {
+  const logoPath = path.join(process.cwd(), 'src/assets/images/site_logo_1786005177763.jpg');
+  if (fs.existsSync(logoPath)) {
+    res.setHeader('Content-Disposition', 'attachment; filename="anindaresim_logo.png"');
+    res.setHeader('Content-Type', 'image/png');
+    return res.sendFile(logoPath);
+  }
+  res.status(404).json({ error: 'Logo bulunamadı.' });
 });
 
 // ================= ABUSE REPORTS (DMCA / VIOLATIONS) =================

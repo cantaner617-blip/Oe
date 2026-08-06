@@ -104,9 +104,14 @@ export default function Navbar({ user, onLogout, systemStatus, themeShade }: Nav
             className="flex items-center space-x-3 group"
             id="nav-logo"
           >
-            <div className="relative flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-teal-500/10 to-emerald-500/5 text-teal-400 border border-teal-500/20 group-hover:border-teal-400/40 group-hover:from-teal-500/20 group-hover:to-emerald-500/10 transition-all duration-300 shadow-sm">
+            <div className="relative flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-teal-500/10 to-emerald-500/5 text-teal-400 border border-teal-500/20 group-hover:border-teal-400/40 group-hover:from-teal-500/20 group-hover:to-emerald-500/10 transition-all duration-300 shadow-sm overflow-hidden">
               <div className="absolute inset-0 rounded-xl bg-teal-400/10 opacity-0 group-hover:opacity-100 animate-pulse transition-opacity duration-300" />
-              <Image className="h-5 w-5 relative z-10 transition-transform duration-300 group-hover:scale-110" />
+              <img 
+                src="/api/site-logo" 
+                alt="ResimYükle Logo" 
+                className="h-8 w-8 rounded-lg relative z-10 transition-transform duration-300 group-hover:scale-110 object-cover" 
+                referrerPolicy="no-referrer"
+              />
             </div>
             <div className="flex flex-col">
               <span className="text-lg font-black tracking-tight text-white leading-none group-hover:text-teal-300 transition-colors duration-300">
@@ -291,6 +296,16 @@ export default function Navbar({ user, onLogout, systemStatus, themeShade }: Nav
                       <MessageSquare className="h-3.5 w-3.5 text-teal-400" />
                       <span>7/24 Teknik Destek</span>
                     </Link>
+
+                    <a
+                      href="/api/download-logo"
+                      download="anindaresim_logo.png"
+                      onClick={() => setDropdownOpen(false)}
+                      className="flex items-center space-x-2 rounded-lg px-2.5 py-2 text-xs font-bold text-amber-400 hover:bg-amber-950/20 hover:text-amber-300 transition-colors border-t border-zinc-900/60 mt-1"
+                    >
+                      <Sparkles className="h-3.5 w-3.5 text-amber-500 animate-pulse" />
+                      <span>Özel Logo İndir (PNG)</span>
+                    </a>
                   </motion.div>
                 )}
               </AnimatePresence>
@@ -477,8 +492,13 @@ export default function Navbar({ user, onLogout, systemStatus, themeShade }: Nav
                 {/* Header inside the Drawer */}
                 <div className="px-6 py-5 border-b border-zinc-900/60 flex items-center justify-between bg-zinc-950/40">
                   <div className="flex items-center space-x-2.5">
-                    <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-teal-500/10 text-teal-400 border border-teal-500/20 shadow-lg shadow-teal-500/5">
-                      <Image className="h-5 w-5" />
+                    <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-teal-500/10 text-teal-400 border border-teal-500/20 shadow-lg shadow-teal-500/5 overflow-hidden">
+                      <img 
+                        src="/api/site-logo" 
+                        alt="ResimYükle Logo" 
+                        className="h-7 w-7 rounded-lg object-cover" 
+                        referrerPolicy="no-referrer"
+                      />
                     </div>
                     <div className="flex flex-col">
                       <span className="text-sm font-black tracking-tight text-white">AnındaResim</span>
@@ -708,6 +728,16 @@ export default function Navbar({ user, onLogout, systemStatus, themeShade }: Nav
                         <MessageSquare className="h-4 w-4 text-teal-400 shrink-0" />
                         <span>7/24 Teknik Destek</span>
                       </Link>
+
+                      <a
+                        href="/api/download-logo"
+                        download="anindaresim_logo.png"
+                        onClick={() => setMobileMenuOpen(false)}
+                        className="flex items-center space-x-3.5 px-3.5 py-2.5 rounded-xl text-xs font-bold text-amber-400 bg-amber-500/5 hover:bg-amber-500/10 border border-amber-500/20 transition-all duration-200 mt-2"
+                      >
+                        <Sparkles className="h-4 w-4 text-amber-400 shrink-0 animate-pulse" />
+                        <span>Özel Logo İndir (PNG)</span>
+                      </a>
                     </div>
                   </div>
 
