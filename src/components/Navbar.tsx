@@ -297,15 +297,17 @@ export default function Navbar({ user, onLogout, systemStatus, themeShade }: Nav
                       <span>7/24 Teknik Destek</span>
                     </Link>
 
-                    <a
-                      href="/api/download-logo"
-                      download="anindaresim_logo.png"
-                      onClick={() => setDropdownOpen(false)}
-                      className="flex items-center space-x-2 rounded-lg px-2.5 py-2 text-xs font-bold text-amber-400 hover:bg-amber-950/20 hover:text-amber-300 transition-colors border-t border-zinc-900/60 mt-1"
-                    >
-                      <Sparkles className="h-3.5 w-3.5 text-amber-500 animate-pulse" />
-                      <span>Özel Logo İndir (PNG)</span>
-                    </a>
+                     {user?.isAdmin && (
+                      <a
+                        href={`/api/download-logo?token=${localStorage.getItem('token') || ''}`}
+                        download="anindaresim_logo.png"
+                        onClick={() => setDropdownOpen(false)}
+                        className="flex items-center space-x-2 rounded-lg px-2.5 py-2 text-xs font-bold text-amber-400 hover:bg-amber-950/20 hover:text-amber-300 transition-colors border-t border-zinc-900/60 mt-1"
+                      >
+                        <Sparkles className="h-3.5 w-3.5 text-amber-500 animate-pulse" />
+                        <span>Özel Logo İndir (PNG)</span>
+                      </a>
+                    )}
                   </motion.div>
                 )}
               </AnimatePresence>
@@ -729,15 +731,17 @@ export default function Navbar({ user, onLogout, systemStatus, themeShade }: Nav
                         <span>7/24 Teknik Destek</span>
                       </Link>
 
-                      <a
-                        href="/api/download-logo"
-                        download="anindaresim_logo.png"
-                        onClick={() => setMobileMenuOpen(false)}
-                        className="flex items-center space-x-3.5 px-3.5 py-2.5 rounded-xl text-xs font-bold text-amber-400 bg-amber-500/5 hover:bg-amber-500/10 border border-amber-500/20 transition-all duration-200 mt-2"
-                      >
-                        <Sparkles className="h-4 w-4 text-amber-400 shrink-0 animate-pulse" />
-                        <span>Özel Logo İndir (PNG)</span>
-                      </a>
+                      {user?.isAdmin && (
+                        <a
+                          href={`/api/download-logo?token=${localStorage.getItem('token') || ''}`}
+                          download="anindaresim_logo.png"
+                          onClick={() => setMobileMenuOpen(false)}
+                          className="flex items-center space-x-3.5 px-3.5 py-2.5 rounded-xl text-xs font-bold text-amber-400 bg-amber-500/5 hover:bg-amber-500/10 border border-amber-500/20 transition-all duration-200 mt-2"
+                        >
+                          <Sparkles className="h-4 w-4 text-amber-400 shrink-0 animate-pulse" />
+                          <span>Özel Logo İndir (PNG)</span>
+                        </a>
+                      )}
                     </div>
                   </div>
 

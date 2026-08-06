@@ -902,8 +902,30 @@ app.get('/api/site-logo', (req, res) => {
   res.status(404).json({ error: 'Logo bulunamadı.' });
 });
 
-// Download Site Logo (Public PNG)
+// Download Site Logo (Admin Only PNG)
 app.get('/api/download-logo', (req, res) => {
+  let token = req.query.token as string;
+  if (!token) {
+    const authHeader = req.headers.authorization;
+    if (authHeader && authHeader.startsWith('Bearer ')) {
+      token = authHeader.substring(7);
+    }
+  }
+
+  if (!token) {
+    return res.status(401).json({ error: 'Bu işlem için yetkiniz bulunmamaktadır.' });
+  }
+
+  const decoded = verifyToken(token);
+  if (!decoded) {
+    return res.status(401).json({ error: 'Geçersiz veya süresi dolmuş oturum.' });
+  }
+
+  const userObj = db.getUserById(decoded.id);
+  if (!userObj || !userObj.isAdmin) {
+    return res.status(403).json({ error: 'Bu işlem için yönetici yetkiniz bulunmamaktadır.' });
+  }
+
   const logoPath = path.join(process.cwd(), 'src/assets/images/site_logo_1786005177763.jpg');
   if (fs.existsSync(logoPath)) {
     res.setHeader('Content-Disposition', 'attachment; filename="anindaresim_logo.png"');
@@ -911,6 +933,17 @@ app.get('/api/download-logo', (req, res) => {
     return res.sendFile(logoPath);
   }
   res.status(404).json({ error: 'Logo bulunamadı.' });
+});
+
+// Download Instagram Profile Avatar (Public PNG)
+app.get('/api/download-instagram', (req, res) => {
+  const avatarPath = path.join(process.cwd(), 'src/assets/images/instagram_profile_picture_1786006991427.jpg');
+  if (fs.existsSync(avatarPath)) {
+    res.setHeader('Content-Disposition', 'attachment; filename="resimyukle_instagram_profile.png"');
+    res.setHeader('Content-Type', 'image/png');
+    return res.sendFile(avatarPath);
+  }
+  res.status(404).json({ error: 'Profil resmi bulunamadı.' });
 });
 
 // ================= ABUSE REPORTS (DMCA / VIOLATIONS) =================

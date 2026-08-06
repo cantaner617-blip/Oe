@@ -480,7 +480,7 @@ export default function App() {
             } />
 
             {/* Static Info Routes */}
-            <Route path="/hakkimizda" element={<About />} />
+            <Route path="/hakkimizda" element={<About user={user} />} />
             <Route path="/sartlar" element={<Terms />} />
             <Route path="/yardim" element={<Help />} />
             <Route path="/ihbar" element={<ReportAbuse />} />

@@ -1,8 +1,13 @@
 import { Link } from 'react-router-dom';
 import { ShieldCheck, Zap, Globe, Cpu, Database, Server, Sparkles, ChevronLeft } from 'lucide-react';
 import { motion } from 'motion/react';
+import { User } from '../types';
 
-export default function About() {
+interface AboutProps {
+  user: User | null;
+}
+
+export default function About({ user }: AboutProps) {
   return (
     <motion.div
       initial={{ opacity: 0, y: 15 }}
@@ -123,30 +128,32 @@ export default function About() {
           </div>
 
           {/* New Corporate Branding & Download Section */}
-          <div className="rounded-2xl border border-amber-500/20 bg-gradient-to-b from-amber-500/5 to-yellow-500/5 p-5 space-y-4 text-xs">
-            <h4 className="font-extrabold text-white flex items-center gap-1.5 uppercase tracking-wider text-amber-400">
-              <Sparkles className="h-4 w-4 text-amber-400" />
-              Marka Logomuz
-            </h4>
-            <div className="flex flex-col items-center gap-3 bg-zinc-950/60 p-4 rounded-xl border border-zinc-900/80">
-              <img 
-                src="/api/site-logo" 
-                alt="ResimYükle Kurumsal Logo" 
-                className="h-24 w-24 rounded-2xl object-cover shadow-[0_4px_20px_rgba(20,184,166,0.2)] border border-teal-500/20"
-                referrerPolicy="no-referrer"
-              />
-              <p className="text-[10px] text-zinc-400 text-center leading-normal">
-                Platformumuzun resmi, yüksek kaliteli markalama ve paylaşım logosu.
-              </p>
-              <a 
-                href="/api/download-logo" 
-                download="anindaresim_logo.png"
-                className="w-full inline-flex items-center justify-center gap-2 rounded-lg bg-gradient-to-r from-teal-500 to-emerald-500 hover:from-teal-400 hover:to-emerald-400 px-3 py-2 text-xs font-black text-zinc-950 transition-all shadow-md cursor-pointer"
-              >
-                <span>PNG Olarak İndir</span>
-              </a>
+          {user?.isAdmin && (
+            <div className="rounded-2xl border border-amber-500/20 bg-gradient-to-b from-amber-500/5 to-yellow-500/5 p-5 space-y-4 text-xs">
+              <h4 className="font-extrabold text-white flex items-center gap-1.5 uppercase tracking-wider text-amber-400">
+                <Sparkles className="h-4 w-4 text-amber-400" />
+                Marka Logomuz
+              </h4>
+              <div className="flex flex-col items-center gap-3 bg-zinc-950/60 p-4 rounded-xl border border-zinc-900/80">
+                <img 
+                  src="/api/site-logo" 
+                  alt="ResimYükle Kurumsal Logo" 
+                  className="h-24 w-24 rounded-2xl object-cover shadow-[0_4px_20px_rgba(20,184,166,0.2)] border border-teal-500/20"
+                  referrerPolicy="no-referrer"
+                />
+                <p className="text-[10px] text-zinc-400 text-center leading-normal">
+                  Platformumuzun resmi, yüksek kaliteli markalama ve paylaşım logosu.
+                </p>
+                <a 
+                  href={`/api/download-logo?token=${localStorage.getItem('token') || ''}`}
+                  download="anindaresim_logo.png"
+                  className="w-full inline-flex items-center justify-center gap-2 rounded-lg bg-gradient-to-r from-teal-500 to-emerald-500 hover:from-teal-400 hover:to-emerald-400 px-3 py-2 text-xs font-black text-zinc-950 transition-all shadow-md cursor-pointer"
+                >
+                  <span>PNG Olarak İndir</span>
+                </a>
+              </div>
             </div>
-          </div>
+          )}
         </div>
 
       </div>
