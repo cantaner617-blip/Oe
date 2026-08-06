@@ -118,7 +118,7 @@ export default function AdminPanel({ user }: AdminPanelProps) {
     },
     {
       id: 'welcome',
-      name: 'AnındaResim\'e Hoş Geldiniz! 🎉',
+      name: 'AnlıkResim\'e Hoş Geldiniz! 🎉',
       text: 'Hızlı, reklamsız ve sınırsız görsel paylaşımının tadını çıkarın. Ücretsiz üye olarak yükleme limitinizi 100 MB\'a çıkarabileceğinizi unutmayın!',
       type: 'info' as const
     },

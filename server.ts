@@ -42,13 +42,13 @@ async function sendVerificationCode(email: string, code: string): Promise<boolea
   });
 
   const mailOptions = {
-    from: `"AnındaResim" <${smtpUser}>`,
+    from: `"AnlıkResim" <${smtpUser}>`,
     to: email,
-    subject: 'Şifre Sıfırlama Doğrulama Kodu - AnındaResim',
+    subject: 'Şifre Sıfırlama Doğrulama Kodu - AnlıkResim',
     html: `
       <div style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; max-width: 500px; margin: 0 auto; padding: 25px; border-radius: 16px; background-color: #0b0f19; color: #f3f4f6; border: 1px solid #1f2937;">
         <div style="text-align: center; margin-bottom: 25px;">
-          <h2 style="color: #2dd4bf; margin: 0; font-size: 24px; font-weight: 800; letter-spacing: -0.5px;">Anında<span style="color: #ffffff;">Resim</span></h2>
+          <h2 style="color: #2dd4bf; margin: 0; font-size: 24px; font-weight: 800; letter-spacing: -0.5px;">Anlık<span style="color: #ffffff;">Resim</span></h2>
           <p style="color: #9ca3af; font-size: 11px; text-transform: uppercase; letter-spacing: 2px; margin-top: 4px; font-weight: 700;">Hızlı & Güvenli Görsel Paylaşım</p>
         </div>
         
@@ -1168,63 +1168,85 @@ Sitemap: ${protocol}://${host}/sitemap.xml`
 
 // Dynamic sitemap.xml
 app.get('/sitemap.xml', (req: Request, res: Response) => {
-  const host = req.get('host') || 'www.anlikresim.com';
-  const protocol = req.protocol === 'https' || req.headers['x-forwarded-proto'] === 'https' ? 'https' : 'http';
-  const baseUrl = `${protocol}://${host}`;
-  const currentDate = new Date().toISOString().split('T')[0];
-
-  // Core static pages
-  const staticPages = [
-    { loc: '', changefreq: 'daily', priority: '1.0' },
-    { loc: '/premium', changefreq: 'weekly', priority: '0.9' },
-    { loc: '/yardim', changefreq: 'weekly', priority: '0.8' },
-    { loc: '/hakkimizda', changefreq: 'monthly', priority: '0.7' },
-    { loc: '/destek', changefreq: 'monthly', priority: '0.7' },
-    { loc: '/sartlar', changefreq: 'monthly', priority: '0.5' },
-    { loc: '/ihbar', changefreq: 'monthly', priority: '0.4' }
-  ];
-
-  let xml = '<?xml version="1.0" encoding="UTF-8"?>\n';
-  xml += '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n';
-
-  // Add static routes
-  staticPages.forEach(page => {
-    xml += '  <url>\n';
-    xml += `    <loc>${baseUrl}${page.loc}</loc>\n`;
-    xml += `    <lastmod>${currentDate}</lastmod>\n`;
-    xml += `    <changefreq>${page.changefreq}</changefreq>\n`;
-    xml += `    <priority>${page.priority}</priority>\n`;
-    xml += '  </url>\n';
-  });
-
-  // Dynamic Image Detail pages (if public images exist)
   try {
-    const images = db.getImages();
-    // Only index non-expired images
-    const now = new Date().toISOString();
-    const publicImages = images.filter(img => {
-      return !img.expiresAt || img.expiresAt > now;
-    });
+    const host = req.get('host') || 'www.anlikresim.com';
+    const protocol = req.protocol === 'https' || req.headers['x-forwarded-proto'] === 'https' ? 'https' : 'http';
+    const baseUrl = `${protocol}://${host}`;
+    const currentDate = new Date().toISOString().split('T')[0];
 
-    // Limit dynamic pages to top 5000 to keep it extremely fast
-    const limitImages = publicImages.slice(0, 5000);
-    limitImages.forEach(img => {
+    // Core static pages
+    const staticPages = [
+      { loc: '', changefreq: 'daily', priority: '1.0' },
+      { loc: '/premium', changefreq: 'weekly', priority: '0.9' },
+      { loc: '/yardim', changefreq: 'weekly', priority: '0.8' },
+      { loc: '/hakkimizda', changefreq: 'monthly', priority: '0.7' },
+      { loc: '/destek', changefreq: 'monthly', priority: '0.7' },
+      { loc: '/sartlar', changefreq: 'monthly', priority: '0.5' },
+      { loc: '/ihbar', changefreq: 'monthly', priority: '0.4' }
+    ];
+
+    let xml = '<?xml version="1.0" encoding="UTF-8"?>\n';
+    xml += '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n';
+
+    // Add static routes
+    staticPages.forEach(page => {
       xml += '  <url>\n';
-      xml += `    <loc>${baseUrl}/i/${img.id}</loc>\n`;
-      const imgDate = img.createdAt ? img.createdAt.split('T')[0] : currentDate;
-      xml += `    <lastmod>${imgDate}</lastmod>\n`;
-      xml += '    <changefreq>monthly</changefreq>\n';
-      xml += '    <priority>0.6</priority>\n';
+      xml += `    <loc>${baseUrl}${page.loc}</loc>\n`;
+      xml += `    <lastmod>${currentDate}</lastmod>\n`;
+      xml += `    <changefreq>${page.changefreq}</changefreq>\n`;
+      xml += `    <priority>${page.priority}</priority>\n`;
       xml += '  </url>\n';
     });
-  } catch (err) {
-    console.error("Error adding dynamic image details to sitemap:", err);
+
+    // Dynamic Image Detail pages (if public images exist)
+    try {
+      const images = db.getImages();
+      // Only index non-expired images
+      const now = new Date().toISOString();
+      const publicImages = images.filter(img => {
+        return !img.expiresAt || img.expiresAt > now;
+      });
+
+      // Limit dynamic pages to top 5000 to keep it extremely fast
+      const limitImages = publicImages.slice(0, 5000);
+      limitImages.forEach(img => {
+        xml += '  <url>\n';
+        xml += `    <loc>${baseUrl}/i/${img.id}</loc>\n`;
+        const imgDate = img.createdAt ? img.createdAt.split('T')[0] : currentDate;
+        xml += `    <lastmod>${imgDate}</lastmod>\n`;
+        xml += '    <changefreq>monthly</changefreq>\n';
+        xml += '    <priority>0.6</priority>\n';
+        xml += '  </url>\n';
+      });
+    } catch (err) {
+      console.error("Error adding dynamic image details to sitemap:", err);
+    }
+
+    xml += '</urlset>';
+
+    res.type('application/xml');
+    res.send(xml);
+  } catch (globalErr) {
+    console.error("Global error in sitemap generation:", globalErr);
+    // Fallback: guaranteed valid XML sitemap on failure
+    const host = req.get('host') || 'www.anlikresim.com';
+    const protocol = req.protocol === 'https' || req.headers['x-forwarded-proto'] === 'https' ? 'https' : 'http';
+    const baseUrl = `${protocol}://${host}`;
+    const currentDate = new Date().toISOString().split('T')[0];
+    
+    let fallbackXml = '<?xml version="1.0" encoding="UTF-8"?>\n';
+    fallbackXml += '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n';
+    fallbackXml += '  <url>\n';
+    fallbackXml += `    <loc>${baseUrl}</loc>\n`;
+    fallbackXml += `    <lastmod>${currentDate}</lastmod>\n`;
+    fallbackXml += '    <changefreq>daily</changefreq>\n';
+    fallbackXml += '    <priority>1.0</priority>\n';
+    fallbackXml += '  </url>\n';
+    fallbackXml += '</urlset>';
+    
+    res.type('application/xml');
+    res.send(fallbackXml);
   }
-
-  xml += '</urlset>';
-
-  res.type('application/xml');
-  res.send(xml);
 });
 
 // ================= BACKGROUND CLEANUP OF EXPIRED IMAGES =================

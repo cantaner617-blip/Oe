@@ -273,7 +273,7 @@ export default function Uploader({ user, onUploadSuccess, systemStatus }: Upload
     return localStorage.getItem('is_watermark_enabled') === 'true';
   });
   const [watermarkText, setWatermarkText] = useState<string>(() => {
-    return localStorage.getItem('watermark_text') || 'AnındaResim';
+    return localStorage.getItem('watermark_text') || 'AnlıkResim';
   });
   const [deleteAfter, setDeleteAfter] = useState<string>('never');
 
@@ -1089,7 +1089,7 @@ export default function Uploader({ user, onUploadSuccess, systemStatus }: Upload
                   disabled={!isWatermarkEnabled}
                   value={watermarkText}
                   onChange={(e) => setWatermarkText(e.target.value)}
-                  placeholder="Örn: AnındaResim"
+                  placeholder="Örn: AnlıkResim"
                   maxLength={40}
                   className={`w-full rounded-xl border pl-8 pr-3.5 py-2 text-xs transition-all focus:outline-none focus:border-teal-500/60 focus:ring-1 focus:ring-teal-500/20 ${
                     isWatermarkEnabled

@@ -135,7 +135,7 @@ export default function Support({ user }: SupportProps) {
             </div>
             <h3 className="font-bold text-white text-sm">%100 Memnuniyet</h3>
             <p className="text-xs text-zinc-400 leading-relaxed">
-              Kullanıcılarımızın deneyimi bizim en büyük önceliğimizdir. AnındaResim platformu olarak her adımda yanınızdayız!
+              Kullanıcılarımızın deneyimi bizim en büyük önceliğimizdir. AnlıkResim platformu olarak her adımda yanınızdayız!
             </p>
           </div>
         </div>

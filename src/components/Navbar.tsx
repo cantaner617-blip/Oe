@@ -115,7 +115,7 @@ export default function Navbar({ user, onLogout, systemStatus, themeShade }: Nav
             </div>
             <div className="flex flex-col">
               <span className="text-lg font-black tracking-tight text-white leading-none group-hover:text-teal-300 transition-colors duration-300">
-                Anında<span className="text-teal-400">Resim</span>
+                Anlık<span className="text-teal-400">Resim</span>
               </span>
               <span className="text-[9px] text-zinc-500 font-bold tracking-widest uppercase mt-0.5 group-hover:text-zinc-400 transition-colors duration-300">
                 Hızlı &amp; Güvenli
