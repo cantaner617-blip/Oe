@@ -13,6 +13,7 @@ import ReportAbuse from './components/ReportAbuse';
 import Support from './components/Support';
 import Premium from './components/Premium';
 import Legal from './components/Legal';
+import AdSenseAd from './components/AdSenseAd';
 import { User, SystemStatus } from './types';
 import { ShieldCheck, Zap, Globe, Heart, AlertTriangle, Hammer, LogIn, Megaphone, X, Sparkles, Gauge, Cloud, Code, Info } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
@@ -88,6 +89,32 @@ export default function App() {
 
     return () => clearInterval(interval);
   }, []);
+
+  // Dynamically load Google AdSense script when enabled
+  useEffect(() => {
+    if (systemStatus?.adsenseEnabled && systemStatus?.adsensePublisherId) {
+      let pubId = systemStatus.adsensePublisherId.trim();
+      // Clean and format publisher id correctly to ca-pub-xxxxxxx
+      if (pubId) {
+        if (pubId.startsWith('pub-')) {
+          pubId = 'ca-' + pubId;
+        } else if (!pubId.startsWith('ca-pub-')) {
+          pubId = 'ca-pub-' + pubId;
+        }
+      }
+
+      const scriptId = 'google-adsense-script';
+      let existingScript = document.getElementById(scriptId);
+      if (!existingScript) {
+        const script = document.createElement('script');
+        script.id = scriptId;
+        script.src = `https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=${pubId}`;
+        script.async = true;
+        script.crossOrigin = 'anonymous';
+        document.head.appendChild(script);
+      }
+    }
+  }, [systemStatus?.adsenseEnabled, systemStatus?.adsensePublisherId]);
 
   // Automatically show new announcements if the list changes
   useEffect(() => {
@@ -430,6 +457,11 @@ export default function App() {
                       </a>
                     </div>
                   </div>
+                )}
+
+                {/* Google AdSense Ad block */}
+                {systemStatus?.adsenseEnabled && systemStatus?.adsensePublisherId && (!user || !user.isPremium) && (
+                  <AdSenseAd publisherId={systemStatus.adsensePublisherId} slotId="home_bottom" />
                 )}
 
               </div>

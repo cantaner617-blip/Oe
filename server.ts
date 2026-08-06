@@ -797,6 +797,26 @@ app.get('/api/system-config', (req, res) => {
   res.json(db.getSystemConfig());
 });
 
+// Dynamic ads.txt for Google AdSense verification
+app.get('/ads.txt', (req, res) => {
+  const sysConfig = db.getSystemConfig();
+  const rawPubId = sysConfig.adsensePublisherId || '';
+  // Clean publisher id just in case they added ca-pub- or pub- prefix or left it raw
+  let pubId = rawPubId.trim();
+  if (pubId && !pubId.startsWith('pub-')) {
+    if (pubId.startsWith('ca-pub-')) {
+      pubId = pubId.replace('ca-pub-', 'pub-');
+    } else {
+      pubId = 'pub-' + pubId;
+    }
+  }
+  if (!pubId) {
+    pubId = 'pub-0000000000000000'; // Default fallback until set
+  }
+  res.setHeader('Content-Type', 'text/plain');
+  res.send(`google.com, ${pubId}, DIRECT, f08c47fec0942fa0\n`);
+});
+
 // Update System Config (Admin POST)
 app.post('/api/system-config', requireAdmin, (req: AuthRequest, res) => {
   const { 
@@ -818,7 +838,11 @@ app.post('/api/system-config', requireAdmin, (req: AuthRequest, res) => {
     adShowToRegistered,
     bankName,
     bankIban,
-    bankReceiver
+    bankReceiver,
+    adsenseEnabled,
+    adsensePublisherId,
+    adsenseAutoAdsEnabled,
+    adsenseResponsiveAdsEnabled
   } = req.body;
   
   const updated = db.updateSystemConfig({
@@ -840,7 +864,11 @@ app.post('/api/system-config', requireAdmin, (req: AuthRequest, res) => {
     adShowToRegistered: adShowToRegistered === true,
     bankName: typeof bankName === 'string' ? bankName : undefined,
     bankIban: typeof bankIban === 'string' ? bankIban : undefined,
-    bankReceiver: typeof bankReceiver === 'string' ? bankReceiver : undefined
+    bankReceiver: typeof bankReceiver === 'string' ? bankReceiver : undefined,
+    adsenseEnabled: adsenseEnabled === true,
+    adsensePublisherId: typeof adsensePublisherId === 'string' ? adsensePublisherId : undefined,
+    adsenseAutoAdsEnabled: adsenseAutoAdsEnabled === true,
+    adsenseResponsiveAdsEnabled: adsenseResponsiveAdsEnabled === true
   });
   res.json(updated);
 });

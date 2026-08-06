@@ -97,6 +97,12 @@ export default function AdminPanel({ user }: AdminPanelProps) {
   const [adButtonText, setAdButtonText] = useState('');
   const [adDuration, setAdDuration] = useState(5);
 
+  // Google AdSense Settings State
+  const [adsenseEnabled, setAdsenseEnabled] = useState(false);
+  const [adsensePublisherId, setAdsensePublisherId] = useState('');
+  const [adsenseAutoAdsEnabled, setAdsenseAutoAdsEnabled] = useState(true);
+  const [adsenseResponsiveAdsEnabled, setAdsenseResponsiveAdsEnabled] = useState(true);
+
   // Interactive Image Pool search & filter states
   const [searchQuery, setSearchQuery] = useState('');
   const [filterType, setFilterType] = useState<'all' | 'guest' | 'member'>('all');
@@ -171,6 +177,12 @@ export default function AdminPanel({ user }: AdminPanelProps) {
         setBankName(statusData.bankName || 'Akbank');
         setBankIban(statusData.bankIban || 'TR56 0004 6000 1580 0745 9931 10');
         setBankReceiver(statusData.bankReceiver || 'ANINDARSİM YAZILIM BİLİŞİM LİMİTED ŞİRKETİ');
+
+        // AdSense Config
+        setAdsenseEnabled(statusData.adsenseEnabled || false);
+        setAdsensePublisherId(statusData.adsensePublisherId || '');
+        setAdsenseAutoAdsEnabled(statusData.adsenseAutoAdsEnabled !== false);
+        setAdsenseResponsiveAdsEnabled(statusData.adsenseResponsiveAdsEnabled !== false);
       }
 
       // 2. Fetch all images
@@ -274,7 +286,11 @@ export default function AdminPanel({ user }: AdminPanelProps) {
           adShowToRegistered,
           bankName,
           bankIban,
-          bankReceiver
+          bankReceiver,
+          adsenseEnabled,
+          adsensePublisherId,
+          adsenseAutoAdsEnabled,
+          adsenseResponsiveAdsEnabled
         })
       });
 
@@ -1040,6 +1056,117 @@ export default function AdminPanel({ user }: AdminPanelProps) {
                           <span>{adButtonText || "Ziyaret Et"}</span>
                           <ExternalLink className="h-2.5 w-2.5" />
                         </a>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="h-px bg-zinc-900/60 my-6" />
+
+                  {/* Google AdSense Integration Settings */}
+                  <div className="rounded-xl border border-zinc-900 bg-zinc-950/10 p-6 space-y-6 text-left">
+                    <div className="flex items-center justify-between border-b border-zinc-900 pb-3">
+                      <div className="space-y-0.5">
+                        <span className="text-sm font-bold text-white block flex items-center gap-2">
+                          <Sparkles className="h-4 w-4 text-teal-400 fill-teal-400/10" />
+                          Google AdSense Reklam Entegrasyonu
+                        </span>
+                        <span className="text-xs text-zinc-400 block">Sitenizden reklam göstererek kazanç sağlamak için AdSense hesabınızı bağlayın.</span>
+                      </div>
+                      <label className="relative inline-flex items-center cursor-pointer select-none">
+                        <input 
+                          type="checkbox" 
+                          checked={adsenseEnabled}
+                          onChange={(e) => setAdsenseEnabled(e.target.checked)}
+                          className="sr-only peer"
+                        />
+                        <div className="w-11 h-6 bg-zinc-800 rounded-full peer peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-zinc-400 after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-teal-500 peer-checked:after:bg-zinc-950 font-sans"></div>
+                      </label>
+                    </div>
+
+                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                      <div className="space-y-4">
+                        <div className="space-y-1.5">
+                          <label className="text-[11px] font-bold text-zinc-400 block">AdSense Yayıncı Kimliği (Publisher ID)</label>
+                          <input
+                            type="text"
+                            value={adsensePublisherId}
+                            onChange={(e) => setAdsensePublisherId(e.target.value)}
+                            placeholder="Örn: pub-1234567890123456"
+                            className="w-full rounded-xl border border-zinc-800 bg-zinc-900/40 px-3.5 py-2.5 text-xs text-white placeholder-zinc-650 focus:outline-none focus:border-teal-500 font-mono font-bold"
+                          />
+                          <span className="text-[10px] text-zinc-500 block leading-tight">
+                            Hesabınızın yayıncı numarasını girin. Bu numara otomatik olarak <strong>/ads.txt</strong> dosyanıza yansıtılır ve AdSense botlarının sitenizi onaylamasını sağlar.
+                          </span>
+                        </div>
+
+                        <div className="space-y-3 pt-2">
+                          <span className="text-[11px] font-bold text-zinc-400 uppercase tracking-wider block">Yerleşim &amp; Gösterim Tercihleri</span>
+                          
+                          <div className="flex items-center justify-between p-3 rounded-xl bg-zinc-950/40 border border-zinc-900">
+                            <div className="space-y-0.5 text-left pr-2">
+                              <span className="text-xs font-bold text-zinc-200 block">Otomatik Reklamlar (Auto Ads)</span>
+                              <span className="text-[10px] text-zinc-500 block">Google'ın en uygun reklam alanlarını otomatik yerleştirmesini etkinleştir.</span>
+                            </div>
+                            <label className="relative inline-flex items-center cursor-pointer shrink-0">
+                              <input 
+                                type="checkbox" 
+                                checked={adsenseAutoAdsEnabled}
+                                onChange={(e) => setAdsenseAutoAdsEnabled(e.target.checked)}
+                                className="sr-only peer"
+                              />
+                              <div className="w-9 h-5 bg-zinc-800 rounded-full peer peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-zinc-400 after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-teal-500"></div>
+                            </label>
+                          </div>
+
+                          <div className="flex items-center justify-between p-3 rounded-xl bg-zinc-950/40 border border-zinc-900">
+                            <div className="space-y-0.5 text-left pr-2">
+                              <span className="text-xs font-bold text-zinc-200 block">Esnek Reklam Alanları (Responsive Units)</span>
+                              <span className="text-[10px] text-zinc-500 block">Sayfa altları ve yan sütunlar gibi ayrılmış özel reklam alanlarını aktif et.</span>
+                            </div>
+                            <label className="relative inline-flex items-center cursor-pointer shrink-0">
+                              <input 
+                                type="checkbox" 
+                                checked={adsenseResponsiveAdsEnabled}
+                                onChange={(e) => setAdsenseResponsiveAdsEnabled(e.target.checked)}
+                                className="sr-only peer"
+                              />
+                              <div className="w-9 h-5 bg-zinc-800 rounded-full peer peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-zinc-400 after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-teal-500"></div>
+                            </label>
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Guide Box */}
+                      <div className="rounded-xl border border-zinc-900 bg-zinc-950/60 p-4 space-y-4 text-xs text-zinc-400">
+                        <span className="text-[10px] font-extrabold uppercase tracking-widest text-teal-400 bg-teal-500/10 px-2.5 py-1 rounded-lg flex items-center gap-1 w-max">
+                          AdSense Başvuru &amp; Onay Rehberi
+                        </span>
+
+                        <div className="space-y-2.5 leading-relaxed">
+                          <p>
+                            Google AdSense onayı sitenizin yasal uygunluğuna ve kullanıcı deneyimine bağlıdır. Başvurunuzun hızlı onaylanması için şu adımlara dikkat edin:
+                          </p>
+                          <ul className="list-disc pl-4 space-y-2 text-zinc-500">
+                            <li>Sitenizin kendi alan adına (Örn: <code className="text-zinc-400">gorselyukle.com</code>) kurulu olması gerekir.</li>
+                            <li>
+                              <span className="text-zinc-300 font-bold">Gizlilik &amp; KVKK Politikası</span> sayfamız otomatik olarak AdSense çerez bildirimlerine uygun olarak güncellenmiştir.
+                            </li>
+                            <li>
+                              Yayıncı kimliğinizi yukarıya girip kaydettiğinizde, sitenizin kök dizinindeki <a href="/ads.txt" target="_blank" className="text-teal-400 underline font-semibold hover:text-teal-300 font-mono">/ads.txt</a> dosyası otomatik olarak AdSense botlarının okuyacağı biçimde yayına girer.
+                            </li>
+                          </ul>
+
+                          {adsensePublisherId ? (
+                            <div className="p-3 rounded-xl bg-zinc-900/60 border border-zinc-800 font-mono text-[10px] text-teal-400/80 break-all space-y-1 mt-2">
+                              <span className="text-[9px] text-zinc-500 uppercase font-sans font-bold block">Canlı ads.txt Kaydınız:</span>
+                              <code>google.com, pub-{(adsensePublisherId.replace('pub-', '').replace('ca-pub-', '') || '0000000000000000')}, DIRECT, f08c47fec0942fa0</code>
+                            </div>
+                          ) : (
+                            <div className="p-3 rounded-xl bg-red-950/10 border border-red-900/20 text-[10px] text-red-400/90 leading-normal mt-2">
+                              ⚠️ Lütfen AdSense'ten para kazanmaya başlamak için Yayıncı Kimliğinizi girin.
+                            </div>
+                          )}
+                        </div>
                       </div>
                     </div>
                   </div>

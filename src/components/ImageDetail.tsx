@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { ChevronLeft, Eye, Calendar, FileText, ArrowDown, Copy, Check, Link as LinkIcon, Code, MessageSquare, AlertCircle, Loader2 } from 'lucide-react';
 import { motion } from 'motion/react';
 import { ImageRecord } from '../types';
+import AdSenseAd from './AdSenseAd';
 
 interface ImageDetailProps {
   id: string;
@@ -185,6 +186,11 @@ export default function ImageDetail({ id, onBack, user, systemStatus }: ImageDet
               <p className="text-sm font-bold text-teal-400 uppercase font-mono">{image.format}</p>
             </div>
           </div>
+
+          {/* Google AdSense Ad block */}
+          {systemStatus?.adsenseEnabled && systemStatus?.adsensePublisherId && (!user || !user.isPremium) && (
+            <AdSenseAd publisherId={systemStatus.adsensePublisherId} slotId="image_detail_bottom" />
+          )}
         </div>
 
         {/* Share codes and details panel */}

@@ -78,6 +78,10 @@ export interface SystemStatus {
   bankName?: string;
   bankIban?: string;
   bankReceiver?: string;
+  adsenseEnabled?: boolean;
+  adsensePublisherId?: string;
+  adsenseAutoAdsEnabled?: boolean;
+  adsenseResponsiveAdsEnabled?: boolean;
 }
 
 export type ViewType = 'home' | 'my-images' | 'login' | 'register' | 'detail' | 'admin' | 'hakkimizda' | 'sartlar' | 'yardim' | 'premium';

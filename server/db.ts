@@ -63,6 +63,10 @@ export interface SystemConfig {
   bankName?: string;
   bankIban?: string;
   bankReceiver?: string;
+  adsenseEnabled?: boolean;
+  adsensePublisherId?: string;
+  adsenseAutoAdsEnabled?: boolean;
+  adsenseResponsiveAdsEnabled?: boolean;
 }
 
 export interface AbuseReport {
@@ -545,7 +549,11 @@ export const db = {
         premiumYearlyPrice: 1200,
         bankName: 'Akbank',
         bankIban: 'TR56 0004 6000 1580 0745 9931 10',
-        bankReceiver: 'ANINDARSİM YAZILIM BİLİŞİM LİMİTED ŞİRKETİ'
+        bankReceiver: 'ANINDARSİM YAZILIM BİLİŞİM LİMİTED ŞİRKETİ',
+        adsenseEnabled: false,
+        adsensePublisherId: '',
+        adsenseAutoAdsEnabled: true,
+        adsenseResponsiveAdsEnabled: true
       };
     }
     if (!dbState.systemConfig.announcements) {
@@ -568,6 +576,18 @@ export const db = {
     }
     if (dbState.systemConfig.bankReceiver === undefined) {
       dbState.systemConfig.bankReceiver = 'ANINDARSİM YAZILIM BİLİŞİM LİMİTED ŞİRKETİ';
+    }
+    if (dbState.systemConfig.adsenseEnabled === undefined) {
+      dbState.systemConfig.adsenseEnabled = false;
+    }
+    if (dbState.systemConfig.adsensePublisherId === undefined) {
+      dbState.systemConfig.adsensePublisherId = '';
+    }
+    if (dbState.systemConfig.adsenseAutoAdsEnabled === undefined) {
+      dbState.systemConfig.adsenseAutoAdsEnabled = true;
+    }
+    if (dbState.systemConfig.adsenseResponsiveAdsEnabled === undefined) {
+      dbState.systemConfig.adsenseResponsiveAdsEnabled = true;
     }
     return dbState.systemConfig;
   },
