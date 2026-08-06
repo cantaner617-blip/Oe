@@ -106,6 +106,21 @@ if (isCloudinaryConfigured) {
   console.warn("Cloudinary configuration missing! Using local database storage fallback for uploaded images.");
 }
 
+// Helper to delete image from Cloudinary storage
+async function deleteImageFromStorage(image: any) {
+  if (!image) return;
+
+  if (isCloudinaryConfigured && image.publicId) {
+    try {
+      await cloudinary.uploader.destroy(image.publicId);
+      console.log(`Successfully deleted Cloudinary asset for image ${image.id}`);
+    } catch (cloudinaryErr) {
+      console.error(`Cloudinary destroy failed for image ${image.id}:`, cloudinaryErr);
+    }
+  }
+}
+
+
 // Multer storage
 const storage = multer.memoryStorage();
 const upload = multer({
@@ -209,11 +224,9 @@ app.get('/api/direct-image/:id', async (req, res) => {
     // Check if image is expired on-the-fly
     const now = new Date().toISOString();
     if (image.expiresAt && image.expiresAt <= now) {
-      if (isCloudinaryConfigured && image.publicId) {
-        cloudinary.uploader.destroy(image.publicId).catch((err: any) => {
-          console.error(`Failed to destroy expired Cloudinary asset for image ${image.id} on direct access:`, err);
-        });
-      }
+      deleteImageFromStorage(image).catch((err: any) => {
+        console.error(`Failed to destroy expired asset for image ${image.id} on direct access:`, err);
+      });
       db.deleteImage(image.id);
       return res.status(404).send('Resim bulunamadı veya süresi doldu.');
     }
@@ -542,7 +555,6 @@ app.post('/api/upload', optionalAuth, upload.single('image'), async (req: AuthRe
     let publicId = '';
     let width = 600;
     let height = 400;
-
     if (isCloudinaryConfigured) {
       // Stream to Cloudinary
       try {
@@ -565,6 +577,7 @@ app.post('/api/upload', optionalAuth, upload.single('image'), async (req: AuthRe
         publicId = result.public_id;
         width = result.width;
         height = result.height;
+        console.log(`Successfully uploaded image ${fileId} to Cloudinary: ${imageUrl}`);
       } catch (cloudinaryErr: any) {
         console.error("Cloudinary upload failed, falling back to local database storage...", cloudinaryErr);
         // Fallback internally
@@ -644,7 +657,6 @@ app.post('/api/upload', optionalAuth, upload.single('image'), async (req: AuthRe
         deleteAfter: record.deleteAfter,
       });
     }
-
     if (!isLoggedIn && guestId) {
       db.incrementGuestUploadCount(guestId);
     }
@@ -732,14 +744,8 @@ app.delete('/api/images/:id', requireAuth, async (req: AuthRequest, res) => {
     return res.status(403).json({ error: 'Bu resmi silme yetkiniz bulunmamaktadır.' });
   }
 
-  // If Cloudinary stored, attempt to destroy it
-  if (isCloudinaryConfigured && image.publicId) {
-    try {
-      await cloudinary.uploader.destroy(image.publicId);
-    } catch (cloudinaryErr) {
-      console.error('Cloudinary destroy failed:', cloudinaryErr);
-    }
-  }
+  // Attempt to delete from cloud storage if configured
+  await deleteImageFromStorage(image);
 
   db.deleteImage(req.params.id);
   res.json({ success: true, message: 'Resim başarıyla silindi.' });
@@ -858,13 +864,8 @@ app.delete('/api/admin/images/:id', requireAdmin, async (req: AuthRequest, res) 
     return res.status(404).json({ error: 'Resim bulunamadı.' });
   }
 
-  if (isCloudinaryConfigured && image.publicId) {
-    try {
-      await cloudinary.uploader.destroy(image.publicId);
-    } catch (cloudinaryErr) {
-      console.error('Cloudinary destroy failed in admin delete:', cloudinaryErr);
-    }
-  }
+  // Attempt to delete from cloud storage if configured
+  await deleteImageFromStorage(image);
 
   db.deleteImage(req.params.id);
   res.json({ success: true, message: 'Resim yönetici tarafından başarıyla silindi.' });
@@ -874,16 +875,9 @@ app.delete('/api/admin/images/:id', requireAdmin, async (req: AuthRequest, res) 
 app.delete('/api/admin/images', requireAdmin, async (req: AuthRequest, res) => {
   const images = db.getImages();
 
-  if (isCloudinaryConfigured) {
-    for (const image of images) {
-      if (image.publicId) {
-        try {
-          await cloudinary.uploader.destroy(image.publicId);
-        } catch (cloudinaryErr) {
-          console.error(`Cloudinary destroy failed in admin delete all for image ${image.id}:`, cloudinaryErr);
-        }
-      }
-    }
+  // Attempt to delete all images from cloud storage
+  for (const image of images) {
+    await deleteImageFromStorage(image);
   }
 
   db.deleteAllImages();
@@ -1258,11 +1252,9 @@ function cleanupExpiredImages() {
     if (expired.length > 0) {
       console.log(`[CLEANUP] Found ${expired.length} expired images.`);
       for (const img of expired) {
-        if (isCloudinaryConfigured && img.publicId) {
-          cloudinary.uploader.destroy(img.publicId).catch((err: any) => {
-            console.error(`Failed to destroy expired Cloudinary asset for image ${img.id}:`, err);
-          });
-        }
+        deleteImageFromStorage(img).catch((err: any) => {
+          console.error(`Failed to destroy expired asset for image ${img.id} during background cleanup:`, err);
+        });
         db.deleteImage(img.id);
         console.log(`[CLEANUP] Successfully deleted expired image: ${img.id}`);
       }
