@@ -90,9 +90,11 @@ export default function App() {
     return () => clearInterval(interval);
   }, []);
 
-  // Dynamically load Google AdSense script when enabled
+  // Dynamically load Google AdSense script when enabled (ONLY for non-premium users)
   useEffect(() => {
-    if (systemStatus?.adsenseEnabled && systemStatus?.adsensePublisherId) {
+    const scriptId = 'google-adsense-script';
+    
+    if (systemStatus?.adsenseEnabled && systemStatus?.adsensePublisherId && (!user || !user.isPremium)) {
       let pubId = systemStatus.adsensePublisherId.trim();
       // Clean and format publisher id correctly to ca-pub-xxxxxxx
       if (pubId) {
@@ -103,7 +105,6 @@ export default function App() {
         }
       }
 
-      const scriptId = 'google-adsense-script';
       let existingScript = document.getElementById(scriptId);
       if (!existingScript) {
         const script = document.createElement('script');
@@ -113,8 +114,17 @@ export default function App() {
         script.crossOrigin = 'anonymous';
         document.head.appendChild(script);
       }
+    } else {
+      // If user is premium or ads are disabled, remove the AdSense script and elements if they exist
+      const existingScript = document.getElementById(scriptId);
+      if (existingScript) {
+        existingScript.remove();
+      }
+      // Also remove any ins.adsbygoogle elements to be safe
+      const ads = document.querySelectorAll('.adsbygoogle');
+      ads.forEach(ad => ad.remove());
     }
-  }, [systemStatus?.adsenseEnabled, systemStatus?.adsensePublisherId]);
+  }, [systemStatus?.adsenseEnabled, systemStatus?.adsensePublisherId, user?.isPremium]);
 
   // Automatically show new announcements if the list changes
   useEffect(() => {
