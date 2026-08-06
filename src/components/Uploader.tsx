@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef, DragEvent, ChangeEvent } from 'react';
-import { Upload, FileImage, Copy, Check, Eye, Link as LinkIcon, Code, MessageSquare, AlertCircle, SlidersHorizontal, Zap, Signature, Clock, Sparkles, ExternalLink } from 'lucide-react';
+import { Upload, FileImage, Copy, Check, Eye, Link as LinkIcon, Code, MessageSquare, AlertCircle, SlidersHorizontal, Zap, Signature, Clock, Sparkles, ExternalLink, Lock } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { User, SystemStatus } from '../types';
 import ImageEditor from './ImageEditor';
@@ -285,8 +285,14 @@ export default function Uploader({ user, onUploadSuccess, systemStatus }: Upload
     return Number(localStorage.getItem('compression_quality')) || 80;
   });
   const [compressionMaxWidth, setCompressionMaxWidth] = useState<string>(() => {
-    return localStorage.getItem('compression_max_width') || 'original';
+    const stored = localStorage.getItem('compression_max_width') || 'original';
+    const isPremium = user?.isPremium || false;
+    if (!isPremium && (stored === '3840' || stored === '2560')) {
+      return '1920';
+    }
+    return stored;
   });
+  const [showPremiumCompressionModal, setShowPremiumCompressionModal] = useState<boolean>(false);
 
   // Advertisement states
   const [showAdModal, setShowAdModal] = useState<boolean>(false);
@@ -491,7 +497,14 @@ export default function Uploader({ user, onUploadSuccess, systemStatus }: Upload
       if (isCompressionEnabled) {
         try {
           setUploadQueue(prev => prev.map(item => item.id === queueId ? { ...item, status: 'compressing' } : item));
-          const compResult = await compressImage(file, compressionQuality, compressionMaxWidth);
+          
+          let effectiveMaxWidth = compressionMaxWidth;
+          const isPremium = user?.isPremium || false;
+          if (!isPremium && (effectiveMaxWidth === '3840' || effectiveMaxWidth === '2560')) {
+            effectiveMaxWidth = '1920';
+          }
+          
+          const compResult = await compressImage(file, compressionQuality, effectiveMaxWidth);
           fileToUpload = compResult.file;
           originalSize = compResult.originalSize;
           compressedSize = compResult.compressedSize;
@@ -989,13 +1002,21 @@ export default function Uploader({ user, onUploadSuccess, systemStatus }: Upload
                     <select
                       value={compressionMaxWidth}
                       disabled={!isCompressionEnabled}
-                      onChange={(e) => setCompressionMaxWidth(e.target.value)}
+                      onChange={(e) => {
+                        const val = e.target.value;
+                        const isPremium = user?.isPremium || false;
+                        if (!isPremium && (val === '3840' || val === '2560')) {
+                          setShowPremiumCompressionModal(true);
+                        } else {
+                          setCompressionMaxWidth(val);
+                        }
+                      }}
                       className="w-full appearance-none rounded-xl border border-zinc-800 bg-zinc-900/40 px-3 py-2 text-xs text-zinc-200 hover:border-zinc-700 hover:bg-zinc-900/60 focus:border-teal-500/60 focus:ring-1 focus:ring-teal-500/20 focus:outline-none pr-8 cursor-pointer transition-all duration-200"
                       id="compression-width-select"
                     >
                       <option value="original">Orijinal (Sınırsız)</option>
-                      <option value="3840">4K Ultra HD (3840px)</option>
-                      <option value="2560">2K Quad HD (2560px)</option>
+                      <option value="3840">4K Ultra HD (3840px) {!user?.isPremium && '⭐ Premium'}</option>
+                      <option value="2560">2K Quad HD (2560px) {!user?.isPremium && '⭐ Premium'}</option>
                       <option value="1920">Full HD (1920px)</option>
                       <option value="1280">HD Ready (1280px)</option>
                     </select>
@@ -1818,6 +1839,69 @@ export default function Uploader({ user, onUploadSuccess, systemStatus }: Upload
                 >
                   <span>{systemStatus.adButtonText || "Sponsoru Ziyaret Et"}</span>
                   <ExternalLink className="h-3.5 w-3.5" />
+                </a>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Premium Compression Resolution Modal */}
+      <AnimatePresence>
+        {showPremiumCompressionModal && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm"
+          >
+            <motion.div
+              initial={{ scale: 0.9, opacity: 0, y: 20 }}
+              animate={{ scale: 1, opacity: 1, y: 0 }}
+              exit={{ scale: 0.95, opacity: 0, y: 15 }}
+              transition={{ type: "spring", damping: 25, stiffness: 350 }}
+              className="relative w-full max-w-md overflow-hidden rounded-3xl border border-zinc-800 bg-zinc-950 p-6 shadow-2xl space-y-5"
+            >
+              {/* Background Glow */}
+              <div className="absolute top-0 right-0 w-32 h-32 bg-amber-500/[0.05] rounded-full filter blur-2xl pointer-events-none"></div>
+
+              <div className="flex items-center gap-3">
+                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-amber-500/10 text-amber-400 border border-amber-500/20">
+                  <Sparkles className="h-5 w-5" />
+                </div>
+                <div>
+                  <h3 className="text-sm font-extrabold text-white leading-tight">
+                    Premium Çözünürlük Limiti
+                  </h3>
+                  <p className="text-[10px] font-bold text-amber-400 uppercase tracking-widest mt-0.5">
+                    Özel Seçenek
+                  </p>
+                </div>
+              </div>
+
+              <div className="space-y-3">
+                <p className="text-xs text-zinc-300 leading-relaxed font-medium">
+                  <strong>4K Ultra HD</strong> (3840px) ve <strong>2K Quad HD</strong> (2560px) çözünürlüklü görsel optimizasyonu yalnızca <strong>Premium Paket</strong> üyelerimize özeldir.
+                </p>
+                <p className="text-xs text-zinc-400 leading-relaxed font-medium">
+                  Görsellerinizi en yüksek çözünürlük sınırıyla, kayıpsız ve ultra hızlı bir şekilde sıkıştırıp optimize etmek için hemen Premium'a geçebilirsiniz!
+                </p>
+              </div>
+
+              {/* Action Buttons */}
+              <div className="flex flex-col sm:flex-row gap-3 pt-3 border-t border-zinc-900">
+                <button
+                  onClick={() => setShowPremiumCompressionModal(false)}
+                  className="flex-1 rounded-xl bg-zinc-900 border border-zinc-800 text-zinc-300 font-bold text-xs py-3.5 hover:bg-zinc-800 hover:text-white transition-all active:scale-95 text-center"
+                >
+                  Vazgeç / Kapat
+                </button>
+                <a
+                  href="/premium"
+                  className="flex-1 rounded-xl bg-gradient-to-r from-amber-500 to-orange-400 text-zinc-950 font-black text-xs py-3.5 flex items-center justify-center gap-1.5 hover:shadow-lg hover:shadow-amber-500/10 hover:brightness-110 active:scale-95 transition-all text-center"
+                >
+                  <span>Premium'a Yükselt</span>
+                  <Sparkles className="h-3.5 w-3.5 text-zinc-950 fill-zinc-950/20" />
                 </a>
               </div>
             </motion.div>

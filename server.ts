@@ -869,6 +869,26 @@ app.delete('/api/admin/images/:id', requireAdmin, async (req: AuthRequest, res) 
   res.json({ success: true, message: 'Resim yönetici tarafından başarıyla silindi.' });
 });
 
+// Admin Delete All Images (Admin DELETE)
+app.delete('/api/admin/images', requireAdmin, async (req: AuthRequest, res) => {
+  const images = db.getImages();
+
+  if (isCloudinaryConfigured) {
+    for (const image of images) {
+      if (image.publicId) {
+        try {
+          await cloudinary.uploader.destroy(image.publicId);
+        } catch (cloudinaryErr) {
+          console.error(`Cloudinary destroy failed in admin delete all for image ${image.id}:`, cloudinaryErr);
+        }
+      }
+    }
+  }
+
+  db.deleteAllImages();
+  res.json({ success: true, message: 'Tüm görseller başarıyla silindi.' });
+});
+
 // ================= ABUSE REPORTS (DMCA / VIOLATIONS) =================
 
 // Public Submit Abuse Report

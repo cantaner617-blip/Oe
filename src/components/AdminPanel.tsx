@@ -338,6 +338,39 @@ export default function AdminPanel({ user }: AdminPanelProps) {
     }
   };
 
+  // Delete all images as Admin
+  const handleDeleteAllImages = async () => {
+    if (!window.confirm("SİSTEMDEKİ TÜM GÖRSELLERİ KALICI OLARAK SİLMEK İSTEDİĞİNİZE EMİN MİSİNİZ?\n\nBu işlem geri alınamaz!")) {
+      return;
+    }
+    
+    const token = localStorage.getItem('token');
+    try {
+      const response = await fetch('/api/admin/images', {
+        method: 'DELETE',
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+
+      if (!response.ok) {
+        const data = await response.json();
+        throw new Error(data.error || "Görseller silinemedi.");
+      }
+
+      // Success
+      setImages([]);
+      setStats(prev => ({
+        ...prev,
+        totalImages: 0,
+        totalViews: 0,
+        guestImages: 0,
+        memberImages: 0
+      }));
+      alert("Sistemdeki tüm görseller başarıyla silindi.");
+    } catch (err: any) {
+      alert(err.message);
+    }
+  };
+
   // Resolve Abuse Report
   const handleResolveReport = async (reportId: string) => {
     const token = localStorage.getItem('token');
@@ -1327,19 +1360,31 @@ export default function AdminPanel({ user }: AdminPanelProps) {
               <h2 className="text-xl font-bold text-white">Sistem Görsel Havuzu ({filteredImages.length} / {images.length})</h2>
               <p className="text-xs text-zinc-400">Sunucu üzerinde yüklü olan tüm görselleri arayabilir, filtreleyebilir ve silebilirsiniz.</p>
             </div>
-            {/* Quick reset if there's query/filters */}
-            {(searchQuery || filterType !== 'all' || sortBy !== 'newest') && (
-              <button
-                onClick={() => {
-                  setSearchQuery('');
-                  setFilterType('all');
-                  setSortBy('newest');
-                }}
-                className="text-xs font-semibold text-teal-400 hover:text-teal-300 transition-colors cursor-pointer"
-              >
-                Filtreleri Sıfırla
-              </button>
-            )}
+            
+            <div className="flex items-center gap-3">
+              {(searchQuery || filterType !== 'all' || sortBy !== 'newest') && (
+                <button
+                  onClick={() => {
+                    setSearchQuery('');
+                    setFilterType('all');
+                    setSortBy('newest');
+                  }}
+                  className="text-xs font-semibold text-teal-400 hover:text-teal-300 transition-colors cursor-pointer"
+                >
+                  Filtreleri Sıfırla
+                </button>
+              )}
+
+              {images.length > 0 && (
+                <button
+                  onClick={handleDeleteAllImages}
+                  className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-red-950/40 hover:bg-red-900/40 border border-red-500/30 hover:border-red-500 text-xs font-bold text-red-400 hover:text-red-300 rounded-xl transition-all cursor-pointer"
+                >
+                  <Trash2 className="h-3.5 w-3.5" />
+                  <span>Tüm Görselleri Sil</span>
+                </button>
+              )}
+            </div>
           </div>
 
           {/* Search and Filters Controller Row */}

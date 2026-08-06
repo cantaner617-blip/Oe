@@ -517,6 +517,22 @@ export const db = {
     return false;
   },
 
+  deleteAllImages(): boolean {
+    const ids = dbState.images.map(img => img.id);
+    dbState.images = [];
+    saveDb();
+
+    if (isFirebaseInitialized && firestore) {
+      ids.forEach(id => {
+        deleteDoc(doc(firestore, 'images', id)).catch((err: any) => {
+          console.error("Failed to delete image from Firestore:", err);
+        });
+      });
+    }
+
+    return true;
+  },
+
   getSystemConfig(): SystemConfig {
     if (!dbState.systemConfig) {
       dbState.systemConfig = {
