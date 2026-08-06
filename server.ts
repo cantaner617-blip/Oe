@@ -1144,7 +1144,7 @@ app.post('/api/admin/support-messages/:id/reply', requireAdmin, (req: AuthReques
 
 // Dynamic robots.txt
 app.get('/robots.txt', (req: Request, res: Response) => {
-  const host = req.get('host') || 'xn--inanhzlmedya-54bc.online';
+  const host = req.get('host') || 'www.anlikresim.com';
   const protocol = req.protocol === 'https' || req.headers['x-forwarded-proto'] === 'https' ? 'https' : 'http';
   
   res.type('text/plain');
@@ -1168,7 +1168,7 @@ Sitemap: ${protocol}://${host}/sitemap.xml`
 
 // Dynamic sitemap.xml
 app.get('/sitemap.xml', (req: Request, res: Response) => {
-  const host = req.get('host') || 'xn--inanhzlmedya-54bc.online';
+  const host = req.get('host') || 'www.anlikresim.com';
   const protocol = req.protocol === 'https' || req.headers['x-forwarded-proto'] === 'https' ? 'https' : 'http';
   const baseUrl = `${protocol}://${host}`;
   const currentDate = new Date().toISOString().split('T')[0];

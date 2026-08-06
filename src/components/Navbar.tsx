@@ -503,7 +503,7 @@ export default function Navbar({ user, onLogout, systemStatus, themeShade }: Nav
                       />
                     </div>
                     <div className="flex flex-col">
-                      <span className="text-sm font-black tracking-tight text-white">AnındaResim</span>
+                      <span className="text-sm font-black tracking-tight text-white">AnlıkResim</span>
                       <span className="text-[10px] text-zinc-500 font-bold tracking-widest uppercase">Navigasyon</span>
                     </div>
                   </div>
@@ -763,7 +763,7 @@ export default function Navbar({ user, onLogout, systemStatus, themeShade }: Nav
                       </span>
                     )}
                   </div>
-                  <p className="text-[10px] text-zinc-600 font-bold">© 2026 AnındaResim. Tüm Hakları Saklıdır.</p>
+                  <p className="text-[10px] text-zinc-600 font-bold">© 2026 AnlıkResim. Tüm Hakları Saklıdır.</p>
                 </div>
 
               </motion.div>

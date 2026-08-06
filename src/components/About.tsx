@@ -49,7 +49,7 @@ export default function About({ user }: AboutProps) {
               Vizyonumuz
             </h2>
             <p className="text-sm text-zinc-300 leading-relaxed">
-              AnındaResim, kullanıcıların görsellerini internete yüklerken reklamlar, yavaş hızlar veya karmaşık üyelik adımları ile zaman kaybetmesini önlemek amacıyla geliştirilmiş yüksek performanslı bir bulut platformudur. Amacımız, tek tıkla hem misafirlere hem de kayıtlı üyelerimize kusursuz, sade ve şık bir paylaşım deneyimi sunmaktır.
+              AnlıkResim, kullanıcıların görsellerini internete yüklerken reklamlar, yavaş hızlar veya karmaşık üyelik adımları ile zaman kaybetmesini önlemek amacıyla geliştirilmiş yüksek performanslı bir bulut platformudur. Amacımız, tek tıkla hem misafirlere hem de kayıtlı üyelerimize kusursuz, sade ve şık bir paylaşım deneyimi sunmaktır.
             </p>
             <p className="text-sm text-zinc-300 leading-relaxed">
               Gelişmiş altyapımız sayesinde yüklediğiniz her görsel otomatik olarak optimize edilir, küresel içerik dağıtım ağı (CDN) aracılığıyla tüm dünyada milisaniyeler içinde görüntülenir.
