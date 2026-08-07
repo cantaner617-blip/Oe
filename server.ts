@@ -984,7 +984,9 @@ app.get('/api/system-status', (req, res) => {
     bunnyStorageZoneName: sysConfig.bunnyStorageZoneName,
     bunnyStorageApiKey: sysConfig.bunnyStorageApiKey,
     bunnyStoragePullZoneUrl: sysConfig.bunnyStoragePullZoneUrl,
-    bunnyStorageRegion: sysConfig.bunnyStorageRegion
+    bunnyStorageRegion: sysConfig.bunnyStorageRegion,
+    instagramUrl: sysConfig.instagramUrl,
+    twitterUrl: sysConfig.twitterUrl
   });
 });
 
@@ -1059,7 +1061,9 @@ app.post('/api/system-config', requireAdmin, (req: AuthRequest, res) => {
     bunnyStorageZoneName,
     bunnyStorageApiKey,
     bunnyStoragePullZoneUrl,
-    bunnyStorageRegion
+    bunnyStorageRegion,
+    instagramUrl,
+    twitterUrl
   } = req.body;
   
   const updated = db.updateSystemConfig({
@@ -1090,7 +1094,9 @@ app.post('/api/system-config', requireAdmin, (req: AuthRequest, res) => {
     bunnyStorageZoneName: typeof bunnyStorageZoneName === 'string' ? bunnyStorageZoneName : undefined,
     bunnyStorageApiKey: typeof bunnyStorageApiKey === 'string' ? bunnyStorageApiKey : undefined,
     bunnyStoragePullZoneUrl: typeof bunnyStoragePullZoneUrl === 'string' ? bunnyStoragePullZoneUrl : undefined,
-    bunnyStorageRegion: typeof bunnyStorageRegion === 'string' ? bunnyStorageRegion : undefined
+    bunnyStorageRegion: typeof bunnyStorageRegion === 'string' ? bunnyStorageRegion : undefined,
+    instagramUrl: typeof instagramUrl === 'string' ? instagramUrl : undefined,
+    twitterUrl: typeof twitterUrl === 'string' ? twitterUrl : undefined
   });
   res.json(updated);
 });
@@ -1566,9 +1572,9 @@ async function start() {
       if (image) {
         const now = new Date().toISOString();
         if (!image.expiresAt || image.expiresAt > now) {
-          const sizeStr = image.size >= 1024 * 1024 
-            ? `${(image.size / (1024 * 1024)).toFixed(2)} MB` 
-            : `${(image.size / 1024).toFixed(2)} KB`;
+          const sizeStr = image.bytes >= 1024 * 1024 
+            ? `${(image.bytes / (1024 * 1024)).toFixed(2)} MB` 
+            : `${(image.bytes / 1024).toFixed(2)} KB`;
             
           const pageTitle = `${image.filename} - AnlıkResim`;
           const description = `AnlıkResim'e yüklenen ${image.filename} görselini görüntüleyin. Boyut: ${sizeStr}, Çözünürlük: ${image.width}x${image.height}.`;

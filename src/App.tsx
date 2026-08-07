@@ -15,7 +15,7 @@ import Premium from './components/Premium';
 import Legal from './components/Legal';
 import AdSenseAd from './components/AdSenseAd';
 import { User, SystemStatus } from './types';
-import { ShieldCheck, Zap, Globe, Heart, AlertTriangle, Hammer, LogIn, Megaphone, X, Sparkles, Gauge, Cloud, Code, Info } from 'lucide-react';
+import { ShieldCheck, Zap, Globe, Heart, AlertTriangle, Hammer, LogIn, Megaphone, X, Sparkles, Gauge, Cloud, Code, Info, Instagram, Twitter } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 
 export default function App() {
@@ -569,6 +569,38 @@ export default function App() {
               <span className="font-bold text-zinc-400">AnlıkResim</span>
               <span>- Tüm Hakları Saklıdır.</span>
             </div>
+
+            {/* Subtle Social Follow Connections */}
+            {(systemStatus?.instagramUrl || systemStatus?.twitterUrl) && (
+              <div className="flex items-center gap-3 bg-zinc-950 px-3 py-1.5 rounded-full border border-zinc-900/60 shadow-inner">
+                <span className="text-[10px] text-zinc-600 font-bold tracking-wider uppercase">Bizi Takip Edin:</span>
+                {systemStatus?.instagramUrl && (
+                  <a
+                    href={systemStatus.instagramUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-zinc-500 hover:text-pink-500 transition-colors duration-200 p-0.5"
+                    aria-label="Instagram sayfamızı takip edin"
+                    title="Instagram"
+                  >
+                    <Instagram className="h-4 w-4" />
+                  </a>
+                )}
+                {systemStatus?.twitterUrl && (
+                  <a
+                    href={systemStatus.twitterUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-zinc-500 hover:text-zinc-200 transition-colors duration-200 p-0.5"
+                    aria-label="Twitter sayfamızı takip edin"
+                    title="Twitter (X)"
+                  >
+                    <Twitter className="h-4 w-4" />
+                  </a>
+                )}
+              </div>
+            )}
+
             <div className="flex items-center space-x-1.5">
               <span>Türkiye'nin hızlı resim paylaşım platformu ile</span>
               <Heart className="h-3 w-3 text-red-500 fill-red-500 animate-pulse" />

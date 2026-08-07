@@ -110,6 +110,10 @@ export default function AdminPanel({ user }: AdminPanelProps) {
   const [bunnyStoragePullZoneUrl, setBunnyStoragePullZoneUrl] = useState('');
   const [bunnyStorageRegion, setBunnyStorageRegion] = useState('');
 
+  // Social Media Links
+  const [instagramUrl, setInstagramUrl] = useState('https://instagram.com/anlikresimcom');
+  const [twitterUrl, setTwitterUrl] = useState('https://x.com/anlikresimcom');
+
   // Interactive Image Pool search & filter states
   const [searchQuery, setSearchQuery] = useState('');
   const [filterType, setFilterType] = useState<'all' | 'guest' | 'member'>('all');
@@ -197,6 +201,10 @@ export default function AdminPanel({ user }: AdminPanelProps) {
         setBunnyStorageApiKey(statusData.bunnyStorageApiKey || '');
         setBunnyStoragePullZoneUrl(statusData.bunnyStoragePullZoneUrl || '');
         setBunnyStorageRegion(statusData.bunnyStorageRegion || '');
+
+        // Social Media Links
+        setInstagramUrl(statusData.instagramUrl || 'https://instagram.com/anlikresimcom');
+        setTwitterUrl(statusData.twitterUrl || 'https://x.com/anlikresimcom');
       }
 
       // 2. Fetch all images
@@ -309,7 +317,9 @@ export default function AdminPanel({ user }: AdminPanelProps) {
           bunnyStorageZoneName,
           bunnyStorageApiKey,
           bunnyStoragePullZoneUrl,
-          bunnyStorageRegion
+          bunnyStorageRegion,
+          instagramUrl,
+          twitterUrl
         })
       });
 
@@ -877,6 +887,36 @@ export default function AdminPanel({ user }: AdminPanelProps) {
                         <RefreshCw className="h-3.5 w-3.5" />
                         <span>Tüm Misafir Sayaçlarını Sıfırla</span>
                       </button>
+                    </div>
+                  </div>
+
+                  {/* Social Media Connections */}
+                  <div className="bg-zinc-950/50 rounded-xl border border-zinc-900 p-4 space-y-4">
+                    <div className="space-y-1">
+                      <span className="text-sm font-bold text-white block">Sosyal Medya Hesapları</span>
+                      <span className="text-xs text-zinc-400 block">Ziyaretçilerin takip edebilmesi için alt bilgi alanında yer alan Instagram ve Twitter (X) linkleri.</span>
+                    </div>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div className="space-y-1.5">
+                        <label className="text-xs font-bold text-zinc-400">Instagram Sayfası URL</label>
+                        <input
+                          type="url"
+                          placeholder="https://instagram.com/hesabiniz"
+                          value={instagramUrl}
+                          onChange={(e) => setInstagramUrl(e.target.value)}
+                          className="w-full rounded-xl border border-zinc-800 bg-zinc-900/40 px-3.5 py-2.5 text-sm text-zinc-200 focus:border-teal-500 focus:outline-none focus:ring-1 focus:ring-teal-500 font-medium"
+                        />
+                      </div>
+                      <div className="space-y-1.5">
+                        <label className="text-xs font-bold text-zinc-400">Twitter (X) Sayfası URL</label>
+                        <input
+                          type="url"
+                          placeholder="https://x.com/hesabiniz"
+                          value={twitterUrl}
+                          onChange={(e) => setTwitterUrl(e.target.value)}
+                          className="w-full rounded-xl border border-zinc-800 bg-zinc-900/40 px-3.5 py-2.5 text-sm text-zinc-200 focus:border-teal-500 focus:outline-none focus:ring-1 focus:ring-teal-500 font-medium"
+                        />
+                      </div>
                     </div>
                   </div>
                 </div>

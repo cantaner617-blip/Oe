@@ -72,6 +72,8 @@ export interface SystemConfig {
   bunnyStorageApiKey?: string;
   bunnyStoragePullZoneUrl?: string;
   bunnyStorageRegion?: string;
+  instagramUrl?: string;
+  twitterUrl?: string;
 }
 
 export interface AbuseReport {
@@ -582,8 +584,16 @@ export const db = {
         bunnyStorageZoneName: '',
         bunnyStorageApiKey: '',
         bunnyStoragePullZoneUrl: '',
-        bunnyStorageRegion: ''
+        bunnyStorageRegion: '',
+        instagramUrl: 'https://instagram.com/anlikresimcom',
+        twitterUrl: 'https://x.com/anlikresimcom'
       };
+    }
+    if (!dbState.systemConfig.instagramUrl) {
+      dbState.systemConfig.instagramUrl = 'https://instagram.com/anlikresimcom';
+    }
+    if (!dbState.systemConfig.twitterUrl) {
+      dbState.systemConfig.twitterUrl = 'https://x.com/anlikresimcom';
     }
     if (!dbState.systemConfig.announcements) {
       dbState.systemConfig.announcements = [];

@@ -82,6 +82,8 @@ export interface SystemStatus {
   adsensePublisherId?: string;
   adsenseAutoAdsEnabled?: boolean;
   adsenseResponsiveAdsEnabled?: boolean;
+  instagramUrl?: string;
+  twitterUrl?: string;
 }
 
 export type ViewType = 'home' | 'my-images' | 'login' | 'register' | 'detail' | 'admin' | 'hakkimizda' | 'sartlar' | 'yardim' | 'premium';
