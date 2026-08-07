@@ -1144,7 +1144,7 @@ app.delete('/api/admin/images', requireAdmin, async (req: AuthRequest, res) => {
 
 // Get Site Logo (Public)
 app.get('/api/site-logo', (req, res) => {
-  const logoPath = path.join(process.cwd(), 'src/assets/images/site_logo_1786005177763.jpg');
+  const logoPath = path.join(process.cwd(), 'src/assets/images/site_logo_new_1786110559678.jpg');
   if (fs.existsSync(logoPath)) {
     res.setHeader('Content-Type', 'image/jpeg');
     return res.sendFile(logoPath);
@@ -1176,7 +1176,7 @@ app.get('/api/download-logo', (req, res) => {
     return res.status(403).json({ error: 'Bu işlem için yönetici yetkiniz bulunmamaktadır.' });
   }
 
-  const logoPath = path.join(process.cwd(), 'src/assets/images/site_logo_1786005177763.jpg');
+  const logoPath = path.join(process.cwd(), 'src/assets/images/site_logo_new_1786110559678.jpg');
   if (fs.existsSync(logoPath)) {
     res.setHeader('Content-Disposition', 'attachment; filename="anindaresim_logo.png"');
     res.setHeader('Content-Type', 'image/png');

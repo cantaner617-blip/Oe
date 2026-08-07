@@ -104,12 +104,12 @@ export default function Navbar({ user, onLogout, systemStatus, themeShade }: Nav
             className="flex items-center space-x-3 group"
             id="nav-logo"
           >
-            <div className="relative flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-teal-500/10 to-emerald-500/5 text-teal-400 border border-teal-500/20 group-hover:border-teal-400/40 group-hover:from-teal-500/20 group-hover:to-emerald-500/10 transition-all duration-300 shadow-sm overflow-hidden">
+            <div className="relative flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-br from-teal-500/10 to-emerald-500/5 text-teal-400 border border-teal-500/20 group-hover:border-teal-400/40 group-hover:from-teal-500/20 group-hover:to-emerald-500/10 transition-all duration-300 shadow-sm overflow-hidden">
               <div className="absolute inset-0 rounded-xl bg-teal-400/10 opacity-0 group-hover:opacity-100 animate-pulse transition-opacity duration-300" />
               <img 
                 src="/api/site-logo" 
                 alt="ResimYükle Logo" 
-                className="h-8 w-8 rounded-lg relative z-10 transition-transform duration-300 group-hover:scale-110 object-cover" 
+                className="h-10 w-10 rounded-lg relative z-10 transition-transform duration-300 group-hover:scale-110 object-cover" 
                 referrerPolicy="no-referrer"
               />
             </div>
@@ -494,11 +494,11 @@ export default function Navbar({ user, onLogout, systemStatus, themeShade }: Nav
                 {/* Header inside the Drawer */}
                 <div className="px-6 py-5 border-b border-zinc-900/60 flex items-center justify-between bg-zinc-950/40">
                   <div className="flex items-center space-x-2.5">
-                    <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-teal-500/10 text-teal-400 border border-teal-500/20 shadow-lg shadow-teal-500/5 overflow-hidden">
+                    <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-teal-500/10 text-teal-400 border border-teal-500/20 shadow-lg shadow-teal-500/5 overflow-hidden">
                       <img 
                         src="/api/site-logo" 
                         alt="ResimYükle Logo" 
-                        className="h-7 w-7 rounded-lg object-cover" 
+                        className="h-9 w-9 rounded-lg object-cover" 
                         referrerPolicy="no-referrer"
                       />
                     </div>
