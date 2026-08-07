@@ -1401,20 +1401,14 @@ app.get('/robots.txt', (req: Request, res: Response) => {
   res.send(
 `User-agent: *
 Allow: /
-Allow: /hakkimizda
-Allow: /sartlar
-Allow: /yardim
-Allow: /ihbar
-Allow: /destek
-Allow: /premium
 Allow: /i/
 Allow: /api/system-status
 Allow: /api/guest-stats
 Allow: /api/site-logo
 Allow: /api/images/
+Disallow: /admin/
 Disallow: /api/
-Disallow: /admin
-Disallow: /galerim
+Disallow: /galerim/
 
 Sitemap: ${protocol}://${host}/sitemap.xml`
   );
