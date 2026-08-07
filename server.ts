@@ -1408,6 +1408,10 @@ Allow: /ihbar
 Allow: /destek
 Allow: /premium
 Allow: /i/
+Allow: /api/system-status
+Allow: /api/guest-stats
+Allow: /api/site-logo
+Allow: /api/images/
 Disallow: /api/
 Disallow: /admin
 Disallow: /galerim
