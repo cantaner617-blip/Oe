@@ -54,8 +54,9 @@ export default function App() {
       setSystemStatus(data);
     } catch (err: any) {
       const isBotUser = typeof navigator !== 'undefined' && /bot|google|baidu|bing|msn|duckduckgo|teoma|slurp|yandex|lighthouse|chrome-lighthouse|headless/i.test(navigator.userAgent);
-      if (isBotUser) {
-        console.warn("System status retrieval skipped or soft-failed (bot env):", err.message || err);
+      const isNetworkError = err instanceof TypeError || (err.message && err.message.includes('Failed to fetch'));
+      if (isBotUser || isNetworkError) {
+        console.warn("System status retrieval soft-failed (network/bot env):", err.message || err);
       } else {
         console.error("System status retrieval failed:", err);
       }
@@ -85,8 +86,9 @@ export default function App() {
         }
       } catch (err: any) {
         const isBotUser = typeof navigator !== 'undefined' && /bot|google|baidu|bing|msn|duckduckgo|teoma|slurp|yandex|lighthouse|chrome-lighthouse|headless/i.test(navigator.userAgent);
-        if (isBotUser) {
-          console.warn("Session verification skipped or soft-failed (bot env):", err.message || err);
+        const isNetworkError = err instanceof TypeError || (err.message && err.message.includes('Failed to fetch'));
+        if (isBotUser || isNetworkError) {
+          console.warn("Session verification soft-failed (network/bot env):", err.message || err);
         } else {
           console.error("Session verification failed:", err);
         }
