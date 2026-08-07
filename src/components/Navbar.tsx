@@ -21,12 +21,10 @@ import {
   X,
   Shield,
   Clock,
-  ExternalLink,
-  Globe
+  ExternalLink
 } from 'lucide-react';
 import { User, SystemStatus } from '../types';
 import { motion, AnimatePresence } from 'motion/react';
-import { useLanguage } from '../context/LanguageContext';
 
 interface NavbarProps {
   user: User | null;
@@ -36,7 +34,6 @@ interface NavbarProps {
 }
 
 export default function Navbar({ user, onLogout, systemStatus, themeShade }: NavbarProps) {
-  const { lang, setLang, t } = useLanguage();
   const navigate = useNavigate();
   const location = useLocation();
   const [dropdownOpen, setDropdownOpen] = useState(false);
@@ -121,7 +118,7 @@ export default function Navbar({ user, onLogout, systemStatus, themeShade }: Nav
                 Anlık<span className="text-teal-400">Resim</span>
               </span>
               <span className="text-[9px] text-zinc-500 font-bold tracking-widest uppercase mt-0.5 group-hover:text-zinc-400 transition-colors duration-300">
-                {t('fast_secure', 'common')}
+                Hızlı &amp; Güvenli
               </span>
             </div>
           </Link>
@@ -133,7 +130,7 @@ export default function Navbar({ user, onLogout, systemStatus, themeShade }: Nav
             {systemStatus && (
               <div 
                 className="flex items-center space-x-1.5 rounded-full px-2.5 py-1 text-xs font-semibold border bg-zinc-900/50 border-zinc-800/80 hover:border-zinc-700/80 transition-all duration-200 cursor-help" 
-                title={systemStatus.isCloudinaryConfigured ? (lang === 'tr' ? "Bulut depolama aktif" : "Cloud storage active") : (lang === 'tr' ? "Yerel depolama aktif" : "Local storage active")}
+                title={systemStatus.isCloudinaryConfigured ? "Bulut depolama aktif" : "Yerel depolama aktif"}
               >
                 {systemStatus.isCloudinaryConfigured ? (
                   <>
@@ -142,7 +139,7 @@ export default function Navbar({ user, onLogout, systemStatus, themeShade }: Nav
                       <span className="relative inline-flex rounded-full h-2 w-2 bg-teal-400"></span>
                     </span>
                     <Cloud className="h-3 w-3 text-teal-400 animate-pulse" />
-                    <span className="text-zinc-400 text-[11px] font-medium">{t('cloud', 'common')}</span>
+                    <span className="text-zinc-400 text-[11px] font-medium">Bulut</span>
                   </>
                 ) : (
                   <>
@@ -150,7 +147,7 @@ export default function Navbar({ user, onLogout, systemStatus, themeShade }: Nav
                       <span className="relative inline-flex rounded-full h-2 w-2 bg-amber-500"></span>
                     </span>
                     <Database className="h-3 w-3 text-amber-500" />
-                    <span className="text-zinc-400 text-[11px] font-medium">{t('local', 'common')}</span>
+                    <span className="text-zinc-400 text-[11px] font-medium">Yerel</span>
                   </>
                 )}
               </div>
@@ -169,7 +166,7 @@ export default function Navbar({ user, onLogout, systemStatus, themeShade }: Nav
               }
             >
               <Sparkles className="h-3.5 w-3.5" />
-              <span>{t('uploadImage', 'common')}</span>
+              <span>Görsel Yükle</span>
             </NavLink>
 
             {user && (
@@ -185,7 +182,7 @@ export default function Navbar({ user, onLogout, systemStatus, themeShade }: Nav
                 }
               >
                 <Grid className="h-3.5 w-3.5" />
-                <span>{t('gallery', 'common')}</span>
+                <span>Galerim</span>
               </NavLink>
             )}
 
@@ -202,7 +199,7 @@ export default function Navbar({ user, onLogout, systemStatus, themeShade }: Nav
                 }
               >
                 <Sparkles className="h-3.5 w-3.5 animate-pulse text-amber-400 fill-amber-400/20" />
-                <span>{t('premium', 'common')}</span>
+                <span>Premium Satın Al</span>
               </NavLink>
             )}
 
@@ -219,20 +216,9 @@ export default function Navbar({ user, onLogout, systemStatus, themeShade }: Nav
                 }
               >
                 <ShieldAlert className="h-3.5 w-3.5" />
-                <span>{t('admin', 'common')}</span>
+                <span>Yönetim</span>
               </NavLink>
             )}
-
-            {/* TR/EN toggle on desktop */}
-            <button
-              onClick={() => setLang(lang === 'tr' ? 'en' : 'tr')}
-              className="flex items-center space-x-1.5 rounded-lg border border-zinc-800 bg-zinc-900/40 px-2.5 py-1.5 text-xs font-bold transition-all duration-200 cursor-pointer shadow-sm hover:border-zinc-700 hover:bg-zinc-900/60"
-            >
-              <Globe className="h-3.5 w-3.5 text-teal-400 shrink-0" />
-              <span className={lang === 'tr' ? 'text-teal-400 font-black' : 'text-zinc-500 font-semibold'}>TR</span>
-              <span className="text-zinc-700">/</span>
-              <span className={lang === 'en' ? 'text-teal-400 font-black' : 'text-zinc-500 font-semibold'}>EN</span>
-            </button>
 
             {/* More Menu Dropdown */}
             <div className="relative" ref={dropdownRef}>
@@ -241,8 +227,8 @@ export default function Navbar({ user, onLogout, systemStatus, themeShade }: Nav
                 className={`flex h-8 w-8 items-center justify-center rounded-lg text-zinc-400 hover:text-white hover:bg-zinc-900/60 transition-all duration-200 border cursor-pointer ${
                   dropdownOpen ? 'bg-zinc-900 text-white border-zinc-800' : 'border-transparent'
                 }`}
-                title={t('more', 'navbar')}
-                aria-label="Daha fazla"
+                title="Bilgi ve Yardım"
+                aria-label="Diha fazla"
                 id="nav-more-dropdown-trigger"
               >
                 <MoreVertical className="h-4 w-4" />
@@ -259,7 +245,7 @@ export default function Navbar({ user, onLogout, systemStatus, themeShade }: Nav
                     className="absolute right-0 mt-2 w-56 rounded-xl border border-zinc-800/80 bg-zinc-950 p-1.5 shadow-2xl ring-1 ring-black/50 z-50 origin-top-right transform-gpu"
                   >
                     <div className="px-2.5 py-1 text-[10px] font-bold text-zinc-500 uppercase tracking-widest border-b border-zinc-900/60 mb-1">
-                      {t('corporate', 'navbar')}
+                      Kurumsal &amp; Bilgi
                     </div>
                     
                     <Link
@@ -268,7 +254,7 @@ export default function Navbar({ user, onLogout, systemStatus, themeShade }: Nav
                       className="flex items-center space-x-2 rounded-lg px-2.5 py-2 text-xs font-semibold text-zinc-300 hover:bg-zinc-900 hover:text-white transition-colors"
                     >
                       <Info className="h-3.5 w-3.5 text-teal-400" />
-                      <span>{t('about', 'common')}</span>
+                      <span>Hakkımızda &amp; Altyapı</span>
                     </Link>
 
                     <Link
@@ -277,7 +263,7 @@ export default function Navbar({ user, onLogout, systemStatus, themeShade }: Nav
                       className="flex items-center space-x-2 rounded-lg px-2.5 py-2 text-xs font-semibold text-zinc-300 hover:bg-zinc-900 hover:text-white transition-colors"
                     >
                       <FileText className="h-3.5 w-3.5 text-teal-400" />
-                      <span>{t('terms', 'common')}</span>
+                      <span>Kullanım Koşulları</span>
                     </Link>
 
                     <Link
@@ -286,11 +272,11 @@ export default function Navbar({ user, onLogout, systemStatus, themeShade }: Nav
                       className="flex items-center space-x-2 rounded-lg px-2.5 py-2 text-xs font-semibold text-zinc-300 hover:bg-zinc-900 hover:text-white transition-colors"
                     >
                       <HelpCircle className="h-3.5 w-3.5 text-teal-400" />
-                      <span>{t('help', 'common')}</span>
+                      <span>SSS &amp; Kılavuz</span>
                     </Link>
 
                     <div className="px-2.5 py-1 text-[10px] font-bold text-zinc-500 uppercase tracking-widest border-t border-b border-zinc-900/60 my-1">
-                      {lang === 'tr' ? 'Destek & Bildirim' : 'Support & Abuse'}
+                      Destek &amp; Bildirim
                     </div>
 
                     <Link
@@ -299,7 +285,7 @@ export default function Navbar({ user, onLogout, systemStatus, themeShade }: Nav
                       className="flex items-center space-x-2 rounded-lg px-2.5 py-2 text-xs font-semibold text-red-400 hover:bg-red-950/20 hover:text-red-300 transition-colors"
                     >
                       <ShieldAlert className="h-3.5 w-3.5 text-red-500" />
-                      <span>{t('report', 'common')} (DMCA)</span>
+                      <span>İhlal Bildirimi (DMCA)</span>
                     </Link>
 
                     <Link
@@ -308,7 +294,7 @@ export default function Navbar({ user, onLogout, systemStatus, themeShade }: Nav
                       className="flex items-center space-x-2 rounded-lg px-2.5 py-2 text-xs font-semibold text-zinc-300 hover:bg-zinc-900 hover:text-white transition-colors"
                     >
                       <MessageSquare className="h-3.5 w-3.5 text-teal-400" />
-                      <span>{t('support', 'common')}</span>
+                      <span>7/24 Teknik Destek</span>
                     </Link>
 
                      {user?.isAdmin && (
@@ -319,7 +305,7 @@ export default function Navbar({ user, onLogout, systemStatus, themeShade }: Nav
                         className="flex items-center space-x-2 rounded-lg px-2.5 py-2 text-xs font-bold text-amber-400 hover:bg-amber-950/20 hover:text-amber-300 transition-colors border-t border-zinc-900/60 mt-1"
                       >
                         <Sparkles className="h-3.5 w-3.5 text-amber-500 animate-pulse" />
-                        <span>{lang === 'tr' ? 'Özel Logo İndir (PNG)' : 'Download Logo (PNG)'}</span>
+                        <span>Özel Logo İndir (PNG)</span>
                       </a>
                     )}
                   </motion.div>
@@ -346,7 +332,7 @@ export default function Navbar({ user, onLogout, systemStatus, themeShade }: Nav
                     {getInitials(user.username)}
                   </div>
                   <div className="flex flex-col text-left">
-                    <span className="text-[10px] text-zinc-500 font-semibold leading-none">{lang === 'tr' ? 'Oturum Açık' : 'Logged In'}</span>
+                    <span className="text-[10px] text-zinc-500 font-semibold leading-none">Oturum Açık</span>
                     <span className="text-xs font-bold text-zinc-200 leading-none mt-0.5 max-w-[80px] truncate flex items-center gap-0.5">
                       {user.username}
                       {user.isPremium && <Sparkles className="h-3 w-3 text-amber-400 fill-amber-400 shrink-0" />}
@@ -365,7 +351,7 @@ export default function Navbar({ user, onLogout, systemStatus, themeShade }: Nav
                       className="absolute right-20 top-12 mt-1.5 w-48 rounded-xl border border-zinc-800 bg-zinc-950 p-1.5 shadow-2xl ring-1 ring-black/50 z-50 origin-top-right transform-gpu"
                     >
                       <div className="px-2.5 py-2 border-b border-zinc-900 mb-1">
-                        <p className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest mb-0.5">{lang === 'tr' ? 'Kullanıcı Hesabı' : 'User Account'}</p>
+                        <p className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest mb-0.5">Kullanıcı Hesabı</p>
                         <p className="text-xs font-bold text-teal-400 truncate flex items-center gap-1">
                           {user.username}
                           {user.isPremium && <span className="inline-flex items-center rounded-md bg-amber-500/15 border border-amber-500/30 text-amber-400 text-[8px] font-black tracking-widest px-1 py-0.5 leading-none shrink-0">PREMIUM</span>}
@@ -378,7 +364,7 @@ export default function Navbar({ user, onLogout, systemStatus, themeShade }: Nav
                         className="flex items-center space-x-2 rounded-lg px-2.5 py-2 text-xs font-semibold text-zinc-300 hover:bg-zinc-900 hover:text-white transition-colors"
                       >
                         <UserIcon className="h-3.5 w-3.5 text-teal-400" />
-                        <span>{t('settings', 'navbar')}</span>
+                        <span>Profil ve Ayarlar</span>
                       </Link>
 
                       <Link
@@ -387,7 +373,7 @@ export default function Navbar({ user, onLogout, systemStatus, themeShade }: Nav
                         className="flex items-center space-x-2 rounded-lg px-2.5 py-2 text-xs font-semibold text-zinc-300 hover:bg-zinc-900 hover:text-white transition-colors"
                       >
                         <Grid className="h-3.5 w-3.5 text-teal-400" />
-                        <span>{t('gallery', 'common')}</span>
+                        <span>Görsellerim</span>
                       </Link>
 
                       <button
@@ -400,7 +386,7 @@ export default function Navbar({ user, onLogout, systemStatus, themeShade }: Nav
                         className="flex w-full items-center space-x-2 rounded-lg px-2.5 py-2 text-xs font-semibold text-red-400 hover:bg-red-950/20 hover:text-red-300 transition-colors text-left cursor-pointer"
                       >
                         <LogOut className="h-3.5 w-3.5" />
-                        <span>{t('logout', 'common')}</span>
+                        <span>Çıkış Yap</span>
                       </button>
                     </motion.div>
                   )}
@@ -414,10 +400,10 @@ export default function Navbar({ user, onLogout, systemStatus, themeShade }: Nav
                   }}
                   id="nav-logout-direct-btn"
                   className="flex items-center space-x-1 rounded-lg border border-red-500/20 bg-red-500/10 hover:bg-red-500/25 px-2.5 py-1.5 text-xs font-bold text-red-400 hover:text-red-300 transition-all duration-200 cursor-pointer shadow-sm shadow-red-500/5 hover:scale-[1.02] active:scale-[0.98]"
-                  title={lang === 'tr' ? 'Güvenli Çıkış' : 'Secure Logout'}
+                  title="Güvenli Çıkış"
                 >
                   <LogOut className="h-3.5 w-3.5" />
-                  <span>{t('logout', 'common')}</span>
+                  <span>Çıkış</span>
                 </button>
 
               </div>
@@ -429,7 +415,7 @@ export default function Navbar({ user, onLogout, systemStatus, themeShade }: Nav
                   className="flex items-center space-x-1.5 rounded-lg border border-zinc-800/85 bg-zinc-900/30 px-3 py-1.5 text-xs font-semibold text-zinc-300 hover:text-white hover:bg-zinc-900 hover:border-zinc-700 transition-all duration-200 hover:scale-[1.02] active:scale-[0.98] cursor-pointer"
                 >
                   <LogIn className="h-3.5 w-3.5 text-teal-400" />
-                  <span>{t('login', 'common')}</span>
+                  <span>Giriş</span>
                 </Link>
                 
                 <Link
@@ -438,34 +424,23 @@ export default function Navbar({ user, onLogout, systemStatus, themeShade }: Nav
                   className="flex items-center space-x-1.5 rounded-lg bg-gradient-to-r from-teal-500 to-emerald-500 hover:from-teal-400 hover:to-emerald-400 px-3 py-1.5 text-xs font-bold text-zinc-950 transition-all duration-200 hover:scale-[1.02] active:scale-[0.98] cursor-pointer shadow-md shadow-teal-500/5 hover:shadow-teal-500/10"
                 >
                   <UserPlus className="h-3.5 w-3.5" />
-                  <span>{t('register', 'common')}</span>
+                  <span>Kayıt Ol</span>
                 </Link>
               </div>
             )}
 
           </nav>
 
-          {/* Mobile Right Bar Actions (Status + Hamburger menu + TR/EN Toggle) */}
+          {/* Mobile Right Bar Actions (Status + Hamburger menu) */}
           <div className="flex md:hidden items-center space-x-2">
             
-            {/* TR/EN toggle on mobile */}
-            <button
-              onClick={() => setLang(lang === 'tr' ? 'en' : 'tr')}
-              className="flex h-9 items-center space-x-1 rounded-lg border border-zinc-800 bg-zinc-900/50 px-2 text-[11px] font-bold transition-all duration-200 cursor-pointer shadow-sm hover:border-zinc-700 hover:bg-zinc-900"
-            >
-              <Globe className="h-3.5 w-3.5 text-teal-400 shrink-0" />
-              <span className={lang === 'tr' ? 'text-teal-400 font-black' : 'text-zinc-500 font-semibold'}>TR</span>
-              <span className="text-zinc-700">/</span>
-              <span className={lang === 'en' ? 'text-teal-400 font-black' : 'text-zinc-500 font-semibold'}>EN</span>
-            </button>
-
             {/* Minimalist Status indicator on mobile */}
             {systemStatus && (
               <div 
                 className={`flex h-7 w-7 items-center justify-center rounded-lg border ${
                   systemStatus.isCloudinaryConfigured ? 'border-teal-500/10 bg-teal-500/5 text-teal-400' : 'border-amber-500/10 bg-amber-500/5 text-amber-500'
                 }`}
-                title={systemStatus.isCloudinaryConfigured ? (lang === 'tr' ? "Bulut Depolama" : "Cloud Storage") : (lang === 'tr' ? "Yerel Depolama" : "Local Storage")}
+                title={systemStatus.isCloudinaryConfigured ? "Bulut Depolama" : "Yerel Depolama"}
               >
                 {systemStatus.isCloudinaryConfigured ? (
                   <Cloud className="h-3.5 w-3.5" />
@@ -479,7 +454,7 @@ export default function Navbar({ user, onLogout, systemStatus, themeShade }: Nav
             <button
               onClick={() => setMobileMenuOpen(true)}
               className="flex h-9 w-9 items-center justify-center rounded-lg border border-zinc-800 bg-zinc-900/50 text-zinc-300 hover:text-white transition-all active:scale-95 cursor-pointer"
-              aria-label={lang === 'tr' ? "Menüyü Aç" : "Open Menu"}
+              aria-label="Menüyü Aç"
               id="mobile-menu-trigger"
             >
               <Menu className="h-5 w-5" />
@@ -529,7 +504,7 @@ export default function Navbar({ user, onLogout, systemStatus, themeShade }: Nav
                     </div>
                     <div className="flex flex-col">
                       <span className="text-sm font-black tracking-tight text-white">AnlıkResim</span>
-                      <span className="text-[10px] text-zinc-500 font-bold tracking-widest uppercase">{lang === 'tr' ? 'Navigasyon' : 'Navigation'}</span>
+                      <span className="text-[10px] text-zinc-500 font-bold tracking-widest uppercase">Navigasyon</span>
                     </div>
                   </div>
 
@@ -537,7 +512,7 @@ export default function Navbar({ user, onLogout, systemStatus, themeShade }: Nav
                     whileTap={{ scale: 0.9 }}
                     onClick={() => setMobileMenuOpen(false)}
                     className="flex h-9 w-9 items-center justify-center rounded-xl border border-zinc-900 text-zinc-400 hover:text-white bg-zinc-950 hover:bg-zinc-900 active:scale-90 transition-colors cursor-pointer"
-                    aria-label={lang === 'tr' ? "Kapat" : "Close"}
+                    aria-label="Kapat"
                   >
                     <X className="h-4.5 w-4.5" />
                   </motion.button>
@@ -561,7 +536,7 @@ export default function Navbar({ user, onLogout, systemStatus, themeShade }: Nav
                             {getInitials(user.username)}
                           </div>
                           <div className="flex-1 min-w-0">
-                            <p className="text-[9px] text-zinc-500 font-black uppercase tracking-wider">{lang === 'tr' ? 'Oturum Açık' : 'Logged In'}</p>
+                            <p className="text-[9px] text-zinc-500 font-black uppercase tracking-wider">Oturum Açık</p>
                             <h4 className="text-sm font-black text-white truncate mt-0.5 flex items-center gap-1.5">
                               {user.username}
                               {user.isPremium && <Sparkles className="h-3.5 w-3.5 text-amber-400 fill-amber-400 inline" />}
@@ -573,7 +548,7 @@ export default function Navbar({ user, onLogout, systemStatus, themeShade }: Nav
                                   ? 'bg-amber-400/10 text-amber-400 border border-amber-500/20' 
                                   : 'bg-teal-400/10 text-teal-400 border border-teal-500/20'
                             }`}>
-                              {user.isAdmin ? (lang === 'tr' ? 'Yönetici' : 'Admin') : user.isPremium ? (lang === 'tr' ? 'Premium Üye' : 'Premium Member') : (lang === 'tr' ? 'Standart Üye' : 'Standard Member')}
+                              {user.isAdmin ? 'Yönetici' : user.isPremium ? 'Premium Üye' : 'Standart Üye'}
                             </span>
                           </div>
                         </div>
@@ -589,14 +564,14 @@ export default function Navbar({ user, onLogout, systemStatus, themeShade }: Nav
                           className="w-full mt-5 flex items-center justify-center space-x-2 rounded-xl bg-red-500/5 hover:bg-red-500/10 border border-red-500/10 hover:border-red-500/20 py-2.5 text-xs font-bold text-red-400 transition-all cursor-pointer"
                         >
                           <LogOut className="h-4 w-4" />
-                          <span>{t('logout', 'common')}</span>
+                          <span>Oturumu Kapat</span>
                         </motion.button>
                       </div>
                     ) : (
                       <div className="bg-zinc-900/20 border border-dashed border-zinc-900 rounded-2xl p-5 text-center relative overflow-hidden">
                         <div className="absolute top-0 left-0 w-24 h-24 bg-teal-500/5 rounded-full blur-xl -ml-6 -mt-6 pointer-events-none" />
                         <p className="text-xs text-zinc-400 leading-relaxed mb-4 font-medium relative z-10">
-                          {lang === 'tr' ? 'Resimlerinizi ömür boyu saklamak, kategorize etmek ve dilediğiniz an erişmek için ücretsiz hesap açın!' : 'Create a free account to store, categorize, and access your images forever!'}
+                          Resimlerinizi ömür boyu saklamak, kategorize etmek ve dilediğiniz an erişmek için ücretsiz hesap açın!
                         </p>
                         <div className="grid grid-cols-2 gap-2.5 relative z-10">
                           <Link
@@ -605,7 +580,7 @@ export default function Navbar({ user, onLogout, systemStatus, themeShade }: Nav
                             className="flex items-center justify-center space-x-1.5 rounded-xl border border-zinc-800 bg-zinc-950 px-3 py-2.5 text-xs font-black text-zinc-200 hover:text-white hover:bg-zinc-900 transition-all active:scale-95"
                           >
                             <LogIn className="h-3.5 w-3.5 text-teal-400" />
-                            <span>{t('login', 'common')}</span>
+                            <span>Giriş Yap</span>
                           </Link>
                           <Link
                             to="/kayit"
@@ -613,7 +588,7 @@ export default function Navbar({ user, onLogout, systemStatus, themeShade }: Nav
                             className="flex items-center justify-center space-x-1.5 rounded-xl bg-teal-500 hover:bg-teal-400 px-3 py-2.5 text-xs font-black text-zinc-950 transition-all active:scale-95 shadow-lg shadow-teal-500/10"
                           >
                             <UserPlus className="h-3.5 w-3.5" />
-                            <span>{t('register', 'common')}</span>
+                            <span>Kayıt Ol</span>
                           </Link>
                         </div>
                       </div>
@@ -622,7 +597,7 @@ export default function Navbar({ user, onLogout, systemStatus, themeShade }: Nav
 
                   {/* Primary Navigation Links */}
                   <div className="space-y-2.5">
-                    <h5 className="text-[10px] font-black text-zinc-600 uppercase tracking-widest px-2">{lang === 'tr' ? 'Ana Menü' : 'Main Menu'}</h5>
+                    <h5 className="text-[10px] font-black text-zinc-600 uppercase tracking-widest px-2">Ana Menü</h5>
                     
                     <div className="space-y-1.5">
                       <Link
@@ -635,7 +610,7 @@ export default function Navbar({ user, onLogout, systemStatus, themeShade }: Nav
                         }`}
                       >
                         <Image className="h-4 w-4 text-teal-400 shrink-0" />
-                        <span className="flex-1">{t('uploadImage', 'common')}</span>
+                        <span className="flex-1">Görsel Yükleme Paneli</span>
                         {location.pathname === '/' && <span className="h-1.5 w-1.5 rounded-full bg-teal-400 shadow-[0_0_8px_rgba(45,212,191,0.5)]" />}
                       </Link>
 
@@ -650,7 +625,7 @@ export default function Navbar({ user, onLogout, systemStatus, themeShade }: Nav
                           }`}
                         >
                           <Sparkles className="h-4 w-4 text-amber-400 fill-amber-400/10 shrink-0 animate-pulse" />
-                          <span className="flex-1">{lang === 'tr' ? 'Premium Paketler' : 'Premium Plans'}</span>
+                          <span className="flex-1">Premium Paketler</span>
                           {location.pathname === '/premium' && <span className="h-1.5 w-1.5 rounded-full bg-amber-400 shadow-[0_0_8px_rgba(245,158,11,0.5)]" />}
                         </Link>
                       )}
@@ -666,7 +641,7 @@ export default function Navbar({ user, onLogout, systemStatus, themeShade }: Nav
                         }`}
                       >
                         <Grid className="h-4 w-4 text-teal-400 shrink-0" />
-                        <span className="flex-1">{t('gallery', 'common')}</span>
+                        <span className="flex-1">Benim Görsellerim</span>
                         {location.pathname === '/galerim' && <span className="h-1.5 w-1.5 rounded-full bg-teal-400 shadow-[0_0_8px_rgba(45,212,191,0.5)]" />}
                       </Link>
                       )}
@@ -682,7 +657,7 @@ export default function Navbar({ user, onLogout, systemStatus, themeShade }: Nav
                           }`}
                         >
                           <Shield className="h-4 w-4 text-rose-400 shrink-0" />
-                          <span className="flex-1">{t('admin_panel', 'navbar')}</span>
+                          <span className="flex-1">Yönetici Paneli</span>
                           {location.pathname === '/admin' && <span className="h-1.5 w-1.5 rounded-full bg-rose-400 shadow-[0_0_8px_rgba(244,63,94,0.5)]" />}
                         </Link>
                       )}
@@ -691,7 +666,7 @@ export default function Navbar({ user, onLogout, systemStatus, themeShade }: Nav
 
                   {/* Informational Pages Links */}
                   <div className="space-y-2.5">
-                    <h5 className="text-[10px] font-black text-zinc-600 uppercase tracking-widest px-2">{t('corporate', 'navbar')}</h5>
+                    <h5 className="text-[10px] font-black text-zinc-600 uppercase tracking-widest px-2">Kurumsal &amp; Yardım</h5>
                     
                     <div className="space-y-1">
                       <Link
@@ -702,7 +677,7 @@ export default function Navbar({ user, onLogout, systemStatus, themeShade }: Nav
                         }`}
                       >
                         <Info className="h-4 w-4 text-teal-400 shrink-0" />
-                        <span>{t('about', 'common')}</span>
+                        <span>Hakkımızda &amp; Altyapı</span>
                       </Link>
 
                       <Link
@@ -713,7 +688,7 @@ export default function Navbar({ user, onLogout, systemStatus, themeShade }: Nav
                         }`}
                       >
                         <FileText className="h-4 w-4 text-teal-400 shrink-0" />
-                        <span>{t('terms', 'common')}</span>
+                        <span>Kullanım Koşulları</span>
                       </Link>
 
                       <Link
@@ -724,14 +699,14 @@ export default function Navbar({ user, onLogout, systemStatus, themeShade }: Nav
                         }`}
                       >
                         <HelpCircle className="h-4 w-4 text-teal-400 shrink-0" />
-                        <span>{t('help', 'common')}</span>
+                        <span>SSS &amp; Kılavuz</span>
                       </Link>
                     </div>
                   </div>
 
                   {/* Destek & DMCA Bildirim Links */}
                   <div className="space-y-2.5">
-                    <h5 className="text-[10px] font-black text-zinc-600 uppercase tracking-widest px-2">{lang === 'tr' ? 'Güvenlik & İletişim' : 'Security & Contact'}</h5>
+                    <h5 className="text-[10px] font-black text-zinc-600 uppercase tracking-widest px-2">Güvenlik &amp; İletişim</h5>
                     
                     <div className="space-y-1">
                       <Link
@@ -742,7 +717,7 @@ export default function Navbar({ user, onLogout, systemStatus, themeShade }: Nav
                         }`}
                       >
                         <ShieldAlert className="h-4 w-4 text-red-500 shrink-0" />
-                        <span>{t('report', 'common')} (DMCA)</span>
+                        <span>İhlal Bildirimi (DMCA)</span>
                       </Link>
 
                       <Link
@@ -753,7 +728,7 @@ export default function Navbar({ user, onLogout, systemStatus, themeShade }: Nav
                         }`}
                       >
                         <MessageSquare className="h-4 w-4 text-teal-400 shrink-0" />
-                        <span>{t('support', 'common')}</span>
+                        <span>7/24 Teknik Destek</span>
                       </Link>
 
                       {user?.isAdmin && (
@@ -764,7 +739,7 @@ export default function Navbar({ user, onLogout, systemStatus, themeShade }: Nav
                           className="flex items-center space-x-3.5 px-3.5 py-2.5 rounded-xl text-xs font-bold text-amber-400 bg-amber-500/5 hover:bg-amber-500/10 border border-amber-500/20 transition-all duration-200 mt-2"
                         >
                           <Sparkles className="h-4 w-4 text-amber-400 shrink-0 animate-pulse" />
-                          <span>{lang === 'tr' ? 'Özel Logo İndir (PNG)' : 'Download Logo (PNG)'}</span>
+                          <span>Özel Logo İndir (PNG)</span>
                         </a>
                       )}
                     </div>
@@ -775,7 +750,7 @@ export default function Navbar({ user, onLogout, systemStatus, themeShade }: Nav
                 {/* Footer inside the Drawer */}
                 <div className="p-6 border-t border-zinc-900 bg-zinc-950 text-center space-y-3">
                   <div className="flex items-center justify-center space-x-2 text-[10px] text-zinc-500 font-black uppercase tracking-wider">
-                    <span>{lang === 'tr' ? 'Sistem Durumu:' : 'System Status:'}</span>
+                    <span>Sistem Durumu:</span>
                     {systemStatus?.isCloudinaryConfigured ? (
                       <span className="text-teal-400 flex items-center space-x-1 font-extrabold bg-teal-500/5 px-2 py-0.5 rounded border border-teal-500/10">
                         <span className="h-1.5 w-1.5 rounded-full bg-teal-400 animate-ping mr-1" />
@@ -784,11 +759,11 @@ export default function Navbar({ user, onLogout, systemStatus, themeShade }: Nav
                     ) : (
                       <span className="text-amber-500 flex items-center space-x-1 font-extrabold bg-amber-500/5 px-2 py-0.5 rounded border border-amber-500/10">
                         <span className="h-1.5 w-1.5 rounded-full bg-amber-500 animate-pulse mr-1" />
-                        {lang === 'tr' ? 'Yerel Depo' : 'Local Disk'}
+                        Yerel Depo
                       </span>
                     )}
                   </div>
-                  <p className="text-[10px] text-zinc-600 font-bold">© 2026 AnlıkResim. {lang === 'tr' ? 'Tüm Hakları Saklıdır.' : 'All Rights Reserved.'}</p>
+                  <p className="text-[10px] text-zinc-600 font-bold">© 2026 AnlıkResim. Tüm Hakları Saklıdır.</p>
                 </div>
 
               </motion.div>
