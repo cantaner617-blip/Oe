@@ -1527,11 +1527,86 @@ async function start() {
     console.error("Failed to initialize database connection/sync in background:", dbErr);
   });
 
+  let vite: any = null;
   if (process.env.NODE_ENV !== 'production') {
-    const vite = await createViteServer({
+    vite = await createViteServer({
       server: { middlewareMode: true },
       appType: 'spa',
     });
+  }
+
+  // Dynamic Open Graph / SEO Meta Tag Injection for image pages (/i/:id)
+  app.get('/i/:id', async (req, res, next) => {
+    try {
+      const { id } = req.params;
+      const image = db.getImageById(id);
+      
+      let templatePath = '';
+      if (process.env.NODE_ENV !== 'production') {
+        templatePath = path.join(process.cwd(), 'index.html');
+      } else {
+        templatePath = path.join(process.cwd(), 'dist', 'index.html');
+      }
+      
+      if (!fs.existsSync(templatePath)) {
+        return next();
+      }
+      
+      let html = fs.readFileSync(templatePath, 'utf8');
+      
+      // If we are in development mode and Vite is loaded, run Vite's HTML transformer
+      if (process.env.NODE_ENV !== 'production' && vite) {
+        html = await vite.transformIndexHtml(req.originalUrl, html);
+      }
+      
+      const host = req.get('host') || 'www.anlikresim.com';
+      const protocol = req.protocol === 'https' || req.headers['x-forwarded-proto'] === 'https' ? 'https' : 'http';
+      const baseUrl = `${protocol}://${host}`;
+      
+      if (image) {
+        const now = new Date().toISOString();
+        if (!image.expiresAt || image.expiresAt > now) {
+          const sizeStr = image.size >= 1024 * 1024 
+            ? `${(image.size / (1024 * 1024)).toFixed(2)} MB` 
+            : `${(image.size / 1024).toFixed(2)} KB`;
+            
+          const pageTitle = `${image.filename} - AnlıkResim`;
+          const description = `AnlıkResim'e yüklenen ${image.filename} görselini görüntüleyin. Boyut: ${sizeStr}, Çözünürlük: ${image.width}x${image.height}.`;
+          const directUrl = `${baseUrl}/${image.id}.${image.format || 'png'}`;
+          const pageUrl = `${baseUrl}/i/${image.id}`;
+          
+          // Replace primary meta tags
+          html = html.replace(/<title>.*?<\/title>/g, `<title>${pageTitle}</title>`);
+          html = html.replace(/<meta name="title" content=".*?" \/>/g, `<meta name="title" content="${pageTitle}" />`);
+          html = html.replace(/<meta name="description" content=".*?" \/>/g, `<meta name="description" content="${description}" />`);
+          html = html.replace(/<link rel="canonical" href=".*?" \/>/g, `<link rel="canonical" href="${pageUrl}" />`);
+          
+          // Open Graph (Facebook / WhatsApp / Slack)
+          html = html.replace(/<meta property="og:title" content=".*?" \/>/g, `<meta property="og:title" content="${pageTitle}" />`);
+          html = html.replace(/<meta property="og:description" content=".*?" \/>/g, `<meta property="og:description" content="${description}" />`);
+          html = html.replace(/<meta property="og:image" content=".*?" \/>/g, `<meta property="og:image" content="${directUrl}" />`);
+          html = html.replace(/<meta property="og:url" content=".*?" \/>/g, `<meta property="og:url" content="${pageUrl}" />`);
+          
+          // Twitter Cards
+          html = html.replace(/<meta property="twitter:title" content=".*?" \/>/g, `<meta property="twitter:title" content="${pageTitle}" />`);
+          html = html.replace(/<meta property="twitter:description" content=".*?" \/>/g, `<meta property="twitter:description" content="${description}" />`);
+          html = html.replace(/<meta property="twitter:image" content=".*?" \/>/g, `<meta property="twitter:image" content="${directUrl}" />`);
+          html = html.replace(/<meta property="twitter:url" content=".*?" \/>/g, `<meta property="twitter:url" content="${pageUrl}" />`);
+        }
+      }
+      
+      res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate, max-age=0');
+      res.setHeader('Pragma', 'no-cache');
+      res.setHeader('Expires', '0');
+      res.setHeader('Content-Type', 'text/html');
+      return res.send(html);
+    } catch (err) {
+      console.error("Open Graph Injector Middleware Error:", err);
+      return next();
+    }
+  });
+
+  if (process.env.NODE_ENV !== 'production') {
     app.use(vite.middlewares);
     console.log("Vite dev server mounted as middleware.");
   } else {
