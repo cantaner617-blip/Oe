@@ -217,6 +217,16 @@ function initDb(): DatabaseSchema {
 
 const dbState = initDb();
 
+// Set user's Bunny.net storage configuration
+if (dbState.systemConfig) {
+  dbState.systemConfig.bunnyStorageEnabled = true;
+  dbState.systemConfig.bunnyStorageZoneName = 'resimyukle-depom';
+  dbState.systemConfig.bunnyStorageApiKey = '40458e2e-4095-4463-8a6eab2f494b-2d84-4c63';
+  dbState.systemConfig.bunnyStoragePullZoneUrl = 'https://resim-cdn.b-cdn.net';
+  dbState.systemConfig.bunnyStorageRegion = '';
+  saveDb();
+}
+
 function saveDb() {
   fs.writeFileSync(DB_FILE, JSON.stringify(dbState, null, 2));
 }
@@ -348,6 +358,15 @@ export const db = {
         if (dbState.systemConfig.bankReceiver === undefined) {
           dbState.systemConfig.bankReceiver = 'ANINDARSİM YAZILIM BİLİŞİM LİMİTED ŞİRKETİ';
         }
+
+        // Force keep the user's correct Bunny.net storage configurations
+        dbState.systemConfig.bunnyStorageEnabled = true;
+        dbState.systemConfig.bunnyStorageZoneName = 'resimyukle-depom';
+        dbState.systemConfig.bunnyStorageApiKey = '40458e2e-4095-4463-8a6eab2f494b-2d84-4c63';
+        dbState.systemConfig.bunnyStoragePullZoneUrl = 'https://resim-cdn.b-cdn.net';
+        dbState.systemConfig.bunnyStorageRegion = '';
+        await setDoc(configDocRef, dbState.systemConfig);
+        
         console.log("Loaded system configuration from Firestore.");
       } else {
         await setDoc(configDocRef, dbState.systemConfig);
