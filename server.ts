@@ -334,6 +334,90 @@ app.get('/api/direct-image/:id', async (req, res) => {
   }
 });
 
+// Short Direct Image Route (e.g., /6b7ad519.jpeg, /6b7ad519.png)
+app.get('/:id.:format', async (req, res, next) => {
+  try {
+    const { id } = req.params;
+    // Strip extension just in case, though id parameter should not include it
+    const cleanId = id.split('.')[0];
+    const image = db.getImageById(cleanId);
+    if (!image) {
+      return next(); // Fall through to next routes, static files, or SPA index.html
+    }
+
+    // Check if image is expired on-the-fly
+    const now = new Date().toISOString();
+    if (image.expiresAt && image.expiresAt <= now) {
+      deleteImageFromStorage(image).catch((err: any) => {
+        console.error(`Failed to destroy expired asset for image ${image.id} on direct access:`, err);
+      });
+      db.deleteImage(image.id);
+      return res.status(404).send('Resim bulunamadı veya süresi doldu.');
+    }
+
+    // Disable caching entirely for temporary/self-destructing images to prevent browser/CDN caching
+    if (image.expiresAt) {
+      res.set('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate, max-age=0');
+      res.set('Pragma', 'no-cache');
+      res.set('Expires', '0');
+    } else {
+      res.set('Cache-Control', 'public, max-age=31536000');
+    }
+
+    // Determine content type
+    let contentType = 'image/png';
+    const fmt = (image.format || '').toLowerCase();
+    if (fmt === 'jpeg' || fmt === 'jpg') {
+      contentType = 'image/jpeg';
+    } else if (fmt === 'gif') {
+      contentType = 'image/gif';
+    } else if (fmt === 'webp') {
+      contentType = 'image/webp';
+    } else if (fmt === 'bmp') {
+      contentType = 'image/bmp';
+    }
+
+    res.set('Content-Type', contentType);
+
+    if (req.query.download === 'true') {
+      res.set('Content-Disposition', `attachment; filename="${encodeURIComponent(image.filename)}"; filename*=UTF-8''${encodeURIComponent(image.filename)}`);
+    }
+
+    // If local, serve from local database data
+    if (image.isLocal && image.localData) {
+      const buffer = Buffer.from(image.localData, 'base64');
+      return res.send(buffer);
+    }
+
+    // If Cloudinary / Bunny, proxy fetch the image stream so that storage origins remain private
+    if (image.url) {
+      try {
+        const response = await fetch(image.url);
+        if (!response.ok) {
+          return res.redirect(image.url);
+        }
+        
+        const responseContentType = response.headers.get('content-type');
+        if (responseContentType) {
+          res.set('Content-Type', responseContentType);
+        }
+        
+        const arrayBuffer = await response.arrayBuffer();
+        const buffer = Buffer.from(arrayBuffer);
+        return res.send(buffer);
+      } catch (proxyErr) {
+        console.error(`Proxy fetch failed for image ${image.id}, redirecting to source url:`, proxyErr);
+        return res.redirect(image.url);
+      }
+    }
+
+    return res.status(404).send('Resim bulunamadı.');
+  } catch (err: any) {
+    console.error("Short direct image proxy error:", err);
+    res.status(500).send('Resim yüklenirken bir sunucu hatası oluştu.');
+  }
+});
+
 // Auth API
 app.post('/api/auth/register', (req, res) => {
   try {
@@ -660,7 +744,7 @@ app.post('/api/upload', optionalAuth, upload.single('image'), async (req: AuthRe
         const siteUrlVal = process.env.APP_URL || `${req.protocol}://${req.get('host')}`;
         return res.json({
           id: record.id,
-          directUrl: `${siteUrlVal}/api/direct-image/${record.id}`,
+          directUrl: `${siteUrlVal}/${record.id}.${record.format || 'png'}`,
           pageUrl: `/i/${record.id}`,
           width: record.width,
           height: record.height,
@@ -723,7 +807,7 @@ app.post('/api/upload', optionalAuth, upload.single('image'), async (req: AuthRe
         const siteUrlVal = process.env.APP_URL || `${req.protocol}://${req.get('host')}`;
         return res.json({
           id: record.id,
-          directUrl: `${siteUrlVal}/api/direct-image/${record.id}`,
+          directUrl: `${siteUrlVal}/${record.id}.${record.format || 'png'}`,
           pageUrl: `/i/${record.id}`,
           width: record.width,
           height: record.height,
@@ -762,7 +846,7 @@ app.post('/api/upload', optionalAuth, upload.single('image'), async (req: AuthRe
       const siteUrlVal = process.env.APP_URL || `${req.protocol}://${req.get('host')}`;
       return res.json({
         id: record.id,
-        directUrl: `${siteUrlVal}/api/direct-image/${record.id}`,
+        directUrl: `${siteUrlVal}/${record.id}.${record.format || 'png'}`,
         pageUrl: `/i/${record.id}`,
         width: record.width,
         height: record.height,
@@ -794,7 +878,7 @@ app.post('/api/upload', optionalAuth, upload.single('image'), async (req: AuthRe
     const siteUrlVal = process.env.APP_URL || `${req.protocol}://${req.get('host')}`;
     res.json({
       id: record.id,
-      directUrl: `${siteUrlVal}/api/direct-image/${record.id}`,
+      directUrl: `${siteUrlVal}/${record.id}.${record.format || 'png'}`,
       pageUrl: `/i/${record.id}`,
       width: record.width,
       height: record.height,
@@ -828,7 +912,7 @@ app.get('/api/images/:id', (req, res) => {
   // Exclude localData from response
   const { localData, ...safeImage } = image;
   const siteUrlVal = process.env.APP_URL || `${req.protocol}://${req.get('host')}`;
-  safeImage.url = `${siteUrlVal}/api/direct-image/${image.id}`;
+  safeImage.url = `${siteUrlVal}/${image.id}.${image.format || 'png'}`;
   res.json({
     ...safeImage,
     views: image.views + 1
@@ -843,7 +927,7 @@ app.get('/api/images-mine', requireAuth, (req: AuthRequest, res) => {
   // Strip large localData fields and route image URLs through the secure proxy
   const safeList = list.map(({ localData, ...img }) => ({
     ...img,
-    url: `${siteUrlVal}/api/direct-image/${img.id}`
+    url: `${siteUrlVal}/${img.id}.${img.format || 'png'}`
   }));
   res.json({ images: safeList });
 });
@@ -1018,7 +1102,7 @@ app.get('/api/admin/images', requireAdmin, (req: AuthRequest, res) => {
   // Strip large localData fields and route image URLs through the secure proxy
   const safeImages = images.map(({ localData, ...img }) => ({
     ...img,
-    url: `${siteUrlVal}/api/direct-image/${img.id}`
+    url: `${siteUrlVal}/${img.id}.${img.format || 'png'}`
   }));
   res.json({ images: safeImages });
 });
@@ -1452,11 +1536,31 @@ async function start() {
     console.log("Vite dev server mounted as middleware.");
   } else {
     const distPath = path.join(process.cwd(), 'dist');
-    app.use(express.static(distPath));
+    
+    // Serve static files with optimized headers
+    app.use(express.static(distPath, {
+      maxAge: '1y', // Default cache for 1 year (will be overridden for HTML below)
+      setHeaders: (res, filePath) => {
+        // If it is index.html or any HTML file, or NOT in the assets folder, do not cache
+        if (filePath.endsWith('.html') || !filePath.includes(path.join('dist', 'assets'))) {
+          res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate, max-age=0');
+          res.setHeader('Pragma', 'no-cache');
+          res.setHeader('Expires', '0');
+        } else {
+          // Vite-built hashed assets are immutable and safe to cache forever on CDN & browsers
+          res.setHeader('Cache-Control', 'public, max-age=31536000, immutable');
+        }
+      }
+    }));
+    
     app.get('*', (req, res) => {
+      // Set absolute no-cache for index.html SPA routing so users always get the latest updates instantly
+      res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate, max-age=0');
+      res.setHeader('Pragma', 'no-cache');
+      res.setHeader('Expires', '0');
       res.sendFile(path.join(distPath, 'index.html'));
     });
-    console.log("Production static files server mounted.");
+    console.log("Production static files server mounted with optimized Caching policies.");
   }
 
   app.listen(PORT, '0.0.0.0', () => {
