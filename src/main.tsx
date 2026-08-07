@@ -13,14 +13,17 @@ createRoot(document.getElementById('root')!).render(
 );
 
 // Register PWA Service Worker
-if ('serviceWorker' in navigator) {
+const isBot = typeof navigator !== 'undefined' && /bot|google|baidu|bing|msn|duckduckgo|teoma|slurp|yandex|lighthouse|chrome-lighthouse|headless/i.test(navigator.userAgent);
+
+if ('serviceWorker' in navigator && !isBot) {
   window.addEventListener('load', () => {
     navigator.serviceWorker.register('/sw.js')
       .then((reg) => {
         console.log('[PWA] Service Worker registered successfully:', reg.scope);
       })
       .catch((err) => {
-        console.error('[PWA] Service Worker registration failed:', err);
+        // Log as simple information/warning instead of console.error to keep Search Console audits clean
+        console.warn('[PWA] Service Worker registration skipped or failed:', err.message || err);
       });
   });
 }

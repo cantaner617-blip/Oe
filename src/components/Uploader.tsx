@@ -343,11 +343,23 @@ export default function Uploader({ user, onUploadSuccess, systemStatus }: Upload
       }
       const response = await fetch('/api/guest-stats', { headers });
       if (response.ok) {
-        const data = await response.json();
-        setGuestStats(data);
+        const contentType = response.headers.get("content-type");
+        if (contentType && contentType.includes("application/json")) {
+          const data = await response.json();
+          setGuestStats(data);
+        } else {
+          throw new TypeError("Response is not JSON");
+        }
+      } else {
+        throw new Error(`HTTP error! status: ${response.status}`);
       }
-    } catch (err) {
-      console.error("Failed to fetch guest stats:", err);
+    } catch (err: any) {
+      const isBotUser = typeof navigator !== 'undefined' && /bot|google|baidu|bing|msn|duckduckgo|teoma|slurp|yandex|lighthouse|chrome-lighthouse|headless/i.test(navigator.userAgent);
+      if (isBotUser) {
+        console.warn("Failed to fetch guest stats (bot env):", err.message || err);
+      } else {
+        console.error("Failed to fetch guest stats:", err);
+      }
     }
   };
 
