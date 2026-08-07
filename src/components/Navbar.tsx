@@ -127,7 +127,7 @@ export default function Navbar({ user, onLogout, systemStatus, themeShade }: Nav
           <nav className="hidden md:flex items-center space-x-2 lg:space-x-3" id="nav-actions">
             
             {/* System Status Indicator */}
-            {systemStatus && (
+            {user?.isAdmin && systemStatus && (
               <div 
                 className="flex items-center space-x-1.5 rounded-full px-2.5 py-1 text-xs font-semibold border bg-zinc-900/50 border-zinc-800/80 hover:border-zinc-700/80 transition-all duration-200 cursor-help" 
                 title={systemStatus.isCloudinaryConfigured ? "Bulut depolama aktif" : "Yerel depolama aktif"}
@@ -435,7 +435,7 @@ export default function Navbar({ user, onLogout, systemStatus, themeShade }: Nav
           <div className="flex md:hidden items-center space-x-2">
             
             {/* Minimalist Status indicator on mobile */}
-            {systemStatus && (
+            {user?.isAdmin && systemStatus && (
               <div 
                 className={`flex h-7 w-7 items-center justify-center rounded-lg border ${
                   systemStatus.isCloudinaryConfigured ? 'border-teal-500/10 bg-teal-500/5 text-teal-400' : 'border-amber-500/10 bg-amber-500/5 text-amber-500'
@@ -749,20 +749,22 @@ export default function Navbar({ user, onLogout, systemStatus, themeShade }: Nav
 
                 {/* Footer inside the Drawer */}
                 <div className="p-6 border-t border-zinc-900 bg-zinc-950 text-center space-y-3">
-                  <div className="flex items-center justify-center space-x-2 text-[10px] text-zinc-500 font-black uppercase tracking-wider">
-                    <span>Sistem Durumu:</span>
-                    {systemStatus?.isCloudinaryConfigured ? (
-                      <span className="text-teal-400 flex items-center space-x-1 font-extrabold bg-teal-500/5 px-2 py-0.5 rounded border border-teal-500/10">
-                        <span className="h-1.5 w-1.5 rounded-full bg-teal-400 animate-ping mr-1" />
-                        Cloudinary
-                      </span>
-                    ) : (
-                      <span className="text-amber-500 flex items-center space-x-1 font-extrabold bg-amber-500/5 px-2 py-0.5 rounded border border-amber-500/10">
-                        <span className="h-1.5 w-1.5 rounded-full bg-amber-500 animate-pulse mr-1" />
-                        Yerel Depo
-                      </span>
-                    )}
-                  </div>
+                  {user?.isAdmin && (
+                    <div className="flex items-center justify-center space-x-2 text-[10px] text-zinc-500 font-black uppercase tracking-wider">
+                      <span>Sistem Durumu:</span>
+                      {systemStatus?.isCloudinaryConfigured ? (
+                        <span className="text-teal-400 flex items-center space-x-1 font-extrabold bg-teal-500/5 px-2 py-0.5 rounded border border-teal-500/10">
+                          <span className="h-1.5 w-1.5 rounded-full bg-teal-400 animate-ping mr-1" />
+                          Cloudinary
+                        </span>
+                      ) : (
+                        <span className="text-amber-500 flex items-center space-x-1 font-extrabold bg-amber-500/5 px-2 py-0.5 rounded border border-amber-500/10">
+                          <span className="h-1.5 w-1.5 rounded-full bg-amber-500 animate-pulse mr-1" />
+                          Yerel Depo
+                        </span>
+                      )}
+                    </div>
+                  )}
                   <p className="text-[10px] text-zinc-600 font-bold">© 2026 AnlıkResim. Tüm Hakları Saklıdır.</p>
                 </div>
 
