@@ -19,7 +19,6 @@ export default function Legal() {
   const handleTabChange = (tab: TabType) => {
     setActiveTab(tab);
     setSearchParams({ tab });
-    window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
   const tabs = [

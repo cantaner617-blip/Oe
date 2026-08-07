@@ -67,6 +67,11 @@ export interface SystemConfig {
   adsensePublisherId?: string;
   adsenseAutoAdsEnabled?: boolean;
   adsenseResponsiveAdsEnabled?: boolean;
+  bunnyStorageEnabled?: boolean;
+  bunnyStorageZoneName?: string;
+  bunnyStorageApiKey?: string;
+  bunnyStoragePullZoneUrl?: string;
+  bunnyStorageRegion?: string;
 }
 
 export interface AbuseReport {
@@ -553,7 +558,12 @@ export const db = {
         adsenseEnabled: false,
         adsensePublisherId: '',
         adsenseAutoAdsEnabled: true,
-        adsenseResponsiveAdsEnabled: true
+        adsenseResponsiveAdsEnabled: true,
+        bunnyStorageEnabled: false,
+        bunnyStorageZoneName: '',
+        bunnyStorageApiKey: '',
+        bunnyStoragePullZoneUrl: '',
+        bunnyStorageRegion: ''
       };
     }
     if (!dbState.systemConfig.announcements) {
@@ -588,6 +598,21 @@ export const db = {
     }
     if (dbState.systemConfig.adsenseResponsiveAdsEnabled === undefined) {
       dbState.systemConfig.adsenseResponsiveAdsEnabled = true;
+    }
+    if (dbState.systemConfig.bunnyStorageEnabled === undefined) {
+      dbState.systemConfig.bunnyStorageEnabled = false;
+    }
+    if (dbState.systemConfig.bunnyStorageZoneName === undefined) {
+      dbState.systemConfig.bunnyStorageZoneName = '';
+    }
+    if (dbState.systemConfig.bunnyStorageApiKey === undefined) {
+      dbState.systemConfig.bunnyStorageApiKey = '';
+    }
+    if (dbState.systemConfig.bunnyStoragePullZoneUrl === undefined) {
+      dbState.systemConfig.bunnyStoragePullZoneUrl = '';
+    }
+    if (dbState.systemConfig.bunnyStorageRegion === undefined) {
+      dbState.systemConfig.bunnyStorageRegion = '';
     }
     return dbState.systemConfig;
   },

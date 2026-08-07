@@ -106,9 +106,48 @@ if (isCloudinaryConfigured) {
   console.warn("Cloudinary configuration missing! Using local database storage fallback for uploaded images.");
 }
 
-// Helper to delete image from Cloudinary storage
+// Helper to delete image from storage (Cloudinary or Bunny.net)
 async function deleteImageFromStorage(image: any) {
   if (!image) return;
+
+  const sysConfig = db.getSystemConfig();
+  const bunnyEnabled = sysConfig.bunnyStorageEnabled || !!process.env.BUNNY_STORAGE_ENABLED;
+  const bunnyZoneName = sysConfig.bunnyStorageZoneName || process.env.BUNNY_STORAGE_ZONE_NAME;
+  const bunnyApiKey = sysConfig.bunnyStorageApiKey || process.env.BUNNY_STORAGE_API_KEY;
+  const bunnyRegion = sysConfig.bunnyStorageRegion || process.env.BUNNY_STORAGE_REGION || '';
+
+  const isBunnyUrl = image.url && (
+    image.url.includes('b-cdn.net') || 
+    (sysConfig.bunnyStoragePullZoneUrl && image.url.includes(sysConfig.bunnyStoragePullZoneUrl.replace(/https?:\/\//, '')))
+  );
+
+  if (isBunnyUrl && bunnyZoneName && bunnyApiKey) {
+    try {
+      const region = bunnyRegion.trim().toLowerCase();
+      const host = (region === '' || region === 'de' || region === 'default') 
+        ? 'storage.bunnycdn.com' 
+        : `${region}.storage.bunnycdn.com`;
+      
+      const deleteUrl = `https://${host}/${bunnyZoneName}/${image.id}.${image.format || 'png'}`;
+      console.log(`Deleting from Bunny.net storage: ${deleteUrl}`);
+      
+      const deleteResponse = await fetch(deleteUrl, {
+        method: 'DELETE',
+        headers: {
+          'AccessKey': bunnyApiKey,
+        }
+      });
+      
+      if (deleteResponse.ok) {
+        console.log(`Successfully deleted Bunny.net asset for image ${image.id}`);
+      } else {
+        const errText = await deleteResponse.text().catch(() => '');
+        console.error(`Bunny.net delete failed with status ${deleteResponse.status}: ${errText}`);
+      }
+    } catch (bunnyErr) {
+      console.error(`Bunny.net delete failed for image ${image.id}:`, bunnyErr);
+    }
+  }
 
   if (isCloudinaryConfigured && image.publicId) {
     try {
@@ -555,7 +594,84 @@ app.post('/api/upload', optionalAuth, upload.single('image'), async (req: AuthRe
     let publicId = '';
     let width = 600;
     let height = 400;
-    if (isCloudinaryConfigured) {
+
+    const bunnyEnabled = sysConfig.bunnyStorageEnabled || !!process.env.BUNNY_STORAGE_ENABLED;
+    const bunnyZoneName = sysConfig.bunnyStorageZoneName || process.env.BUNNY_STORAGE_ZONE_NAME;
+    const bunnyApiKey = sysConfig.bunnyStorageApiKey || process.env.BUNNY_STORAGE_API_KEY;
+    const bunnyPullZoneUrl = sysConfig.bunnyStoragePullZoneUrl || process.env.BUNNY_STORAGE_PULL_ZONE_URL;
+    const bunnyRegion = sysConfig.bunnyStorageRegion || process.env.BUNNY_STORAGE_REGION || '';
+
+    const isBunnyConfigured = !!(bunnyEnabled && bunnyZoneName && bunnyApiKey && bunnyPullZoneUrl);
+
+    if (isBunnyConfigured) {
+      try {
+        const region = bunnyRegion.trim().toLowerCase();
+        const host = (region === '' || region === 'de' || region === 'default') 
+          ? 'storage.bunnycdn.com' 
+          : `${region}.storage.bunnycdn.com`;
+        
+        const uploadUrl = `https://${host}/${bunnyZoneName}/${fileId}.${format}`;
+        
+        console.log(`Uploading to Bunny.net storage: ${uploadUrl}`);
+        
+        const uploadResponse = await fetch(uploadUrl, {
+          method: 'PUT',
+          headers: {
+            'AccessKey': bunnyApiKey,
+            'Content-Type': req.file.mimetype,
+          },
+          body: req.file.buffer
+        });
+
+        if (!uploadResponse.ok) {
+          const errText = await uploadResponse.text().catch(() => '');
+          throw new Error(`Bunny.net upload failed with status ${uploadResponse.status}: ${errText}`);
+        }
+
+        const cleanPullZone = bunnyPullZoneUrl.replace(/\/$/, '');
+        imageUrl = `${cleanPullZone}/${fileId}.${format}`;
+        console.log(`Successfully uploaded image ${fileId} to Bunny.net: ${imageUrl}`);
+      } catch (bunnyErr: any) {
+        console.error("Bunny.net upload failed, falling back to local database storage...", bunnyErr);
+        // Fallback internally
+        const base64Data = req.file.buffer.toString('base64');
+        const siteUrl = process.env.APP_URL || `http://localhost:${PORT}`;
+        imageUrl = `${siteUrl}/api/local-images/${fileId}`;
+
+        if (!isLoggedIn && guestId) {
+          db.incrementGuestUploadCount(guestId);
+        }
+
+        const record = db.addImage({
+          id: fileId,
+          userId: req.user ? req.user.id : null,
+          url: imageUrl,
+          filename,
+          format,
+          bytes,
+          width,
+          height,
+          isLocal: true,
+          localData: base64Data,
+          expiresAt,
+          deleteAfter,
+        });
+
+        const siteUrlVal = process.env.APP_URL || `${req.protocol}://${req.get('host')}`;
+        return res.json({
+          id: record.id,
+          directUrl: `${siteUrlVal}/api/direct-image/${record.id}`,
+          pageUrl: `/i/${record.id}`,
+          width: record.width,
+          height: record.height,
+          bytes: record.bytes,
+          filename: record.filename,
+          isLocalFallback: true,
+          expiresAt: record.expiresAt,
+          deleteAfter: record.deleteAfter,
+        });
+      }
+    } else if (isCloudinaryConfigured) {
       // Stream to Cloudinary
       try {
         const result = await new Promise<any>((resolve, reject) => {
@@ -772,7 +888,19 @@ app.get('/api/system-status', (req, res) => {
     premiumEnabled: sysConfig.premiumEnabled,
     premiumMonthlyPrice: sysConfig.premiumMonthlyPrice,
     premiumYearlyPrice: sysConfig.premiumYearlyPrice,
-    adShowToRegistered: sysConfig.adShowToRegistered
+    adShowToRegistered: sysConfig.adShowToRegistered,
+    bankName: sysConfig.bankName,
+    bankIban: sysConfig.bankIban,
+    bankReceiver: sysConfig.bankReceiver,
+    adsenseEnabled: sysConfig.adsenseEnabled,
+    adsensePublisherId: sysConfig.adsensePublisherId,
+    adsenseAutoAdsEnabled: sysConfig.adsenseAutoAdsEnabled,
+    adsenseResponsiveAdsEnabled: sysConfig.adsenseResponsiveAdsEnabled,
+    bunnyStorageEnabled: sysConfig.bunnyStorageEnabled,
+    bunnyStorageZoneName: sysConfig.bunnyStorageZoneName,
+    bunnyStorageApiKey: sysConfig.bunnyStorageApiKey,
+    bunnyStoragePullZoneUrl: sysConfig.bunnyStoragePullZoneUrl,
+    bunnyStorageRegion: sysConfig.bunnyStorageRegion
   });
 });
 
@@ -842,7 +970,12 @@ app.post('/api/system-config', requireAdmin, (req: AuthRequest, res) => {
     adsenseEnabled,
     adsensePublisherId,
     adsenseAutoAdsEnabled,
-    adsenseResponsiveAdsEnabled
+    adsenseResponsiveAdsEnabled,
+    bunnyStorageEnabled,
+    bunnyStorageZoneName,
+    bunnyStorageApiKey,
+    bunnyStoragePullZoneUrl,
+    bunnyStorageRegion
   } = req.body;
   
   const updated = db.updateSystemConfig({
@@ -868,7 +1001,12 @@ app.post('/api/system-config', requireAdmin, (req: AuthRequest, res) => {
     adsenseEnabled: adsenseEnabled === true,
     adsensePublisherId: typeof adsensePublisherId === 'string' ? adsensePublisherId : undefined,
     adsenseAutoAdsEnabled: adsenseAutoAdsEnabled === true,
-    adsenseResponsiveAdsEnabled: adsenseResponsiveAdsEnabled === true
+    adsenseResponsiveAdsEnabled: adsenseResponsiveAdsEnabled === true,
+    bunnyStorageEnabled: bunnyStorageEnabled === true,
+    bunnyStorageZoneName: typeof bunnyStorageZoneName === 'string' ? bunnyStorageZoneName : undefined,
+    bunnyStorageApiKey: typeof bunnyStorageApiKey === 'string' ? bunnyStorageApiKey : undefined,
+    bunnyStoragePullZoneUrl: typeof bunnyStoragePullZoneUrl === 'string' ? bunnyStoragePullZoneUrl : undefined,
+    bunnyStorageRegion: typeof bunnyStorageRegion === 'string' ? bunnyStorageRegion : undefined
   });
   res.json(updated);
 });

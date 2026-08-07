@@ -103,6 +103,13 @@ export default function AdminPanel({ user }: AdminPanelProps) {
   const [adsenseAutoAdsEnabled, setAdsenseAutoAdsEnabled] = useState(true);
   const [adsenseResponsiveAdsEnabled, setAdsenseResponsiveAdsEnabled] = useState(true);
 
+  // Bunny.net Storage Settings State
+  const [bunnyStorageEnabled, setBunnyStorageEnabled] = useState(false);
+  const [bunnyStorageZoneName, setBunnyStorageZoneName] = useState('');
+  const [bunnyStorageApiKey, setBunnyStorageApiKey] = useState('');
+  const [bunnyStoragePullZoneUrl, setBunnyStoragePullZoneUrl] = useState('');
+  const [bunnyStorageRegion, setBunnyStorageRegion] = useState('');
+
   // Interactive Image Pool search & filter states
   const [searchQuery, setSearchQuery] = useState('');
   const [filterType, setFilterType] = useState<'all' | 'guest' | 'member'>('all');
@@ -183,6 +190,13 @@ export default function AdminPanel({ user }: AdminPanelProps) {
         setAdsensePublisherId(statusData.adsensePublisherId || '');
         setAdsenseAutoAdsEnabled(statusData.adsenseAutoAdsEnabled !== false);
         setAdsenseResponsiveAdsEnabled(statusData.adsenseResponsiveAdsEnabled !== false);
+
+        // Bunny.net Storage Config
+        setBunnyStorageEnabled(statusData.bunnyStorageEnabled || false);
+        setBunnyStorageZoneName(statusData.bunnyStorageZoneName || '');
+        setBunnyStorageApiKey(statusData.bunnyStorageApiKey || '');
+        setBunnyStoragePullZoneUrl(statusData.bunnyStoragePullZoneUrl || '');
+        setBunnyStorageRegion(statusData.bunnyStorageRegion || '');
       }
 
       // 2. Fetch all images
@@ -290,7 +304,12 @@ export default function AdminPanel({ user }: AdminPanelProps) {
           adsenseEnabled,
           adsensePublisherId,
           adsenseAutoAdsEnabled,
-          adsenseResponsiveAdsEnabled
+          adsenseResponsiveAdsEnabled,
+          bunnyStorageEnabled,
+          bunnyStorageZoneName,
+          bunnyStorageApiKey,
+          bunnyStoragePullZoneUrl,
+          bunnyStorageRegion
         })
       });
 
@@ -1166,6 +1185,104 @@ export default function AdminPanel({ user }: AdminPanelProps) {
                               ⚠️ Lütfen AdSense'ten para kazanmaya başlamak için Yayıncı Kimliğinizi girin.
                             </div>
                           )}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="h-px bg-zinc-900/60 my-6" />
+
+                  {/* Bunny.net Storage Integration Settings */}
+                  <div className="rounded-xl border border-zinc-900 bg-zinc-950/10 p-6 space-y-6 text-left">
+                    <div className="flex items-center justify-between border-b border-zinc-900 pb-3">
+                      <div className="space-y-0.5">
+                        <span className="text-sm font-bold text-white block flex items-center gap-2">
+                          <Settings className="h-4 w-4 text-teal-400" />
+                          Bunny.net Bulut Depolama Entegrasyonu
+                        </span>
+                        <span className="text-xs text-zinc-400 block">Resimlerinizi yüksek hızlı CDN destekli Bunny.net Storage Zone üzerinde güvenle barındırın.</span>
+                      </div>
+                      <label className="relative inline-flex items-center cursor-pointer select-none">
+                        <input 
+                          type="checkbox" 
+                          checked={bunnyStorageEnabled}
+                          onChange={(e) => setBunnyStorageEnabled(e.target.checked)}
+                          className="sr-only peer"
+                        />
+                        <div className="w-11 h-6 bg-zinc-800 rounded-full peer peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-zinc-400 after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-teal-500 peer-checked:after:bg-zinc-950 font-sans"></div>
+                      </label>
+                    </div>
+
+                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                      <div className="space-y-4">
+                        <div className="space-y-1.5">
+                          <label className="text-[11px] font-bold text-zinc-400 block">Depolama Alanı Adı (Storage Zone Name)</label>
+                          <input
+                            type="text"
+                            value={bunnyStorageZoneName}
+                            onChange={(e) => setBunnyStorageZoneName(e.target.value)}
+                            placeholder="Örn: gorsel-depom"
+                            className="w-full rounded-xl border border-zinc-800 bg-zinc-900/40 px-3.5 py-2.5 text-xs text-white placeholder-zinc-650 focus:outline-none focus:border-teal-500 font-mono font-bold"
+                          />
+                        </div>
+
+                        <div className="space-y-1.5">
+                          <label className="text-[11px] font-bold text-zinc-400 block">API Erişim Anahtarı (API Access Key / Password)</label>
+                          <input
+                            type="password"
+                            value={bunnyStorageApiKey}
+                            onChange={(e) => setBunnyStorageApiKey(e.target.value)}
+                            placeholder="Örn: f8b71d2b-xxxx-xxxx..."
+                            className="w-full rounded-xl border border-zinc-800 bg-zinc-900/40 px-3.5 py-2.5 text-xs text-white placeholder-zinc-650 focus:outline-none focus:border-teal-500 font-mono font-bold"
+                          />
+                        </div>
+
+                        <div className="space-y-1.5">
+                          <label className="text-[11px] font-bold text-zinc-400 block">Pull Zone URL (CDN Dağıtım URL'niz)</label>
+                          <input
+                            type="text"
+                            value={bunnyStoragePullZoneUrl}
+                            onChange={(e) => setBunnyStoragePullZoneUrl(e.target.value)}
+                            placeholder="Örn: https://gorsel.b-cdn.net"
+                            className="w-full rounded-xl border border-zinc-800 bg-zinc-900/40 px-3.5 py-2.5 text-xs text-white placeholder-zinc-650 focus:outline-none focus:border-teal-500 font-mono font-bold"
+                          />
+                        </div>
+
+                        <div className="space-y-1.5">
+                          <label className="text-[11px] font-bold text-zinc-400 block">Depolama Bölgesi (Storage Zone Region)</label>
+                          <select
+                            value={bunnyStorageRegion}
+                            onChange={(e) => setBunnyStorageRegion(e.target.value)}
+                            className="w-full rounded-xl border border-zinc-800 bg-zinc-900 px-3.5 py-2.5 text-xs text-white focus:outline-none focus:border-teal-500 font-bold"
+                          >
+                            <option value="">Default / Europe (Germany - Falkenstein)</option>
+                            <option value="uk">United Kingdom (London)</option>
+                            <option value="ny">United States (New York)</option>
+                            <option value="la">United States (Los Angeles)</option>
+                            <option value="sg">Singapore (Singapore)</option>
+                            <option value="se">Sweden (Stockholm)</option>
+                            <option value="jh">Johannesburg (South Africa)</option>
+                            <option value="syd">Sydney (Australia)</option>
+                          </select>
+                        </div>
+                      </div>
+
+                      {/* Guide Box */}
+                      <div className="rounded-xl border border-zinc-900 bg-zinc-950/60 p-4 space-y-4 text-xs text-zinc-400">
+                        <span className="text-[10px] font-extrabold uppercase tracking-widest text-teal-400 bg-teal-500/10 px-2.5 py-1 rounded-lg flex items-center gap-1 w-max">
+                          Bunny.net Bağlantı Rehberi
+                        </span>
+
+                        <div className="space-y-2.5 leading-relaxed">
+                          <p>
+                            Bunny.net depolama alanınızı bağlamak oldukça basittir. Sırasıyla şu adımları izleyin:
+                          </p>
+                          <ol className="list-decimal pl-4 space-y-2 text-zinc-500">
+                            <li>Bunny.net panelinizden <span className="text-zinc-300 font-bold">Storage</span> sekmesine girin ve yeni bir <span className="text-zinc-300 font-bold">Storage Zone</span> oluşturun.</li>
+                            <li>Oluşturduğunuz depolama alanına tıklayıp sol menüden <span className="text-zinc-300 font-bold">FTP &amp; API Access</span> sayfasına gelin.</li>
+                            <li>Oradaki <span className="text-zinc-300 font-bold">Password</span> değerini kopyalayarak yukarıdaki <strong>API Erişim Anahtarı</strong> alanına yapıştırın.</li>
+                            <li>Resimlerin internette görünmesi için bir <span className="text-zinc-300 font-bold">Pull Zone</span> bağlandığından emin olun ve Pull Zone linkini <strong>Pull Zone URL</strong> alanına girin (Örn: <code className="text-teal-400 font-mono">https://gorsel.b-cdn.net</code>).</li>
+                          </ol>
                         </div>
                       </div>
                     </div>
