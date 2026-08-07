@@ -22,60 +22,60 @@ interface UploadedResult {
 
 const applyWatermark = (file: File, text: string): Promise<File> => {
   return new Promise((resolve) => {
-    const reader = new FileReader();
-    reader.onload = (e) => {
-      const img = new Image();
-      img.onload = () => {
-        const canvas = document.createElement('canvas');
-        canvas.width = img.width;
-        canvas.height = img.height;
-        const ctx = canvas.getContext('2d');
-        if (!ctx) {
+    const url = URL.createObjectURL(file);
+    const img = new Image();
+    img.onload = () => {
+      URL.revokeObjectURL(url);
+      const canvas = document.createElement('canvas');
+      canvas.width = img.width;
+      canvas.height = img.height;
+      const ctx = canvas.getContext('2d');
+      if (!ctx) {
+        resolve(file);
+        return;
+      }
+      // Draw original image
+      ctx.drawImage(img, 0, 0);
+
+      // Configure watermark style based on image size
+      const size = Math.max(16, Math.floor(img.width * 0.035)); // Adaptive font size (3.5% of width)
+      ctx.font = `bold ${size}px sans-serif`;
+      
+      // Measure text width to align bottom right with some padding
+      const textMetrics = ctx.measureText(text);
+      const paddingX = Math.max(16, img.width * 0.025);
+      const paddingY = Math.max(16, img.height * 0.025);
+      const x = img.width - textMetrics.width - paddingX;
+      const y = img.height - paddingY;
+
+      // Draw outline/shadow for high-contrast readability
+      ctx.strokeStyle = 'rgba(0, 0, 0, 0.7)';
+      ctx.lineWidth = Math.max(2, size * 0.15);
+      ctx.strokeText(text, x, y);
+
+      // Draw primary text with elegant high-contrast translucent white
+      ctx.fillStyle = 'rgba(255, 255, 255, 0.85)';
+      ctx.fillText(text, x, y);
+
+      // Export back to a File
+      const format = file.type || 'image/png';
+      canvas.toBlob((blob) => {
+        if (blob) {
+          const watermarkedFile = new File([blob], file.name, {
+            type: format,
+            lastModified: Date.now()
+          });
+          resolve(watermarkedFile);
+        } else {
           resolve(file);
-          return;
         }
-        // Draw original image
-        ctx.drawImage(img, 0, 0);
-
-        // Configure watermark style based on image size
-        const size = Math.max(16, Math.floor(img.width * 0.035)); // Adaptive font size (3.5% of width)
-        ctx.font = `bold ${size}px sans-serif`;
-        
-        // Measure text width to align bottom right with some padding
-        const textMetrics = ctx.measureText(text);
-        const paddingX = Math.max(16, img.width * 0.025);
-        const paddingY = Math.max(16, img.height * 0.025);
-        const x = img.width - textMetrics.width - paddingX;
-        const y = img.height - paddingY;
-
-        // Draw outline/shadow for high-contrast readability
-        ctx.strokeStyle = 'rgba(0, 0, 0, 0.7)';
-        ctx.lineWidth = Math.max(2, size * 0.15);
-        ctx.strokeText(text, x, y);
-
-        // Draw primary text with elegant high-contrast translucent white
-        ctx.fillStyle = 'rgba(255, 255, 255, 0.85)';
-        ctx.fillText(text, x, y);
-
-        // Export back to a File
-        const format = file.type || 'image/png';
-        canvas.toBlob((blob) => {
-          if (blob) {
-            const watermarkedFile = new File([blob], file.name, {
-              type: format,
-              lastModified: Date.now()
-            });
-            resolve(watermarkedFile);
-          } else {
-            resolve(file);
-          }
-        }, format, 0.92);
-      };
-      img.onerror = () => resolve(file);
-      img.src = e.target?.result as string;
+      }, format, 0.92);
     };
-    reader.onerror = () => resolve(file);
-    reader.readAsDataURL(file);
+    img.onerror = () => {
+      URL.revokeObjectURL(url);
+      resolve(file);
+    };
+    img.src = url;
   });
 };
 
@@ -98,87 +98,87 @@ const compressImage = (
       return;
     }
 
-    const reader = new FileReader();
-    reader.onload = (e) => {
-      const img = new Image();
-      img.onload = () => {
-        const canvas = document.createElement('canvas');
-        let width = img.width;
-        let height = img.height;
+    const url = URL.createObjectURL(file);
+    const img = new Image();
+    img.onload = () => {
+      URL.revokeObjectURL(url);
+      const canvas = document.createElement('canvas');
+      let width = img.width;
+      let height = img.height;
 
-        // Calculate new dimensions if max width is defined and less than current width
-        if (maxWidthOption !== 'original') {
-          const maxDim = parseInt(maxWidthOption, 10);
-          if (width > maxDim || height > maxDim) {
-            if (width > height) {
-              height = Math.round((height * maxDim) / width);
-              width = maxDim;
-            } else {
-              width = Math.round((width * maxDim) / height);
-              height = maxDim;
-            }
+      // Calculate new dimensions if max width is defined and less than current width
+      if (maxWidthOption !== 'original') {
+        const maxDim = parseInt(maxWidthOption, 10);
+        if (width > maxDim || height > maxDim) {
+          if (width > height) {
+            height = Math.round((height * maxDim) / width);
+            width = maxDim;
+          } else {
+            width = Math.round((width * maxDim) / height);
+            height = maxDim;
           }
         }
+      }
 
-        canvas.width = width;
-        canvas.height = height;
-        const ctx = canvas.getContext('2d');
-        if (!ctx) {
-          resolve({ file, originalSize: file.size, compressedSize: file.size, ratio: 0 });
-          return;
-        }
+      canvas.width = width;
+      canvas.height = height;
+      const ctx = canvas.getContext('2d');
+      if (!ctx) {
+        resolve({ file, originalSize: file.size, compressedSize: file.size, ratio: 0 });
+        return;
+      }
 
-        // Use high-quality image smoothing
-        ctx.imageSmoothingEnabled = true;
-        ctx.imageSmoothingQuality = 'high';
+      // Use high-quality image smoothing
+      ctx.imageSmoothingEnabled = true;
+      ctx.imageSmoothingQuality = 'high';
 
-        // Draw and scale image
-        ctx.drawImage(img, 0, 0, width, height);
+      // Draw and scale image
+      ctx.drawImage(img, 0, 0, width, height);
 
-        let format = file.type;
-        // If it's BMP, convert to JPEG to compress, otherwise keep format
-        if (format === 'image/bmp') {
-          format = 'image/jpeg';
-        }
+      let format = file.type;
+      // If it's BMP, convert to JPEG to compress, otherwise keep format
+      if (format === 'image/bmp') {
+        format = 'image/jpeg';
+      }
 
-        // Quality parameter is between 0 and 1
-        const qFactor = quality / 100;
+      // Quality parameter is between 0 and 1
+      const qFactor = quality / 100;
 
-        canvas.toBlob((blob) => {
-          if (blob) {
-            const ext = format === 'image/jpeg' ? '.jpg' : format === 'image/png' ? '.png' : format === 'image/webp' ? '.webp' : '';
-            let newName = file.name;
-            if (ext) {
-              newName = file.name.replace(/\.[^/.]+$/, "") + ext;
-            }
-            
-            const compressedFile = new File([blob], newName, {
-              type: format,
-              lastModified: Date.now()
+      canvas.toBlob((blob) => {
+        if (blob) {
+          const ext = format === 'image/jpeg' ? '.jpg' : format === 'image/png' ? '.png' : format === 'image/webp' ? '.webp' : '';
+          let newName = file.name;
+          if (ext) {
+            newName = file.name.replace(/\.[^/.]+$/, "") + ext;
+          }
+          
+          const compressedFile = new File([blob], newName, {
+            type: format,
+            lastModified: Date.now()
+          });
+
+          // If compressed file is indeed smaller, return it
+          if (compressedFile.size < file.size) {
+            const ratio = (file.size - compressedFile.size) / file.size;
+            resolve({
+              file: compressedFile,
+              originalSize: file.size,
+              compressedSize: compressedFile.size,
+              ratio
             });
-
-            // If compressed file is indeed smaller, return it
-            if (compressedFile.size < file.size) {
-              const ratio = (file.size - compressedFile.size) / file.size;
-              resolve({
-                file: compressedFile,
-                originalSize: file.size,
-                compressedSize: compressedFile.size,
-                ratio
-              });
-            } else {
-              resolve({ file, originalSize: file.size, compressedSize: file.size, ratio: 0 });
-            }
           } else {
             resolve({ file, originalSize: file.size, compressedSize: file.size, ratio: 0 });
           }
-        }, format, qFactor);
-      };
-      img.onerror = () => resolve({ file, originalSize: file.size, compressedSize: file.size, ratio: 0 });
-      img.src = e.target?.result as string;
+        } else {
+          resolve({ file, originalSize: file.size, compressedSize: file.size, ratio: 0 });
+        }
+      }, format, qFactor);
     };
-    reader.onerror = () => resolve({ file, originalSize: file.size, compressedSize: file.size, ratio: 0 });
-    reader.readAsDataURL(file);
+    img.onerror = () => {
+      URL.revokeObjectURL(url);
+      resolve({ file, originalSize: file.size, compressedSize: file.size, ratio: 0 });
+    };
+    img.src = url;
   });
 };
 

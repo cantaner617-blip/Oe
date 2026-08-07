@@ -65,22 +65,21 @@ export default function ImageEditor({ file, user, onSave, onCancel, onDirectUplo
 
   const imageRef = useRef<HTMLImageElement | null>(null);
 
-  // Load image file as data URL
+  // Load image file as Object URL (high performance, no UI thread blocking)
   useEffect(() => {
-    const reader = new FileReader();
-    reader.onload = (e) => {
-      if (e.target?.result) {
-        setImageSrc(e.target.result as string);
-        
-        // Get dimensions
-        const img = new Image();
-        img.onload = () => {
-          setImgDimensions({ w: img.width, h: img.height });
-        };
-        img.src = e.target.result as string;
-      }
+    const url = URL.createObjectURL(file);
+    setImageSrc(url);
+    
+    // Get dimensions
+    const img = new Image();
+    img.onload = () => {
+      setImgDimensions({ w: img.width, h: img.height });
     };
-    reader.readAsDataURL(file);
+    img.src = url;
+
+    return () => {
+      URL.revokeObjectURL(url);
+    };
   }, [file]);
 
   const handleRotate = () => {
