@@ -20,63 +20,75 @@ interface UploadedResult {
   bytes: number;
 }
 
-const applyWatermark = (file: File, text: string): Promise<File> => {
-  return new Promise((resolve) => {
-    const url = URL.createObjectURL(file);
-    const img = new Image();
-    img.onload = () => {
-      URL.revokeObjectURL(url);
-      const canvas = document.createElement('canvas');
-      canvas.width = img.width;
-      canvas.height = img.height;
-      const ctx = canvas.getContext('2d');
-      if (!ctx) {
-        resolve(file);
-        return;
-      }
-      // Draw original image
-      ctx.drawImage(img, 0, 0);
+const applyWatermark = async (file: File, text: string): Promise<File> => {
+  if (!text || text.trim() === '') return file;
+  
+  try {
+    let width: number;
+    let height: number;
+    let source: CanvasImageSource;
 
-      // Configure watermark style based on image size
-      const size = Math.max(16, Math.floor(img.width * 0.035)); // Adaptive font size (3.5% of width)
-      ctx.font = `bold ${size}px sans-serif`;
-      
-      // Measure text width to align bottom right with some padding
-      const textMetrics = ctx.measureText(text);
-      const paddingX = Math.max(16, img.width * 0.025);
-      const paddingY = Math.max(16, img.height * 0.025);
-      const x = img.width - textMetrics.width - paddingX;
-      const y = img.height - paddingY;
+    if (typeof createImageBitmap === 'function') {
+      const bitmap = await createImageBitmap(file);
+      width = bitmap.width;
+      height = bitmap.height;
+      source = bitmap;
+    } else {
+      const img = await new Promise<HTMLImageElement>((resolve, reject) => {
+        const url = URL.createObjectURL(file);
+        const i = new Image();
+        i.onload = () => { URL.revokeObjectURL(url); resolve(i); };
+        i.onerror = (e) => { URL.revokeObjectURL(url); reject(e); };
+        i.src = url;
+      });
+      width = img.width;
+      height = img.height;
+      source = img;
+    }
 
-      // Draw outline/shadow for high-contrast readability
-      ctx.strokeStyle = 'rgba(0, 0, 0, 0.7)';
-      ctx.lineWidth = Math.max(2, size * 0.15);
-      ctx.strokeText(text, x, y);
+    const canvas = document.createElement('canvas');
+    canvas.width = width;
+    canvas.height = height;
+    const ctx = canvas.getContext('2d');
+    if (!ctx) {
+      if ('close' in source && typeof (source as any).close === 'function') (source as any).close();
+      return file;
+    }
 
-      // Draw primary text with elegant high-contrast translucent white
-      ctx.fillStyle = 'rgba(255, 255, 255, 0.85)';
-      ctx.fillText(text, x, y);
+    ctx.drawImage(source, 0, 0);
 
-      // Export back to a File
-      const format = file.type || 'image/png';
-      canvas.toBlob((blob) => {
-        if (blob) {
-          const watermarkedFile = new File([blob], file.name, {
-            type: format,
-            lastModified: Date.now()
-          });
-          resolve(watermarkedFile);
-        } else {
-          resolve(file);
-        }
-      }, format, 0.92);
-    };
-    img.onerror = () => {
-      URL.revokeObjectURL(url);
-      resolve(file);
-    };
-    img.src = url;
-  });
+    if ('close' in source && typeof (source as any).close === 'function') {
+      (source as any).close();
+    }
+
+    const size = Math.max(16, Math.floor(width * 0.035));
+    ctx.font = `bold ${size}px sans-serif`;
+    const textMetrics = ctx.measureText(text);
+    const paddingX = Math.max(16, width * 0.025);
+    const paddingY = Math.max(16, height * 0.025);
+    const x = width - textMetrics.width - paddingX;
+    const y = height - paddingY;
+
+    ctx.strokeStyle = 'rgba(0, 0, 0, 0.7)';
+    ctx.lineWidth = Math.max(2, size * 0.15);
+    ctx.strokeText(text, x, y);
+
+    ctx.fillStyle = 'rgba(255, 255, 255, 0.85)';
+    ctx.fillText(text, x, y);
+
+    const format = file.type || 'image/png';
+    const blob = await new Promise<Blob | null>((res) => canvas.toBlob(res, format, 0.92));
+    if (blob) {
+      return new File([blob], file.name, {
+        type: format,
+        lastModified: Date.now()
+      });
+    }
+    return file;
+  } catch (err) {
+    console.error("Watermark error:", err);
+    return file;
+  }
 };
 
 interface CompressionResult {
@@ -86,100 +98,106 @@ interface CompressionResult {
   ratio: number;
 }
 
-const compressImage = (
+const compressImage = async (
   file: File,
   quality: number, // 0 to 100
   maxWidthOption: string // 'original' | '1280' | '1920' | '2560' | '3840'
 ): Promise<CompressionResult> => {
-  return new Promise((resolve) => {
-    // If it's a GIF or SVG, do not compress to avoid losing animations or vector quality
-    if (file.type === 'image/gif' || file.type === 'image/svg+xml') {
-      resolve({ file, originalSize: file.size, compressedSize: file.size, ratio: 0 });
-      return;
+  // If GIF or SVG, skip compression completely
+  if (file.type === 'image/gif' || file.type === 'image/svg+xml') {
+    return { file, originalSize: file.size, compressedSize: file.size, ratio: 0 };
+  }
+
+  // Fast path: Small files (< 300KB) with no max dimension resize skip re-encoding for speed
+  if (file.size < 300 * 1024 && maxWidthOption === 'original') {
+    return { file, originalSize: file.size, compressedSize: file.size, ratio: 0 };
+  }
+
+  try {
+    let width: number;
+    let height: number;
+    let source: CanvasImageSource;
+
+    if (typeof createImageBitmap === 'function') {
+      const bitmap = await createImageBitmap(file);
+      width = bitmap.width;
+      height = bitmap.height;
+      source = bitmap;
+    } else {
+      const img = await new Promise<HTMLImageElement>((resolve, reject) => {
+        const url = URL.createObjectURL(file);
+        const i = new Image();
+        i.onload = () => { URL.revokeObjectURL(url); resolve(i); };
+        i.onerror = (e) => { URL.revokeObjectURL(url); reject(e); };
+        i.src = url;
+      });
+      width = img.width;
+      height = img.height;
+      source = img;
     }
 
-    const url = URL.createObjectURL(file);
-    const img = new Image();
-    img.onload = () => {
-      URL.revokeObjectURL(url);
-      const canvas = document.createElement('canvas');
-      let width = img.width;
-      let height = img.height;
+    let targetWidth = width;
+    let targetHeight = height;
 
-      // Calculate new dimensions if max width is defined and less than current width
-      if (maxWidthOption !== 'original') {
-        const maxDim = parseInt(maxWidthOption, 10);
-        if (width > maxDim || height > maxDim) {
-          if (width > height) {
-            height = Math.round((height * maxDim) / width);
-            width = maxDim;
-          } else {
-            width = Math.round((width * maxDim) / height);
-            height = maxDim;
-          }
-        }
-      }
-
-      canvas.width = width;
-      canvas.height = height;
-      const ctx = canvas.getContext('2d');
-      if (!ctx) {
-        resolve({ file, originalSize: file.size, compressedSize: file.size, ratio: 0 });
-        return;
-      }
-
-      // Use high-quality image smoothing
-      ctx.imageSmoothingEnabled = true;
-      ctx.imageSmoothingQuality = 'high';
-
-      // Draw and scale image
-      ctx.drawImage(img, 0, 0, width, height);
-
-      let format = file.type;
-      // If it's BMP, convert to JPEG to compress, otherwise keep format
-      if (format === 'image/bmp') {
-        format = 'image/jpeg';
-      }
-
-      // Quality parameter is between 0 and 1
-      const qFactor = quality / 100;
-
-      canvas.toBlob((blob) => {
-        if (blob) {
-          const ext = format === 'image/jpeg' ? '.jpg' : format === 'image/png' ? '.png' : format === 'image/webp' ? '.webp' : '';
-          let newName = file.name;
-          if (ext) {
-            newName = file.name.replace(/\.[^/.]+$/, "") + ext;
-          }
-          
-          const compressedFile = new File([blob], newName, {
-            type: format,
-            lastModified: Date.now()
-          });
-
-          // If compressed file is indeed smaller, return it
-          if (compressedFile.size < file.size) {
-            const ratio = (file.size - compressedFile.size) / file.size;
-            resolve({
-              file: compressedFile,
-              originalSize: file.size,
-              compressedSize: compressedFile.size,
-              ratio
-            });
-          } else {
-            resolve({ file, originalSize: file.size, compressedSize: file.size, ratio: 0 });
-          }
+    if (maxWidthOption !== 'original') {
+      const maxDim = parseInt(maxWidthOption, 10);
+      if (width > maxDim || height > maxDim) {
+        if (width > height) {
+          targetHeight = Math.round((height * maxDim) / width);
+          targetWidth = maxDim;
         } else {
-          resolve({ file, originalSize: file.size, compressedSize: file.size, ratio: 0 });
+          targetWidth = Math.round((width * maxDim) / height);
+          targetHeight = maxDim;
         }
-      }, format, qFactor);
-    };
-    img.onerror = () => {
-      URL.revokeObjectURL(url);
-      resolve({ file, originalSize: file.size, compressedSize: file.size, ratio: 0 });
-    };
-    img.src = url;
-  });
+      }
+    }
+
+    // Skip re-encoding PNG if dimensions didn't change and quality >= 85 (re-encoding PNG won't reduce size)
+    if (targetWidth === width && targetHeight === height && file.type === 'image/png' && quality >= 85) {
+      if ('close' in source && typeof (source as any).close === 'function') (source as any).close();
+      return { file, originalSize: file.size, compressedSize: file.size, ratio: 0 };
+    }
+
+    const canvas = document.createElement('canvas');
+    canvas.width = targetWidth;
+    canvas.height = targetHeight;
+    const ctx = canvas.getContext('2d');
+    if (!ctx) {
+      if ('close' in source && typeof (source as any).close === 'function') (source as any).close();
+      return { file, originalSize: file.size, compressedSize: file.size, ratio: 0 };
+    }
+
+    ctx.imageSmoothingEnabled = true;
+    ctx.imageSmoothingQuality = 'high';
+    ctx.drawImage(source, 0, 0, targetWidth, targetHeight);
+
+    if ('close' in source && typeof (source as any).close === 'function') {
+      (source as any).close();
+    }
+
+    let format = file.type || 'image/jpeg';
+    if (format === 'image/bmp') format = 'image/jpeg';
+    const qFactor = Math.max(0.1, Math.min(1.0, quality / 100));
+
+    const blob = await new Promise<Blob | null>((res) => canvas.toBlob(res, format, qFactor));
+    if (blob) {
+      const ext = format === 'image/jpeg' ? '.jpg' : format === 'image/png' ? '.png' : format === 'image/webp' ? '.webp' : '';
+      let newName = file.name;
+      if (ext) {
+        newName = file.name.replace(/\.[^/.]+$/, "") + ext;
+      }
+      const compressedFile = new File([blob], newName, { type: format, lastModified: Date.now() });
+
+      if (compressedFile.size < file.size) {
+        const ratio = (file.size - compressedFile.size) / file.size;
+        return { file: compressedFile, originalSize: file.size, compressedSize: compressedFile.size, ratio };
+      }
+    }
+
+    return { file, originalSize: file.size, compressedSize: file.size, ratio: 0 };
+  } catch (err) {
+    return { file, originalSize: file.size, compressedSize: file.size, ratio: 0 };
+  }
 };
 
 function StagingFileCard({ file, index, onEdit, onRemove }: { file: File; index: number; onEdit: () => void; onRemove: () => void }) {
@@ -239,9 +257,76 @@ function StagingFileCard({ file, index, onEdit, onRemove }: { file: File; index:
   );
 }
 
+function ProgressRing({
+  progress,
+  size = 68,
+  strokeWidth = 5,
+  showPercentage = true,
+  className = ""
+}: {
+  progress: number;
+  size?: number;
+  strokeWidth?: number;
+  showPercentage?: boolean;
+  className?: string;
+}) {
+  const normalizedProgress = Math.min(100, Math.max(0, progress));
+  const radius = (size - strokeWidth) / 2;
+  const circumference = 2 * Math.PI * radius;
+  const strokeDashoffset = circumference - (normalizedProgress / 100) * circumference;
+
+  return (
+    <div className={`relative inline-flex items-center justify-center shrink-0 ${className}`} style={{ width: size, height: size }}>
+      <svg className="transform -rotate-90 w-full h-full drop-shadow-[0_0_12px_rgba(20,184,166,0.35)]">
+        {/* Background Track Circle */}
+        <circle
+          cx={size / 2}
+          cy={size / 2}
+          r={radius}
+          className="text-zinc-800/90"
+          strokeWidth={strokeWidth}
+          stroke="currentColor"
+          fill="transparent"
+        />
+        {/* Animated Progress Circle */}
+        <circle
+          cx={size / 2}
+          cy={size / 2}
+          r={radius}
+          className="text-teal-400 transition-all duration-300 ease-out"
+          strokeWidth={strokeWidth}
+          strokeDasharray={circumference}
+          strokeDashoffset={strokeDashoffset}
+          strokeLinecap="round"
+          stroke="currentColor"
+          fill="transparent"
+        />
+      </svg>
+      {showPercentage && (
+        <div className="absolute inset-0 flex flex-col items-center justify-center text-center">
+          <span className="text-xs font-black text-white font-mono tracking-tight">
+            {Math.round(normalizedProgress)}%
+          </span>
+        </div>
+      )}
+    </div>
+  );
+}
+
 export default function Uploader({ user, onUploadSuccess, systemStatus }: UploaderProps) {
   const [dragActive, setDragActive] = useState(false);
   const [loading, setLoading] = useState(false);
+  const uploadStartTimeRef = useRef<number>(0);
+  const [nowTime, setNowTime] = useState<number>(0);
+
+  useEffect(() => {
+    if (!loading) return;
+    setNowTime(Date.now());
+    const interval = setInterval(() => {
+      setNowTime(Date.now());
+    }, 250);
+    return () => clearInterval(interval);
+  }, [loading]);
   const [error, setError] = useState<string | null>(null);
   const [results, setResults] = useState<UploadedResult[]>([]);
   const [activeResultIndex, setActiveResultIndex] = useState<number>(0);
@@ -465,6 +550,8 @@ export default function Uploader({ user, onUploadSuccess, systemStatus }: Upload
     }
 
     setError(null);
+    uploadStartTimeRef.current = Date.now();
+    setNowTime(Date.now());
     setLoading(true);
     setResults([]);
     setActiveResultIndex(0);
@@ -483,7 +570,7 @@ export default function Uploader({ user, onUploadSuccess, systemStatus }: Upload
     const allowedTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/bmp', 'image/webp'];
     const limitMb = user ? 100 : 20;
     const maxSize = limitMb * 1024 * 1024;
-    const CONCURRENCY_LIMIT = 4; // limit concurrent uploads to 4 at a time to optimize network
+    const CONCURRENCY_LIMIT = 6; // High-speed parallel worker stream for rapid multi-file uploads
 
     // Single file processing and upload logic
     const uploadSingleFile = async (file: File, queueId: string) => {
@@ -807,108 +894,155 @@ export default function Uploader({ user, onUploadSuccess, systemStatus }: Upload
 
             <AnimatePresence mode="wait">
               {loading ? (
-                <motion.div
-                  key="loading"
-                  initial={{ opacity: 0, y: 10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: -10 }}
-                  className="w-full max-w-xl space-y-5 text-left p-2 sm:p-4 cursor-default relative z-10"
-                  id="uploader-loading-state"
-                  onClick={(e) => e.stopPropagation()} // Prevent triggering input click on queue item click
-                >
-                  <div className="flex items-center justify-between border-b border-zinc-900 pb-3">
-                    <div>
-                      <h3 className="text-sm font-bold text-white flex items-center gap-2">
-                        <span className="flex h-2.5 w-2.5 rounded-full bg-teal-400 animate-pulse shadow-[0_0_8px_rgba(45,212,191,0.8)]"></span>
-                        Toplu Yükleme İşlemi ({uploadQueue.filter(x => x.status === 'completed').length} / {uploadQueue.length})
-                      </h3>
-                      <p className="text-xs text-zinc-400 mt-0.5 font-medium">Seçilen görseller sırayla sunucuya aktarılıyor...</p>
-                    </div>
-                    <div className="text-xs font-bold text-teal-400 font-mono bg-teal-500/10 px-2.5 py-1 rounded-lg border border-teal-500/20">
-                      {Math.round((uploadQueue.filter(x => x.status === 'completed' || x.status === 'failed').length / uploadQueue.length) * 100)}%
-                    </div>
-                  </div>
+                (() => {
+                  const completedCount = uploadQueue.filter(x => x.status === 'completed' || x.status === 'failed').length;
+                  const totalCount = uploadQueue.length;
+                  const progressPercent = totalCount > 0 ? (completedCount / totalCount) * 100 : 0;
+                  
+                  const elapsedSec = Math.max(0.1, (nowTime - uploadStartTimeRef.current) / 1000);
+                  let etaText = "Hesaplanıyor...";
+                  if (completedCount === totalCount && totalCount > 0) {
+                    etaText = "Tamamlandı";
+                  } else if (completedCount > 0) {
+                    const avgTimePerItem = elapsedSec / completedCount;
+                    const remainingItems = totalCount - completedCount;
+                    const remainingSec = Math.ceil(avgTimePerItem * remainingItems);
+                    if (remainingSec <= 1) {
+                      etaText = "Birkaç saniye...";
+                    } else if (remainingSec < 60) {
+                      etaText = `~${remainingSec} sn kaldı`;
+                    } else {
+                      const mins = Math.floor(remainingSec / 60);
+                      const secs = remainingSec % 60;
+                      etaText = `~${mins} dk ${secs} sn kaldı`;
+                    }
+                  }
 
-                  {/* Progress Bar */}
-                  <div className="h-2 w-full rounded-full bg-zinc-900 overflow-hidden border border-zinc-800/80 p-0.5">
+                  return (
                     <motion.div
-                      className="h-full bg-gradient-to-r from-teal-500 via-emerald-400 to-teal-300 rounded-full shadow-[0_0_12px_rgba(20,184,166,0.5)]"
-                      initial={{ width: 0 }}
-                      animate={{ width: `${(uploadQueue.filter(x => x.status === 'completed' || x.status === 'failed').length / uploadQueue.length) * 100}%` }}
-                      transition={{ duration: 0.3 }}
-                    />
-                  </div>
-
-                  {/* Queue List */}
-                  <div className="max-h-[220px] overflow-y-auto space-y-2 pr-1.5 custom-scrollbar">
-                    {uploadQueue.map((item) => (
-                      <div
-                        key={item.id}
-                        className="flex items-center justify-between rounded-xl border border-zinc-800/60 bg-zinc-900/40 p-3 text-xs backdrop-blur-sm"
-                      >
-                        <div className="flex items-center space-x-3 min-w-0 flex-1">
-                          <div className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border ${
-                            item.status === 'completed'
-                              ? 'bg-emerald-500/10 border-emerald-500/20 text-emerald-400'
-                              : item.status === 'failed'
-                                ? 'bg-red-500/10 border-red-500/20 text-red-400'
-                                : item.status === 'uploading'
-                                  ? 'bg-teal-500/10 border-teal-500/20 text-teal-400 animate-pulse'
-                                  : item.status === 'compressing'
-                                    ? 'bg-violet-500/10 border-violet-500/20 text-violet-400 animate-pulse'
-                                    : 'bg-zinc-900 border-zinc-800 text-zinc-500'
-                          }`}>
-                            <FileImage className="h-4 w-4" />
+                      key="loading"
+                      initial={{ opacity: 0, y: 10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, y: -10 }}
+                      className="w-full max-w-xl space-y-5 text-left p-2 sm:p-4 cursor-default relative z-10"
+                      id="uploader-loading-state"
+                      onClick={(e) => e.stopPropagation()} // Prevent triggering input click on queue item click
+                    >
+                      {/* Top Bar with Progress Ring & ETA info */}
+                      <div className="flex items-center gap-4 border-b border-zinc-900/80 pb-4">
+                        <ProgressRing progress={progressPercent} size={64} strokeWidth={5} />
+                        
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center justify-between gap-2">
+                            <h3 className="text-sm font-bold text-white flex items-center gap-2 truncate">
+                              <span className="flex h-2 w-2 rounded-full bg-teal-400 animate-pulse shadow-[0_0_8px_rgba(45,212,191,0.8)]"></span>
+                              Toplu Yükleme İşlemi ({completedCount} / {totalCount})
+                            </h3>
+                            <span className="text-[11px] font-bold text-teal-400 font-mono bg-teal-500/10 px-2 py-0.5 rounded-md border border-teal-500/20 shrink-0">
+                              %{Math.round(progressPercent)}
+                            </span>
                           </div>
-                          <div className="truncate flex-1">
-                            <p className="font-semibold text-zinc-200 truncate">{item.filename}</p>
-                            <p className="text-[10px] text-zinc-500 font-mono mt-0.5 flex flex-wrap items-center gap-1.5">
-                              <span>{formatSize(item.size)}</span>
-                              {item.compressionRatio !== undefined && item.compressionRatio > 0 && (
-                                <span className="text-emerald-400 font-bold bg-emerald-500/10 px-1 rounded text-[9px]">
-                                  (-{(item.compressionRatio * 100).toFixed(0)}% Sıkıştırıldı)
-                                </span>
-                              )}
-                            </p>
-                          </div>
-                        </div>
 
-                        <div className="shrink-0 pl-3">
-                          {item.status === 'completed' && (
-                            <span className="inline-flex items-center rounded-md bg-emerald-500/10 px-2 py-0.5 text-[10px] font-bold text-emerald-450 ring-1 ring-inset ring-emerald-500/20">
-                              ✓ Yüklendi
+                          <div className="flex items-center gap-3 mt-1.5 text-xs text-zinc-400">
+                            <span className="flex items-center gap-1 font-medium text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded border border-emerald-500/20 text-[11px]">
+                              <Clock className="h-3 w-3" />
+                              <span>{etaText}</span>
                             </span>
-                          )}
-                          {item.status === 'failed' && (
-                            <span className="inline-flex items-center rounded-md bg-red-500/10 px-2 py-0.5 text-[10px] font-bold text-red-450 ring-1 ring-inset ring-red-500/20" title={item.error}>
-                              Hata
+                            <span className="text-zinc-500 text-[11px]">
+                              • Hızlı Paralel Aktarım
                             </span>
-                          )}
-                          {item.status === 'uploading' && (
-                            <span className="inline-flex items-center rounded-md bg-teal-500/10 px-2 py-0.5 text-[10px] font-bold text-teal-400 ring-1 ring-inset ring-teal-500/20 animate-pulse">
-                              Yükleniyor
-                            </span>
-                          )}
-                          {item.status === 'compressing' && (
-                            <span className="inline-flex items-center rounded-md bg-violet-500/10 px-2 py-0.5 text-[10px] font-bold text-violet-400 ring-1 ring-inset ring-violet-500/20 animate-pulse">
-                              Sıkıştırılıyor...
-                            </span>
-                          )}
-                          {item.status === 'watermarking' && (
-                            <span className="inline-flex items-center rounded-md bg-amber-500/10 px-2 py-0.5 text-[10px] font-bold text-amber-400 ring-1 ring-inset ring-amber-500/20 animate-pulse">
-                              Filigran...
-                            </span>
-                          )}
-                          {item.status === 'pending' && (
-                            <span className="inline-flex items-center rounded-md bg-zinc-900 px-2 py-0.5 text-[10px] font-bold text-zinc-500 border border-zinc-800">
-                              Bekliyor
-                            </span>
-                          )}
+                          </div>
                         </div>
                       </div>
-                    ))}
-                  </div>
-                </motion.div>
+
+                      {/* Linear Progress Bar with glowing gradient */}
+                      <div className="space-y-1">
+                        <div className="flex justify-between text-[11px] font-medium text-zinc-400 px-0.5">
+                          <span>İlerleme Seviyesi</span>
+                          <span className="text-zinc-500 font-mono">{completedCount} / {totalCount} Görsel</span>
+                        </div>
+                        <div className="h-2.5 w-full rounded-full bg-zinc-900/90 overflow-hidden border border-zinc-800/80 p-0.5 shadow-inner">
+                          <motion.div
+                            className="h-full bg-gradient-to-r from-teal-500 via-emerald-400 to-teal-300 rounded-full shadow-[0_0_12px_rgba(20,184,166,0.5)]"
+                            initial={{ width: 0 }}
+                            animate={{ width: `${progressPercent}%` }}
+                            transition={{ duration: 0.3 }}
+                          />
+                        </div>
+                      </div>
+
+                      {/* Queue List */}
+                      <div className="max-h-[220px] overflow-y-auto space-y-2 pr-1.5 custom-scrollbar">
+                        {uploadQueue.map((item) => (
+                          <div
+                            key={item.id}
+                            className="flex items-center justify-between rounded-xl border border-zinc-800/60 bg-zinc-900/40 p-3 text-xs backdrop-blur-sm hover:border-zinc-700/60 transition-colors"
+                          >
+                            <div className="flex items-center space-x-3 min-w-0 flex-1">
+                              <div className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border ${
+                                item.status === 'completed'
+                                  ? 'bg-emerald-500/10 border-emerald-500/20 text-emerald-400'
+                                  : item.status === 'failed'
+                                    ? 'bg-red-500/10 border-red-500/20 text-red-400'
+                                    : item.status === 'uploading'
+                                      ? 'bg-teal-500/10 border-teal-500/20 text-teal-400 animate-pulse'
+                                      : item.status === 'compressing'
+                                        ? 'bg-violet-500/10 border-violet-500/20 text-violet-400 animate-pulse'
+                                        : 'bg-zinc-900 border-zinc-800 text-zinc-500'
+                              }`}>
+                                <FileImage className="h-4 w-4" />
+                              </div>
+                              <div className="truncate flex-1">
+                                <p className="font-semibold text-zinc-200 truncate">{item.filename}</p>
+                                <p className="text-[10px] text-zinc-500 font-mono mt-0.5 flex flex-wrap items-center gap-1.5">
+                                  <span>{formatSize(item.size)}</span>
+                                  {item.compressionRatio !== undefined && item.compressionRatio > 0 && (
+                                    <span className="text-emerald-400 font-bold bg-emerald-500/10 px-1 rounded text-[9px]">
+                                      (-{(item.compressionRatio * 100).toFixed(0)}% Sıkıştırıldı)
+                                    </span>
+                                  )}
+                                </p>
+                              </div>
+                            </div>
+
+                            <div className="shrink-0 pl-3">
+                              {item.status === 'completed' && (
+                                <span className="inline-flex items-center rounded-md bg-emerald-500/10 px-2 py-0.5 text-[10px] font-bold text-emerald-450 ring-1 ring-inset ring-emerald-500/20">
+                                  ✓ Yüklendi
+                                </span>
+                              )}
+                              {item.status === 'failed' && (
+                                <span className="inline-flex items-center rounded-md bg-red-500/10 px-2 py-0.5 text-[10px] font-bold text-red-450 ring-1 ring-inset ring-red-500/20" title={item.error}>
+                                  Hata
+                                </span>
+                              )}
+                              {item.status === 'uploading' && (
+                                <span className="inline-flex items-center rounded-md bg-teal-500/10 px-2 py-0.5 text-[10px] font-bold text-teal-400 ring-1 ring-inset ring-teal-500/20 animate-pulse">
+                                  Yükleniyor
+                                </span>
+                              )}
+                              {item.status === 'compressing' && (
+                                <span className="inline-flex items-center rounded-md bg-violet-500/10 px-2 py-0.5 text-[10px] font-bold text-violet-400 ring-1 ring-inset ring-violet-500/20 animate-pulse">
+                                  Sıkıştırılıyor...
+                                </span>
+                              )}
+                              {item.status === 'watermarking' && (
+                                <span className="inline-flex items-center rounded-md bg-amber-500/10 px-2 py-0.5 text-[10px] font-bold text-amber-400 ring-1 ring-inset ring-amber-500/20 animate-pulse">
+                                  Filigran...
+                                </span>
+                              )}
+                              {item.status === 'pending' && (
+                                <span className="inline-flex items-center rounded-md bg-zinc-900 px-2 py-0.5 text-[10px] font-bold text-zinc-500 border border-zinc-800">
+                                  Bekliyor
+                                </span>
+                              )}
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </motion.div>
+                  );
+                })()
               ) : (
                 <motion.div
                   key="idle"
