@@ -785,12 +785,16 @@ export default function Uploader({ user, onUploadSuccess, systemStatus }: Upload
             onDragLeave={handleDrag}
             onDrop={handleDrop}
             onClick={triggerFileInput}
-            className={`relative flex flex-col items-center justify-center rounded-2xl border-2 border-dashed p-12 text-center cursor-pointer transition-all duration-300 min-h-[340px] group ${
+            className={`relative overflow-hidden flex flex-col items-center justify-center rounded-3xl border-2 border-dashed p-10 sm:p-14 text-center cursor-pointer transition-all duration-300 min-h-[360px] group ${
               dragActive 
-                ? 'border-teal-400 bg-teal-500/5 scale-[1.01]' 
-                : 'border-zinc-800 bg-zinc-950/40 hover:border-zinc-700 hover:bg-zinc-950/60'
+                ? 'border-teal-400 bg-teal-500/10 shadow-[0_0_50px_rgba(20,184,166,0.2)] scale-[1.01]' 
+                : 'border-zinc-800/80 bg-gradient-to-b from-zinc-950/80 via-zinc-950/40 to-zinc-950/90 hover:border-teal-500/40 hover:bg-zinc-950/90 hover:shadow-[0_10px_35px_rgba(0,0,0,0.6)]'
             }`}
           >
+            {/* Ambient Background Glow Effect */}
+            <div className="absolute inset-0 bg-gradient-to-b from-teal-500/[0.04] via-transparent to-teal-500/[0.02] opacity-60 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none rounded-3xl" />
+            <div className="absolute -top-24 left-1/2 -translate-x-1/2 w-96 h-32 bg-teal-500/10 rounded-full blur-3xl pointer-events-none group-hover:bg-teal-500/15 transition-all duration-500" />
+
             <input
               ref={fileInputRef}
               type="file"
@@ -808,27 +812,27 @@ export default function Uploader({ user, onUploadSuccess, systemStatus }: Upload
                   initial={{ opacity: 0, y: 10 }}
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0, y: -10 }}
-                  className="w-full max-w-xl space-y-5 text-left p-2 sm:p-4 cursor-default"
+                  className="w-full max-w-xl space-y-5 text-left p-2 sm:p-4 cursor-default relative z-10"
                   id="uploader-loading-state"
                   onClick={(e) => e.stopPropagation()} // Prevent triggering input click on queue item click
                 >
                   <div className="flex items-center justify-between border-b border-zinc-900 pb-3">
                     <div>
                       <h3 className="text-sm font-bold text-white flex items-center gap-2">
-                        <span className="flex h-2 w-2 rounded-full bg-teal-400 animate-pulse"></span>
+                        <span className="flex h-2.5 w-2.5 rounded-full bg-teal-400 animate-pulse shadow-[0_0_8px_rgba(45,212,191,0.8)]"></span>
                         Toplu Yükleme İşlemi ({uploadQueue.filter(x => x.status === 'completed').length} / {uploadQueue.length})
                       </h3>
                       <p className="text-xs text-zinc-400 mt-0.5 font-medium">Seçilen görseller sırayla sunucuya aktarılıyor...</p>
                     </div>
-                    <div className="text-xs font-bold text-teal-400 font-mono">
+                    <div className="text-xs font-bold text-teal-400 font-mono bg-teal-500/10 px-2.5 py-1 rounded-lg border border-teal-500/20">
                       {Math.round((uploadQueue.filter(x => x.status === 'completed' || x.status === 'failed').length / uploadQueue.length) * 100)}%
                     </div>
                   </div>
 
                   {/* Progress Bar */}
-                  <div className="h-1.5 w-full rounded-full bg-zinc-900 overflow-hidden border border-zinc-800/50">
+                  <div className="h-2 w-full rounded-full bg-zinc-900 overflow-hidden border border-zinc-800/80 p-0.5">
                     <motion.div
-                      className="h-full bg-gradient-to-r from-teal-500 to-emerald-400 rounded-full"
+                      className="h-full bg-gradient-to-r from-teal-500 via-emerald-400 to-teal-300 rounded-full shadow-[0_0_12px_rgba(20,184,166,0.5)]"
                       initial={{ width: 0 }}
                       animate={{ width: `${(uploadQueue.filter(x => x.status === 'completed' || x.status === 'failed').length / uploadQueue.length) * 100}%` }}
                       transition={{ duration: 0.3 }}
@@ -840,7 +844,7 @@ export default function Uploader({ user, onUploadSuccess, systemStatus }: Upload
                     {uploadQueue.map((item) => (
                       <div
                         key={item.id}
-                        className="flex items-center justify-between rounded-xl border border-zinc-900/80 bg-zinc-950/40 p-3 text-xs"
+                        className="flex items-center justify-between rounded-xl border border-zinc-800/60 bg-zinc-900/40 p-3 text-xs backdrop-blur-sm"
                       >
                         <div className="flex items-center space-x-3 min-w-0 flex-1">
                           <div className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border ${
@@ -911,39 +915,39 @@ export default function Uploader({ user, onUploadSuccess, systemStatus }: Upload
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
                   exit={{ opacity: 0 }}
-                  className="flex flex-col items-center space-y-6"
+                  className="flex flex-col items-center space-y-6 relative z-10"
                   id="uploader-idle-state"
                 >
                   {/* Central Animated Upload Icon Container */}
                   <div className="relative flex items-center justify-center">
                     {/* Pulsing ring behind */}
-                    <div className="absolute -inset-4 rounded-full bg-gradient-to-tr from-teal-500/10 to-emerald-500/5 blur-xl opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+                    <div className="absolute -inset-5 rounded-3xl bg-gradient-to-tr from-teal-500/20 via-emerald-500/10 to-transparent blur-xl opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
                     
                     {/* Animated Ripple Circles */}
-                    <div className="absolute h-24 w-24 rounded-full border border-teal-500/5 scale-90 opacity-0 group-hover:opacity-100 group-hover:scale-110 transition-all duration-500 ease-out" />
-                    <div className="absolute h-20 w-20 rounded-full border border-teal-500/10 scale-95 opacity-0 group-hover:opacity-100 group-hover:scale-105 transition-all duration-300 ease-out" />
+                    <div className="absolute h-28 w-28 rounded-full border border-teal-500/10 scale-90 opacity-0 group-hover:opacity-100 group-hover:scale-110 transition-all duration-500 ease-out pointer-events-none" />
+                    <div className="absolute h-22 w-22 rounded-full border border-teal-500/20 scale-95 opacity-0 group-hover:opacity-100 group-hover:scale-105 transition-all duration-300 ease-out pointer-events-none" />
 
                     {/* Main Icon Container */}
-                    <div className="relative flex h-16 w-16 items-center justify-center rounded-2xl bg-zinc-900 border border-zinc-800 text-teal-400 shadow-inner group-hover:border-teal-500 group-hover:text-teal-300 group-hover:shadow-teal-950/20 group-hover:scale-105 transition-all duration-300">
-                      <Upload className="h-7 w-7 group-hover:-translate-y-0.5 transition-transform duration-300" />
+                    <div className="relative flex h-20 w-20 items-center justify-center rounded-2xl bg-gradient-to-b from-zinc-900 to-zinc-950 border border-zinc-800/90 text-teal-400 shadow-xl group-hover:border-teal-500/60 group-hover:text-teal-300 group-hover:shadow-[0_0_25px_rgba(20,184,166,0.25)] group-hover:scale-110 transition-all duration-300">
+                      <Upload className="h-8 w-8 group-hover:-translate-y-1 transition-transform duration-300 drop-shadow-[0_2px_8px_rgba(20,184,166,0.4)]" />
                     </div>
                   </div>
                   
-                  <div className="space-y-2">
-                    <h3 className="text-xl font-bold tracking-tight text-white sm:text-2xl">
-                      Resmini sürükle ve bırak veya <span className="text-teal-400 font-extrabold group-hover:text-teal-300 transition-colors">dosya seç</span>
+                  <div className="space-y-2.5 max-w-md">
+                    <h3 className="text-xl sm:text-2xl font-extrabold tracking-tight text-white">
+                      Resmini sürükle ve bırak veya <span className="text-transparent bg-clip-text bg-gradient-to-r from-teal-400 via-emerald-400 to-teal-300 group-hover:underline underline-offset-4 decoration-teal-400/40 transition-all">dosya seç</span>
                     </h3>
-                    <p className="text-sm text-zinc-400 max-w-sm mx-auto font-medium">
+                    <p className="text-xs sm:text-sm text-zinc-400 font-medium leading-relaxed">
                       Maksimum {user ? '100' : '20'} MB boyutunda JPG, PNG, GIF, BMP veya WEBP dosyalarını yükleyebilirsiniz.
                     </p>
                   </div>
 
                   {/* Format Badges Row */}
-                  <div className="flex flex-wrap justify-center gap-1.5 pt-1">
+                  <div className="flex flex-wrap justify-center gap-2 pt-1">
                     {['JPG', 'PNG', 'WEBP', 'GIF', 'BMP'].map((fmt) => (
                       <span 
                         key={fmt}
-                        className="inline-flex items-center rounded-lg bg-zinc-900/80 px-2.5 py-1 text-[10px] font-black tracking-wider text-zinc-500 border border-zinc-800/80 hover:border-zinc-700 hover:text-zinc-400 transition-colors duration-150"
+                        className="inline-flex items-center rounded-lg bg-zinc-900/90 px-3 py-1 text-[10px] font-black tracking-wider text-zinc-400 border border-zinc-800/90 hover:border-teal-500/30 hover:text-teal-300 hover:bg-zinc-800/80 transition-all duration-200 shadow-sm"
                       >
                         {fmt}
                       </span>
@@ -951,17 +955,17 @@ export default function Uploader({ user, onUploadSuccess, systemStatus }: Upload
                   </div>
 
                   {!user ? (
-                    <div className="rounded-full bg-zinc-900/80 px-4 py-1.5 text-xs text-zinc-400 border border-zinc-800/80 shadow-sm flex items-center gap-2">
-                      <span className="flex h-1.5 w-1.5 rounded-full bg-amber-500 animate-pulse" />
+                    <div className="rounded-full bg-zinc-900/90 px-4 py-2 text-xs text-zinc-300 border border-zinc-800/90 shadow-md flex items-center gap-2.5 backdrop-blur-sm">
+                      <span className="flex h-2 w-2 rounded-full bg-amber-500 animate-pulse shadow-[0_0_8px_rgba(245,158,11,0.8)]" />
                       <span>
-                        Giriş yapmadan yükleme limiti <strong>20 MB</strong>'dır. Üye olarak limitinizi <strong>100 MB</strong>'a çıkarabilirsiniz!
+                        Giriş yapmadan yükleme limiti <strong className="text-white">20 MB</strong>'dır. Üye olarak limitinizi <strong className="text-teal-400">100 MB</strong>'a çıkarabilirsiniz!
                       </span>
                     </div>
                   ) : (
-                    <div className="rounded-full bg-teal-500/10 px-4 py-1.5 text-xs text-teal-400 border border-teal-500/25 shadow-sm flex items-center gap-2">
-                      <span className="flex h-1.5 w-1.5 rounded-full bg-teal-400" />
+                    <div className="rounded-full bg-teal-500/10 px-4 py-2 text-xs text-teal-300 border border-teal-500/30 shadow-md flex items-center gap-2.5 backdrop-blur-sm">
+                      <span className="flex h-2 w-2 rounded-full bg-teal-400 shadow-[0_0_8px_rgba(45,212,191,0.8)]" />
                       <span>
-                        ✓ Giriş yaptınız. <strong>100 MB</strong>'lık yüksek üyelik limiti aktif!
+                        ✓ Giriş yaptınız. <strong className="text-white">100 MB</strong>'lık yüksek üyelik limiti aktif!
                       </span>
                     </div>
                   )}
@@ -971,20 +975,22 @@ export default function Uploader({ user, onUploadSuccess, systemStatus }: Upload
           </div>
 
           {/* Gelişmiş Seçenekler Paneli */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 rounded-2xl border border-zinc-900 bg-zinc-950/40 p-6 shadow-xl relative overflow-hidden backdrop-blur-sm">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 rounded-3xl border border-zinc-800/80 bg-zinc-950/70 p-6 sm:p-7 shadow-2xl relative overflow-hidden backdrop-blur-md hover:border-zinc-800 transition-all duration-300">
             {/* Ambient accent top highlight */}
-            <div className="absolute top-0 left-0 right-0 h-[1px] bg-gradient-to-r from-transparent via-teal-500/20 to-transparent"></div>
+            <div className="absolute top-0 left-0 right-0 h-[1px] bg-gradient-to-r from-transparent via-teal-400/40 to-transparent"></div>
+            <div className="absolute -top-12 -left-12 w-36 h-36 bg-teal-500/5 rounded-full blur-3xl pointer-events-none" />
+            <div className="absolute -bottom-12 -right-12 w-36 h-36 bg-emerald-500/5 rounded-full blur-3xl pointer-events-none" />
             
             {/* Süreli Resim Seçeneği */}
-            <div className="space-y-3.5 md:border-r md:border-zinc-900/60 md:pr-6 md:mr-1">
-              <label className="text-xs font-bold uppercase tracking-widest text-zinc-400 flex items-center gap-2">
+            <div className="space-y-3.5 md:border-r md:border-zinc-900/80 md:pr-6 md:mr-1">
+              <label className="text-xs font-bold uppercase tracking-widest text-zinc-300 flex items-center gap-2">
                 <Clock className="h-4 w-4 text-teal-400" /> Depolama Süresi
               </label>
               <div className="relative">
                 <select
                   value={deleteAfter}
                   onChange={(e) => setDeleteAfter(e.target.value)}
-                  className="w-full appearance-none rounded-xl border border-zinc-800 bg-zinc-900/40 px-3.5 py-2.5 text-xs text-zinc-200 hover:border-zinc-700 hover:bg-zinc-900/60 focus:border-teal-500/60 focus:ring-1 focus:ring-teal-500/20 focus:outline-none pr-10 cursor-pointer transition-all duration-200"
+                  className="w-full appearance-none rounded-xl border border-zinc-800/90 bg-zinc-900/60 px-3.5 py-2.5 text-xs text-zinc-200 hover:border-zinc-700/90 hover:bg-zinc-900/90 focus:border-teal-500/80 focus:ring-2 focus:ring-teal-500/20 focus:outline-none pr-10 cursor-pointer transition-all duration-200 shadow-sm"
                   id="delete-after-select"
                 >
                   <option value="never">Kalıcı (Silinmez)</option>
@@ -1003,27 +1009,39 @@ export default function Uploader({ user, onUploadSuccess, systemStatus }: Upload
             </div>
 
             {/* Sıkıştırma ve Optimizasyon Seçeneği */}
-            <div className="space-y-3.5 md:border-r md:border-zinc-900/60 md:pr-6 md:mr-1">
-              <div className="flex items-center justify-between">
-                <label className="text-xs font-bold uppercase tracking-widest text-zinc-400 flex items-center gap-2">
-                  <Zap className="h-4 w-4 text-teal-400" /> Sıkıştır &amp; Optimize Et
-                </label>
-                <label className="relative inline-flex items-center cursor-pointer select-none">
-                  <input
-                    type="checkbox"
-                    checked={isCompressionEnabled}
-                    onChange={(e) => setIsCompressionEnabled(e.target.checked)}
-                    className="sr-only peer"
-                    id="compression-toggle-checkbox"
+            <div className="space-y-3.5 md:border-r md:border-zinc-900/80 md:pr-6 md:mr-1">
+              <div 
+                onClick={() => setIsCompressionEnabled(!isCompressionEnabled)}
+                className="flex items-center justify-between cursor-pointer select-none group/toggle py-0.5"
+              >
+                <span className="text-xs font-bold uppercase tracking-widest text-zinc-300 group-hover/toggle:text-teal-300 flex items-center gap-2 transition-colors">
+                  <Zap className="h-4 w-4 text-teal-400 fill-teal-500/10" /> Sıkıştır &amp; Optimize Et
+                </span>
+                <button
+                  type="button"
+                  role="switch"
+                  aria-checked={isCompressionEnabled}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setIsCompressionEnabled(!isCompressionEnabled);
+                  }}
+                  className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-teal-500/30 ${
+                    isCompressionEnabled ? 'bg-teal-500' : 'bg-zinc-800'
+                  }`}
+                  id="compression-toggle-button"
+                >
+                  <span
+                    className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-zinc-950 shadow-md ring-0 transition duration-200 ease-in-out ${
+                      isCompressionEnabled ? 'translate-x-5' : 'translate-x-0'
+                    }`}
                   />
-                  <div className="w-9 h-5 bg-zinc-800 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-4 after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-zinc-400 after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-teal-500 peer-checked:after:bg-zinc-950 shadow-[inset_0_1px_3px_rgba(0,0,0,0.4)]"></div>
-                </label>
+                </button>
               </div>
 
               <div className={`space-y-3.5 transition-all duration-300 ${isCompressionEnabled ? 'opacity-100' : 'opacity-30 pointer-events-none'}`}>
                 {/* Genişlik/Çözünürlük Sınırı */}
                 <div className="space-y-1.5">
-                  <span className="text-[10px] font-semibold text-zinc-500 uppercase tracking-wider block">Çözünürlük Sınırı</span>
+                  <span className="text-[10px] font-semibold text-zinc-400 uppercase tracking-wider block">Çözünürlük Sınırı</span>
                   <div className="relative">
                     <select
                       value={compressionMaxWidth}
@@ -1037,7 +1055,7 @@ export default function Uploader({ user, onUploadSuccess, systemStatus }: Upload
                           setCompressionMaxWidth(val);
                         }
                       }}
-                      className="w-full appearance-none rounded-xl border border-zinc-800 bg-zinc-900/40 px-3 py-2 text-xs text-zinc-200 hover:border-zinc-700 hover:bg-zinc-900/60 focus:border-teal-500/60 focus:ring-1 focus:ring-teal-500/20 focus:outline-none pr-8 cursor-pointer transition-all duration-200"
+                      className="w-full appearance-none rounded-xl border border-zinc-800/90 bg-zinc-900/60 px-3 py-2 text-xs text-zinc-200 hover:border-zinc-700/90 hover:bg-zinc-900/90 focus:border-teal-500/80 focus:ring-2 focus:ring-teal-500/20 focus:outline-none pr-8 cursor-pointer transition-all duration-200 shadow-sm"
                       id="compression-width-select"
                     >
                       <option value="original">Orijinal (Sınırsız)</option>
@@ -1055,7 +1073,7 @@ export default function Uploader({ user, onUploadSuccess, systemStatus }: Upload
                 {/* Sıkıştırma Kalitesi Slider */}
                 <div className="space-y-1.5">
                   <div className="flex items-center justify-between">
-                    <span className="text-[10px] font-semibold text-zinc-500 uppercase tracking-wider">Kalite Oranı</span>
+                    <span className="text-[10px] font-semibold text-zinc-400 uppercase tracking-wider">Kalite Oranı</span>
                     <span className="text-[10px] font-bold text-teal-400 font-mono">
                       %{compressionQuality} {compressionQuality >= 90 ? '(Mükemmel)' : compressionQuality >= 75 ? '(Dengeli)' : '(Yüksek Sıkıştırma)'}
                     </span>
@@ -1068,7 +1086,7 @@ export default function Uploader({ user, onUploadSuccess, systemStatus }: Upload
                     value={compressionQuality}
                     disabled={!isCompressionEnabled}
                     onChange={(e) => setCompressionQuality(Number(e.target.value))}
-                    className="w-full h-1 bg-zinc-800 rounded-lg appearance-none cursor-pointer accent-teal-500 focus:outline-none bg-gradient-to-r from-teal-500/20 to-teal-500"
+                    className="w-full h-1.5 bg-zinc-800 rounded-lg appearance-none cursor-pointer accent-teal-400 focus:outline-none bg-gradient-to-r from-teal-500/20 to-teal-400"
                   />
                 </div>
               </div>
@@ -1079,20 +1097,32 @@ export default function Uploader({ user, onUploadSuccess, systemStatus }: Upload
 
             {/* Filigran Ekleme Seçeneği */}
             <div className="space-y-3.5">
-              <div className="flex items-center justify-between">
-                <label className="text-xs font-bold uppercase tracking-widest text-zinc-400 flex items-center gap-2">
+              <div 
+                onClick={() => setIsWatermarkEnabled(!isWatermarkEnabled)}
+                className="flex items-center justify-between cursor-pointer select-none group/toggle py-0.5"
+              >
+                <span className="text-xs font-bold uppercase tracking-widest text-zinc-300 group-hover/toggle:text-teal-300 flex items-center gap-2 transition-colors">
                   <Signature className="h-4 w-4 text-teal-400" /> Görsele Filigran Ekle
-                </label>
-                <label className="relative inline-flex items-center cursor-pointer select-none">
-                  <input
-                    type="checkbox"
-                    checked={isWatermarkEnabled}
-                    onChange={(e) => setIsWatermarkEnabled(e.target.checked)}
-                    className="sr-only peer"
-                    id="watermark-toggle-checkbox"
+                </span>
+                <button
+                  type="button"
+                  role="switch"
+                  aria-checked={isWatermarkEnabled}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setIsWatermarkEnabled(!isWatermarkEnabled);
+                  }}
+                  className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-teal-500/30 ${
+                    isWatermarkEnabled ? 'bg-teal-500' : 'bg-zinc-800'
+                  }`}
+                  id="watermark-toggle-button"
+                >
+                  <span
+                    className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-zinc-950 shadow-md ring-0 transition duration-200 ease-in-out ${
+                      isWatermarkEnabled ? 'translate-x-5' : 'translate-x-0'
+                    }`}
                   />
-                  <div className="w-9 h-5 bg-zinc-800 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-4 after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-zinc-400 after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-teal-500 peer-checked:after:bg-zinc-950 shadow-[inset_0_1px_3px_rgba(0,0,0,0.4)]"></div>
-                </label>
+                </button>
               </div>
 
               <div className="transition-all duration-300 relative">
@@ -1103,9 +1133,9 @@ export default function Uploader({ user, onUploadSuccess, systemStatus }: Upload
                   onChange={(e) => setWatermarkText(e.target.value)}
                   placeholder="Örn: AnlıkResim"
                   maxLength={40}
-                  className={`w-full rounded-xl border pl-8 pr-3.5 py-2 text-xs transition-all focus:outline-none focus:border-teal-500/60 focus:ring-1 focus:ring-teal-500/20 ${
+                  className={`w-full rounded-xl border pl-8 pr-3.5 py-2 text-xs transition-all focus:outline-none focus:border-teal-500/80 focus:ring-2 focus:ring-teal-500/20 ${
                     isWatermarkEnabled
-                      ? 'border-zinc-800 bg-zinc-900/40 text-zinc-200 hover:border-zinc-700 hover:bg-zinc-900/60'
+                      ? 'border-zinc-800/90 bg-zinc-900/60 text-zinc-200 hover:border-zinc-700/90 hover:bg-zinc-900/90 shadow-sm'
                       : 'border-zinc-900/40 bg-zinc-950/20 text-zinc-600 cursor-not-allowed'
                   }`}
                   id="watermark-text-input"

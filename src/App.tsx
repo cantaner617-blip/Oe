@@ -53,12 +53,8 @@ export default function App() {
       const data = await response.json();
       setSystemStatus(data);
     } catch (err: any) {
-      const isBotUser = typeof navigator !== 'undefined' && /bot|google|baidu|bing|msn|duckduckgo|teoma|slurp|yandex|lighthouse|chrome-lighthouse|headless/i.test(navigator.userAgent);
-      if (isBotUser) {
-        console.warn("System status retrieval skipped or soft-failed (bot env):", err.message || err);
-      } else {
-        console.error("System status retrieval failed:", err);
-      }
+      // Soft-fail for background polling or transient network glitches
+      console.warn("System status retrieval non-critical note:", err?.message || err);
     }
   };
 
@@ -84,12 +80,7 @@ export default function App() {
           setUser(null);
         }
       } catch (err: any) {
-        const isBotUser = typeof navigator !== 'undefined' && /bot|google|baidu|bing|msn|duckduckgo|teoma|slurp|yandex|lighthouse|chrome-lighthouse|headless/i.test(navigator.userAgent);
-        if (isBotUser) {
-          console.warn("Session verification skipped or soft-failed (bot env):", err.message || err);
-        } else {
-          console.error("Session verification failed:", err);
-        }
+        console.warn("Session verification note:", err?.message || err);
         localStorage.removeItem('token');
         setUser(null);
       }

@@ -593,36 +593,37 @@ export default function AdminPanel({ user }: AdminPanelProps) {
     <div className="space-y-8 pb-16 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-6" id="admin-panel">
       
       {/* Upper Header Banner */}
-      <div className="relative overflow-hidden rounded-3xl border border-zinc-900 bg-gradient-to-r from-zinc-950 via-zinc-900/40 to-zinc-950 p-6 sm:p-8 shadow-2xl">
-        <div className="absolute top-0 right-0 -mt-12 -mr-12 w-64 h-64 bg-teal-500/10 rounded-full blur-3xl pointer-events-none"></div>
-        <div className="absolute bottom-0 left-1/3 -mb-12 w-64 h-64 bg-amber-500/10 rounded-full blur-3xl pointer-events-none"></div>
+      <div className="relative overflow-hidden rounded-3xl border border-zinc-800/80 bg-gradient-to-r from-zinc-950 via-zinc-900/80 to-zinc-950 p-6 sm:p-8 shadow-2xl backdrop-blur-md">
+        <div className="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-transparent via-teal-400/50 to-transparent"></div>
+        <div className="absolute -top-16 -right-16 w-72 h-72 bg-teal-500/10 rounded-full blur-3xl pointer-events-none"></div>
+        <div className="absolute -bottom-16 left-1/3 w-72 h-72 bg-indigo-500/10 rounded-full blur-3xl pointer-events-none"></div>
         
         <div className="relative flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6">
           <div className="space-y-2">
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-teal-500/10 border border-teal-500/20 text-teal-400 text-xs font-black uppercase tracking-wider">
-              <Sparkles className="h-3.5 w-3.5" />
+            <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-teal-500/10 border border-teal-500/20 text-teal-300 text-xs font-black uppercase tracking-wider shadow-sm">
+              <span className="flex h-2 w-2 rounded-full bg-teal-400 animate-pulse shadow-[0_0_8px_rgba(45,212,191,0.8)]" />
               <span>www.anlikresim.com • Yönetici Kontrol Merkezi</span>
             </div>
             <h1 className="text-3xl sm:text-4xl font-extrabold tracking-tight text-white flex items-center gap-3">
-              <ShieldAlert className="h-9 w-9 text-teal-400" />
+              <ShieldAlert className="h-9 w-9 text-teal-400 drop-shadow-[0_0_12px_rgba(20,184,166,0.3)]" />
               Sistem Yönetim Paneli
             </h1>
-            <p className="text-sm text-zinc-400 max-w-2xl leading-relaxed">
+            <p className="text-xs sm:text-sm text-zinc-400 max-w-2xl leading-relaxed font-medium">
               Duyurular, reklam kampanyaları, Bunny.net depolama entegrasyonu, DMCA ihbarları ve 7/24 destek taleplerini tek merkezden profesyonelce yönetin.
             </p>
           </div>
           
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-3 flex-wrap">
             <button
               onClick={fetchAdminData}
-              className="flex items-center space-x-2 rounded-xl border border-zinc-800 bg-zinc-900/80 hover:bg-zinc-800 px-4 py-2.5 text-xs font-bold text-zinc-200 transition-all cursor-pointer shadow-lg hover:border-teal-500/40"
+              className="flex items-center space-x-2 rounded-2xl border border-zinc-800/90 bg-zinc-900/90 hover:bg-zinc-800 px-4 py-2.5 text-xs font-bold text-zinc-200 transition-all cursor-pointer shadow-lg hover:border-teal-500/40 hover:text-white"
             >
               <RefreshCw className="h-4 w-4 text-teal-400 animate-spin-hover" />
               <span>Verileri Yenile</span>
             </button>
             <button
               onClick={() => navigate('/')}
-              className="flex items-center space-x-2 rounded-xl border border-teal-500/30 bg-teal-500/10 hover:bg-teal-500/20 px-4 py-2.5 text-xs font-bold text-teal-300 transition-all cursor-pointer shadow-lg"
+              className="flex items-center space-x-2 rounded-2xl border border-teal-500/30 bg-teal-500/10 hover:bg-teal-500/20 px-4 py-2.5 text-xs font-extrabold text-teal-300 transition-all cursor-pointer shadow-lg hover:border-teal-500/50"
             >
               <Globe className="h-4 w-4" />
               <span>Siteye Dön</span>
@@ -639,132 +640,173 @@ export default function AdminPanel({ user }: AdminPanelProps) {
       )}
 
       {/* Admin Quick Metrics Bento Grid */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5" id="admin-stats-grid">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4" id="admin-stats-grid">
         
         {/* Metric 1: Total Images */}
-        <div className="relative overflow-hidden rounded-2xl border border-zinc-900 bg-zinc-950/60 p-6 flex items-center justify-between shadow-xl group hover:border-teal-500/40 transition-all duration-300">
-          <div className="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-transparent via-teal-500/30 to-transparent"></div>
-          <div className="space-y-1.5">
-            <span className="text-[10px] font-extrabold text-zinc-500 uppercase tracking-widest block">Toplam Görsel</span>
+        <div className="relative overflow-hidden rounded-3xl border border-zinc-800/80 bg-zinc-950/70 p-5 flex flex-col justify-between shadow-xl group hover:border-teal-500/50 hover:shadow-[0_0_25px_rgba(20,184,166,0.12)] transition-all duration-300 backdrop-blur-md">
+          <div className="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-teal-500/40 via-cyan-400/40 to-transparent"></div>
+          <div className="flex items-center justify-between mb-3">
+            <span className="text-[10px] font-black text-zinc-400 uppercase tracking-widest">Toplam Görsel</span>
+            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-teal-500/10 text-teal-400 border border-teal-500/25 group-hover:scale-110 group-hover:bg-teal-500/20 transition-all duration-300 shadow-inner">
+              <ImageIcon className="h-5 w-5" />
+            </div>
+          </div>
+          <div className="space-y-1">
             <span className="text-3xl font-black text-white block tracking-tight font-mono">{stats.totalImages}</span>
             <span className="text-[11px] text-zinc-400 block font-medium">
               <span className="text-teal-400 font-bold">{stats.memberImages}</span> üye • <span className="text-zinc-500 font-bold">{stats.guestImages}</span> misafir
             </span>
           </div>
-          <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-teal-500/10 text-teal-400 border border-teal-500/25 group-hover:scale-110 group-hover:bg-teal-500/20 transition-all duration-300 shadow-inner">
-            <ImageIcon className="h-6 w-6" />
-          </div>
         </div>
 
         {/* Metric 2: Total Views */}
-        <div className="relative overflow-hidden rounded-2xl border border-zinc-900 bg-zinc-950/60 p-6 flex items-center justify-between shadow-xl group hover:border-emerald-500/40 transition-all duration-300">
-          <div className="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-transparent via-emerald-500/30 to-transparent"></div>
-          <div className="space-y-1.5">
-            <span className="text-[10px] font-extrabold text-zinc-500 uppercase tracking-widest block">Toplam İzlenme</span>
-            <span className="text-3xl font-black text-white block tracking-tight font-mono">{stats.totalViews.toLocaleString('tr-TR')}</span>
-            <span className="text-[11px] text-zinc-500 block font-medium">Görsel tıklanma sayısı</span>
+        <div className="relative overflow-hidden rounded-3xl border border-zinc-800/80 bg-zinc-950/70 p-5 flex flex-col justify-between shadow-xl group hover:border-emerald-500/50 hover:shadow-[0_0_25px_rgba(16,185,129,0.12)] transition-all duration-300 backdrop-blur-md">
+          <div className="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-emerald-500/40 via-teal-400/40 to-transparent"></div>
+          <div className="flex items-center justify-between mb-3">
+            <span className="text-[10px] font-black text-zinc-400 uppercase tracking-widest">Toplam İzlenme</span>
+            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-emerald-500/10 text-emerald-400 border border-emerald-500/25 group-hover:scale-110 group-hover:bg-emerald-500/20 transition-all duration-300 shadow-inner">
+              <EyeIcon className="h-5 w-5" />
+            </div>
           </div>
-          <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-emerald-500/10 text-emerald-400 border border-emerald-500/25 group-hover:scale-110 group-hover:bg-emerald-500/20 transition-all duration-300 shadow-inner">
-            <EyeIcon className="h-6 w-6" />
+          <div className="space-y-1">
+            <span className="text-3xl font-black text-white block tracking-tight font-mono">{stats.totalViews.toLocaleString('tr-TR')}</span>
+            <span className="text-[11px] text-zinc-400 block font-medium">Görsel görüntülenme</span>
           </div>
         </div>
 
         {/* Metric 3: DMCA Abuse Reports */}
-        <div className="relative overflow-hidden rounded-2xl border border-zinc-900 bg-zinc-950/60 p-6 flex items-center justify-between shadow-xl group hover:border-red-500/40 transition-all duration-300">
-          <div className="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-transparent via-red-500/30 to-transparent"></div>
-          <div className="space-y-1.5">
-            <span className="text-[10px] font-extrabold text-zinc-500 uppercase tracking-widest block">Aktif İhbarlar (DMCA)</span>
-            <span className={`text-3xl font-black block tracking-tight font-mono ${pendingReportsCount > 0 ? 'text-red-400' : 'text-zinc-400'}`}>
+        <div className="relative overflow-hidden rounded-3xl border border-zinc-800/80 bg-zinc-950/70 p-5 flex flex-col justify-between shadow-xl group hover:border-rose-500/50 hover:shadow-[0_0_25px_rgba(244,63,94,0.12)] transition-all duration-300 backdrop-blur-md">
+          <div className="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-rose-500/40 via-pink-400/40 to-transparent"></div>
+          <div className="flex items-center justify-between mb-3">
+            <span className="text-[10px] font-black text-zinc-400 uppercase tracking-widest">DMCA İhbarlar</span>
+            <div className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl border group-hover:scale-110 transition-all duration-300 shadow-inner ${
+              pendingReportsCount > 0 
+                ? 'bg-rose-500/10 text-rose-400 border-rose-500/30 group-hover:bg-rose-500/20' 
+                : 'bg-zinc-900/60 text-zinc-500 border-zinc-800'
+            }`}>
+              <ShieldAlert className="h-5 w-5" />
+            </div>
+          </div>
+          <div className="space-y-1">
+            <span className={`text-3xl font-black block tracking-tight font-mono ${pendingReportsCount > 0 ? 'text-rose-400' : 'text-zinc-400'}`}>
               {pendingReportsCount}
             </span>
-            <span className="text-[11px] text-zinc-500 block font-medium">İnceleme bekleyen şikayet</span>
-          </div>
-          <div className={`flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl border group-hover:scale-110 transition-all duration-300 shadow-inner ${
-            pendingReportsCount > 0 
-              ? 'bg-red-500/10 text-red-400 border-red-500/25 group-hover:bg-red-500/20' 
-              : 'bg-zinc-900/50 text-zinc-500 border-zinc-800'
-          }`}>
-            <ShieldAlert className="h-6 w-6" />
+            <span className="text-[11px] text-zinc-400 block font-medium">Bekleyen şikayet</span>
           </div>
         </div>
 
         {/* Metric 4: Unread Support Messages */}
-        <div className="relative overflow-hidden rounded-2xl border border-zinc-900 bg-zinc-950/60 p-6 flex items-center justify-between shadow-xl group hover:border-blue-500/40 transition-all duration-300">
-          <div className="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-transparent via-blue-500/30 to-transparent"></div>
-          <div className="space-y-1.5">
-            <span className="text-[10px] font-extrabold text-zinc-500 uppercase tracking-widest block">Okunmamış Destek</span>
-            <span className={`text-3xl font-black block tracking-tight font-mono ${unreadMessagesCount > 0 ? 'text-blue-400' : 'text-zinc-400'}`}>
+        <div className="relative overflow-hidden rounded-3xl border border-zinc-800/80 bg-zinc-950/70 p-5 flex flex-col justify-between shadow-xl group hover:border-indigo-500/50 hover:shadow-[0_0_25px_rgba(99,102,241,0.12)] transition-all duration-300 backdrop-blur-md">
+          <div className="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-indigo-500/40 via-blue-400/40 to-transparent"></div>
+          <div className="flex items-center justify-between mb-3">
+            <span className="text-[10px] font-black text-zinc-400 uppercase tracking-widest">Okunmamış Destek</span>
+            <div className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl border group-hover:scale-110 transition-all duration-300 shadow-inner ${
+              unreadMessagesCount > 0 
+                ? 'bg-indigo-500/10 text-indigo-400 border-indigo-500/30 group-hover:bg-indigo-500/20' 
+                : 'bg-zinc-900/60 text-zinc-500 border-zinc-800'
+            }`}>
+              <MessageSquare className="h-5 w-5" />
+            </div>
+          </div>
+          <div className="space-y-1">
+            <span className={`text-3xl font-black block tracking-tight font-mono ${unreadMessagesCount > 0 ? 'text-indigo-400' : 'text-zinc-400'}`}>
               {unreadMessagesCount}
             </span>
-            <span className="text-[11px] text-zinc-500 block font-medium">Cevap bekleyen mesaj</span>
+            <span className="text-[11px] text-zinc-400 block font-medium">Cevap bekleyen mesaj</span>
           </div>
-          <div className={`flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl border group-hover:scale-110 transition-all duration-300 shadow-inner ${
-            unreadMessagesCount > 0 
-              ? 'bg-blue-500/10 text-blue-400 border-blue-500/25 group-hover:bg-blue-500/20' 
-              : 'bg-zinc-900/50 text-zinc-500 border-zinc-800'
-          }`}>
-            <MessageSquare className="h-6 w-6" />
+        </div>
+
+        {/* Metric 5: Registered Users */}
+        <div className="relative overflow-hidden rounded-3xl border border-zinc-800/80 bg-zinc-950/70 p-5 flex flex-col justify-between shadow-xl group hover:border-amber-500/50 hover:shadow-[0_0_25px_rgba(245,158,11,0.12)] transition-all duration-300 backdrop-blur-md">
+          <div className="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-amber-500/40 via-yellow-400/40 to-transparent"></div>
+          <div className="flex items-center justify-between mb-3">
+            <span className="text-[10px] font-black text-zinc-400 uppercase tracking-widest">Kayıtlı Üyeler</span>
+            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-amber-500/10 text-amber-400 border border-amber-500/25 group-hover:scale-110 group-hover:bg-amber-500/20 transition-all duration-300 shadow-inner">
+              <Users className="h-5 w-5" />
+            </div>
+          </div>
+          <div className="space-y-1">
+            <span className="text-3xl font-black text-white block tracking-tight font-mono">{usersList.length}</span>
+            <span className="text-[11px] text-amber-400 font-bold block">
+              {usersList.filter(u => u.isPremium).length} VIP Üye
+            </span>
           </div>
         </div>
 
       </div>
 
-      {/* Main Upgraded Tab Navigation */}
-      <div className="flex border-b border-zinc-900 gap-2 overflow-x-auto pb-px" id="admin-tabs">
+      {/* Main Upgraded Pill Tab Navigation */}
+      <div className="p-2 rounded-2xl border border-zinc-800/80 bg-zinc-950/80 backdrop-blur-md flex flex-wrap gap-2 shadow-xl" id="admin-tabs">
         <button
           onClick={() => setActiveTab('system')}
-          className={`px-5 py-3.5 text-xs font-extrabold rounded-t-2xl whitespace-nowrap transition-all flex items-center gap-2.5 cursor-pointer border-t border-x ${
+          className={`px-4 sm:px-5 py-3 text-xs font-extrabold rounded-xl transition-all flex items-center gap-2.5 cursor-pointer ${
             activeTab === 'system' 
-              ? 'bg-zinc-900/80 border-zinc-800 text-teal-400 shadow-lg' 
-              : 'bg-transparent border-transparent text-zinc-400 hover:text-white hover:bg-zinc-900/30'
+              ? 'bg-gradient-to-r from-teal-500/20 via-emerald-500/10 to-teal-500/20 border border-teal-500/40 text-teal-300 shadow-[0_0_15px_rgba(20,184,166,0.15)]' 
+              : 'bg-zinc-900/40 border border-transparent text-zinc-400 hover:text-white hover:bg-zinc-900/80 hover:border-zinc-800'
           }`}
         >
           <Settings className="h-4 w-4" />
-          <span>Sistem &amp; Altyapı Ayarları</span>
+          <span>Sistem &amp; Altyapı</span>
         </button>
         <button
           onClick={() => setActiveTab('images')}
-          className={`px-5 py-3.5 text-xs font-extrabold rounded-t-2xl whitespace-nowrap transition-all flex items-center gap-2.5 cursor-pointer border-t border-x ${
+          className={`px-4 sm:px-5 py-3 text-xs font-extrabold rounded-xl transition-all flex items-center gap-2.5 cursor-pointer ${
             activeTab === 'images' 
-              ? 'bg-zinc-900/80 border-zinc-800 text-teal-400 shadow-lg' 
-              : 'bg-transparent border-transparent text-zinc-400 hover:text-white hover:bg-zinc-900/30'
+              ? 'bg-gradient-to-r from-teal-500/20 via-emerald-500/10 to-teal-500/20 border border-teal-500/40 text-teal-300 shadow-[0_0_15px_rgba(20,184,166,0.15)]' 
+              : 'bg-zinc-900/40 border border-transparent text-zinc-400 hover:text-white hover:bg-zinc-900/80 hover:border-zinc-800'
           }`}
         >
           <ImageIcon className="h-4 w-4" />
-          <span>Görsel Havuzu ({images.length})</span>
+          <span>Görsel Havuzu</span>
+          <span className="ml-1 px-2 py-0.5 rounded-full text-[10px] bg-zinc-900 border border-zinc-800 text-teal-400 font-mono">
+            {images.length}
+          </span>
         </button>
         <button
           onClick={() => setActiveTab('reports')}
-          className={`px-5 py-3.5 text-xs font-extrabold rounded-t-2xl whitespace-nowrap transition-all flex items-center gap-2.5 cursor-pointer border-t border-x ${
+          className={`px-4 sm:px-5 py-3 text-xs font-extrabold rounded-xl transition-all flex items-center gap-2.5 cursor-pointer ${
             activeTab === 'reports' 
-              ? 'bg-zinc-900/80 border-zinc-800 text-teal-400 shadow-lg' 
-              : 'bg-transparent border-transparent text-zinc-400 hover:text-white hover:bg-zinc-900/30'
+              ? 'bg-gradient-to-r from-rose-500/20 via-pink-500/10 to-rose-500/20 border border-rose-500/40 text-rose-300 shadow-[0_0_15px_rgba(244,63,94,0.15)]' 
+              : 'bg-zinc-900/40 border border-transparent text-zinc-400 hover:text-white hover:bg-zinc-900/80 hover:border-zinc-800'
           }`}
         >
           <ShieldAlert className="h-4 w-4" />
-          <span>DMCA / İhbar Paneli ({pendingReportsCount})</span>
+          <span>DMCA İhbarları</span>
+          {pendingReportsCount > 0 && (
+            <span className="px-2 py-0.5 rounded-full text-[10px] bg-rose-500/20 border border-rose-500/40 text-rose-300 font-bold animate-pulse">
+              {pendingReportsCount}
+            </span>
+          )}
         </button>
         <button
           onClick={() => setActiveTab('support')}
-          className={`px-5 py-3.5 text-xs font-extrabold rounded-t-2xl whitespace-nowrap transition-all flex items-center gap-2.5 cursor-pointer border-t border-x ${
+          className={`px-4 sm:px-5 py-3 text-xs font-extrabold rounded-xl transition-all flex items-center gap-2.5 cursor-pointer ${
             activeTab === 'support' 
-              ? 'bg-zinc-900/80 border-zinc-800 text-teal-400 shadow-lg' 
-              : 'bg-transparent border-transparent text-zinc-400 hover:text-white hover:bg-zinc-900/30'
+              ? 'bg-gradient-to-r from-indigo-500/20 via-blue-500/10 to-indigo-500/20 border border-indigo-500/40 text-indigo-300 shadow-[0_0_15px_rgba(99,102,241,0.15)]' 
+              : 'bg-zinc-900/40 border border-transparent text-zinc-400 hover:text-white hover:bg-zinc-900/80 hover:border-zinc-800'
           }`}
         >
           <MessageSquare className="h-4 w-4" />
-          <span>Destek Mesajları ({unreadMessagesCount})</span>
+          <span>Destek Talepleri</span>
+          {unreadMessagesCount > 0 && (
+            <span className="px-2 py-0.5 rounded-full text-[10px] bg-indigo-500/20 border border-indigo-500/40 text-indigo-300 font-bold animate-pulse">
+              {unreadMessagesCount}
+            </span>
+          )}
         </button>
         <button
           onClick={() => setActiveTab('users')}
-          className={`px-5 py-3.5 text-xs font-extrabold rounded-t-2xl whitespace-nowrap transition-all flex items-center gap-2.5 cursor-pointer border-t border-x ${
+          className={`px-4 sm:px-5 py-3 text-xs font-extrabold rounded-xl transition-all flex items-center gap-2.5 cursor-pointer ${
             activeTab === 'users' 
-              ? 'bg-zinc-900/80 border-zinc-800 text-teal-400 shadow-lg' 
-              : 'bg-transparent border-transparent text-zinc-400 hover:text-white hover:bg-zinc-900/30'
+              ? 'bg-gradient-to-r from-amber-500/20 via-yellow-500/10 to-amber-500/20 border border-amber-500/40 text-amber-300 shadow-[0_0_15px_rgba(245,158,11,0.15)]' 
+              : 'bg-zinc-900/40 border border-transparent text-zinc-400 hover:text-white hover:bg-zinc-900/80 hover:border-zinc-800'
           }`}
         >
           <Users className="h-4 w-4" />
-          <span>Kullanıcı Yönetimi ({usersList.length})</span>
+          <span>Kullanıcı Yönetimi</span>
+          <span className="ml-1 px-2 py-0.5 rounded-full text-[10px] bg-zinc-900 border border-zinc-800 text-amber-400 font-mono">
+            {usersList.length}
+          </span>
         </button>
       </div>
 
@@ -773,72 +815,85 @@ export default function AdminPanel({ user }: AdminPanelProps) {
         <div className="grid grid-cols-1 md:grid-cols-4 gap-6 animate-in fade-in duration-200" id="tab-system-content">
           {/* Left Secondary Sub-Navigation */}
           <div className="md:col-span-1 space-y-4">
-            <div className="bg-zinc-950/60 rounded-3xl border border-zinc-900 p-4 space-y-1.5 shadow-xl">
-              <span className="text-[10px] font-black text-zinc-500 uppercase tracking-widest px-3 pb-2.5 block border-b border-zinc-900 mb-2">Altyapı Menüsü</span>
+            <div className="bg-zinc-950/80 rounded-3xl border border-zinc-800/80 p-4 space-y-2 shadow-xl backdrop-blur-md">
+              <span className="text-[10px] font-black text-zinc-400 uppercase tracking-widest px-3 pb-2 block border-b border-zinc-800/80 mb-2">Altyapı Menüsü</span>
               
               <button
                 type="button"
                 onClick={() => setSystemSubTab('general')}
-                className={`w-full text-left px-3.5 py-3 rounded-2xl text-xs font-bold transition-all flex items-center gap-3 cursor-pointer border ${
+                className={`w-full text-left px-3.5 py-3 rounded-2xl text-xs font-extrabold transition-all flex items-center justify-between cursor-pointer border ${
                   systemSubTab === 'general'
-                    ? 'bg-teal-500/10 border-teal-500/30 text-teal-400 shadow-md'
-                    : 'bg-transparent border-transparent text-zinc-400 hover:text-white hover:bg-zinc-900/50'
+                    ? 'bg-gradient-to-r from-teal-500/20 to-emerald-500/10 border-teal-500/40 text-teal-300 shadow-[0_0_12px_rgba(20,184,166,0.12)]'
+                    : 'bg-zinc-900/30 border-transparent text-zinc-400 hover:text-white hover:bg-zinc-900/80 hover:border-zinc-800'
                 }`}
               >
-                <Sliders className="h-4 w-4" />
-                <span>Genel &amp; Limitler</span>
+                <div className="flex items-center gap-2.5">
+                  <Sliders className="h-4 w-4 text-teal-400" />
+                  <span>Genel &amp; Limitler</span>
+                </div>
               </button>
 
               <button
                 type="button"
                 onClick={() => setSystemSubTab('announcements')}
-                className={`w-full text-left px-3.5 py-3 rounded-2xl text-xs font-bold transition-all flex items-center gap-3 cursor-pointer border ${
+                className={`w-full text-left px-3.5 py-3 rounded-2xl text-xs font-extrabold transition-all flex items-center justify-between cursor-pointer border ${
                   systemSubTab === 'announcements'
-                    ? 'bg-teal-500/10 border-teal-500/30 text-teal-400 shadow-md'
-                    : 'bg-transparent border-transparent text-zinc-400 hover:text-white hover:bg-zinc-900/50'
+                    ? 'bg-gradient-to-r from-teal-500/20 to-emerald-500/10 border-teal-500/40 text-teal-300 shadow-[0_0_12px_rgba(20,184,166,0.12)]'
+                    : 'bg-zinc-900/30 border-transparent text-zinc-400 hover:text-white hover:bg-zinc-900/80 hover:border-zinc-800'
                 }`}
               >
-                <Megaphone className="h-4 w-4" />
-                <span>Duyurular ({announcementsList.length})</span>
+                <div className="flex items-center gap-2.5">
+                  <Megaphone className="h-4 w-4 text-teal-400" />
+                  <span>Duyurular</span>
+                </div>
+                <span className="px-2 py-0.5 rounded-full text-[10px] bg-zinc-900 border border-zinc-800 text-teal-400 font-mono">
+                  {announcementsList.length}
+                </span>
               </button>
 
               <button
                 type="button"
                 onClick={() => setSystemSubTab('ads')}
-                className={`w-full text-left px-3.5 py-3 rounded-2xl text-xs font-bold transition-all flex items-center gap-3 cursor-pointer border ${
+                className={`w-full text-left px-3.5 py-3 rounded-2xl text-xs font-extrabold transition-all flex items-center justify-between cursor-pointer border ${
                   systemSubTab === 'ads'
-                    ? 'bg-teal-500/10 border-teal-500/30 text-teal-400 shadow-md'
-                    : 'bg-transparent border-transparent text-zinc-400 hover:text-white hover:bg-zinc-900/50'
+                    ? 'bg-gradient-to-r from-teal-500/20 to-emerald-500/10 border-teal-500/40 text-teal-300 shadow-[0_0_12px_rgba(20,184,166,0.12)]'
+                    : 'bg-zinc-900/30 border-transparent text-zinc-400 hover:text-white hover:bg-zinc-900/80 hover:border-zinc-800'
                 }`}
               >
-                <Sparkles className="h-4 w-4" />
-                <span>Sponsor &amp; AdSense</span>
+                <div className="flex items-center gap-2.5">
+                  <Sparkles className="h-4 w-4 text-amber-400" />
+                  <span>Sponsor &amp; AdSense</span>
+                </div>
               </button>
 
               <button
                 type="button"
                 onClick={() => setSystemSubTab('storage')}
-                className={`w-full text-left px-3.5 py-3 rounded-2xl text-xs font-bold transition-all flex items-center gap-3 cursor-pointer border ${
+                className={`w-full text-left px-3.5 py-3 rounded-2xl text-xs font-extrabold transition-all flex items-center justify-between cursor-pointer border ${
                   systemSubTab === 'storage'
-                    ? 'bg-teal-500/10 border-teal-500/30 text-teal-400 shadow-md'
-                    : 'bg-transparent border-transparent text-zinc-400 hover:text-white hover:bg-zinc-900/50'
+                    ? 'bg-gradient-to-r from-teal-500/20 to-emerald-500/10 border-teal-500/40 text-teal-300 shadow-[0_0_12px_rgba(20,184,166,0.12)]'
+                    : 'bg-zinc-900/30 border-transparent text-zinc-400 hover:text-white hover:bg-zinc-900/80 hover:border-zinc-800'
                 }`}
               >
-                <HardDrive className="h-4 w-4" />
-                <span>Bunny.net Depolama</span>
+                <div className="flex items-center gap-2.5">
+                  <HardDrive className="h-4 w-4 text-cyan-400" />
+                  <span>Bunny.net Depolama</span>
+                </div>
               </button>
 
               <button
                 type="button"
                 onClick={() => setSystemSubTab('premium')}
-                className={`w-full text-left px-3.5 py-3 rounded-2xl text-xs font-bold transition-all flex items-center gap-3 cursor-pointer border ${
+                className={`w-full text-left px-3.5 py-3 rounded-2xl text-xs font-extrabold transition-all flex items-center justify-between cursor-pointer border ${
                   systemSubTab === 'premium'
-                    ? 'bg-teal-500/10 border-teal-500/30 text-teal-400 shadow-md'
-                    : 'bg-transparent border-transparent text-zinc-400 hover:text-white hover:bg-zinc-900/50'
+                    ? 'bg-gradient-to-r from-amber-500/20 to-yellow-500/10 border-amber-500/40 text-amber-300 shadow-[0_0_12px_rgba(245,158,11,0.12)]'
+                    : 'bg-zinc-900/30 border-transparent text-zinc-400 hover:text-white hover:bg-zinc-900/80 hover:border-zinc-800'
                 }`}
               >
-                <CreditCard className="h-4 w-4" />
-                <span>VIP &amp; Banka İban</span>
+                <div className="flex items-center gap-2.5">
+                  <CreditCard className="h-4 w-4 text-amber-400" />
+                  <span>VIP &amp; Banka İban</span>
+                </div>
               </button>
             </div>
 
